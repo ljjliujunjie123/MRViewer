@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 import sys
 import vtk
 from PyQt5 import QtCore, QtGui, QtWidgets
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
 class myMainWindow(QtWidgets.QMainWindow):
