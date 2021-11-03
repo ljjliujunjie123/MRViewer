@@ -1,8 +1,10 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow
 import sys
-import vtk
+import vtkmodules.all as vtk
 from PyQt5 import QtCore, QtGui, QtWidgets
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+
+from PlaneAndBallWindow import PlaneAndBallWindow
 
 
 class myMainWindow(QtWidgets.QMainWindow):
@@ -57,6 +59,7 @@ class myMainWindow(QtWidgets.QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = myMainWindow()
+    #window = myMainWindow()
+    window = PlaneAndBallWindow()
     sys.exit(app.exec_())
 
