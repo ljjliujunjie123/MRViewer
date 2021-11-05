@@ -60,7 +60,7 @@ class myMainWindow(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     #window = myMainWindow()
-    #window = PlaneAndBallWindow()
+    # window = PlaneAndBallWindow()
     MainWindow = QtWidgets.QMainWindow()
     ui = FileFolderWindow()
     ui.setupUI(MainWindow)
