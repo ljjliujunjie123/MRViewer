@@ -5,7 +5,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from PlaneAndBallWindow import PlaneAndBallWindow
-
+from FileFolderWindow import FileFolderWindow
 
 class myMainWindow(QtWidgets.QMainWindow):
 
@@ -60,6 +60,10 @@ class myMainWindow(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     #window = myMainWindow()
-    window = PlaneAndBallWindow()
+    #window = PlaneAndBallWindow()
+    MainWindow = QtWidgets.QMainWindow()
+    ui = FileFolderWindow()
+    ui.setupUI(MainWindow)
+    MainWindow.show()
     sys.exit(app.exec_())
 
