@@ -1,69 +1,21 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow
 import sys
+
 import vtkmodules.all as vtk
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
-from PlaneAndBallWindow import PlaneAndBallWindow
-from FileFolderWindow import FileFolderWindow
+from ui.FileFolderWindow import FileFolderWindow
+from ui.PlaneAndBallWindow import PlaneAndBallWindow
+from ui.LJJMainWindow import LJJMainWindow
 
-class myMainWindow(QtWidgets.QMainWindow):
-
-    def __init__(self, parent=None):
-        QtWidgets.QMainWindow.__init__(self, parent)
-
-        self.frame = QtWidgets.QFrame()
-
-        self.vl = QtWidgets.QVBoxLayout()
-        self.vtkWidget = QVTKRenderWindowInteractor(self.frame)
-        self.vl.addWidget(self.vtkWidget)
-
-        self.ren = vtk.vtkRenderer()
-        self.vtkWidget.GetRenderWindow().AddRenderer(self.ren)
-        self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
-
-        # Create source
-        source = vtk.vtkConeSource()
-        source.SetCenter(0, 0, 0)
-        source.SetRadius(0.1)
-
-        source1 = vtk.vtkSphereSource()
-        source1.SetCenter(0, 0, 0)
-        source1.SetRadius(0.3)
-
-        # Create a mapper
-        mapper = vtk.vtkPolyDataMapper()
-        mapper.SetInputConnection(source.GetOutputPort())
-
-        mapper1 = vtk.vtkPolyDataMapper()
-        mapper1.SetInputConnection(source1.GetOutputPort())
-
-        # Create an actor
-        actor = vtk.vtkActor()
-        actor.SetMapper(mapper)
-
-        actor1 = vtk.vtkActor()
-        actor1.SetMapper(mapper1)
-
-        self.ren.AddActor(actor)
-        self.ren.AddActor(actor1)
-
-        self.ren.ResetCamera()
-
-        self.frame.setLayout(self.vl)
-        self.setCentralWidget(self.frame)
-
-        self.show()
-        self.iren.Initialize()
-
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QMessageBox
+from ui.FileFolderWindow import *
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    #window = myMainWindow()
-    # window = PlaneAndBallWindow()
-    MainWindow = QtWidgets.QMainWindow()
-    ui = FileFolderWindow()
-    ui.setupUI(MainWindow)
-    MainWindow.show()
+    mainWindow = LJJMainWindow()
     sys.exit(app.exec_())
 
