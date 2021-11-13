@@ -8,6 +8,7 @@ from ui.ImageShownContainer import ImageShownContainer
 class LJJMainWindow(QMainWindow):
 
     updateImageShownSignal = pyqtSignal(str,str)
+    updateImageListSignal = pyqtSignal(list)
 
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
@@ -47,6 +48,7 @@ class LJJMainWindow(QMainWindow):
 
         #信号绑定部分
         self.updateImageShownSignal.connect(self.updateImageShownArea)
+        self.updateImageListSignal.connect(self.updateImageListArea)
         self.actionopen_file.triggered.connect(self.openFileFolderWindow)
 
         self.retranslateUi(self)
@@ -67,14 +69,22 @@ class LJJMainWindow(QMainWindow):
         fileCount = len(fileNames)
         if fileCount < 1:
             QMessageBox.information(None,"提示","请至少选择一个文件",QMessageBox.Ok)
+            return
         elif fileCount < 2:
             self.updateImageShownSignal.emit(fileNames[0],'')
         else:
             self.updateImageShownSignal.emit(fileNames[0],fileNames[1])
 
+        self.updateImageListSignal.emit(fileNames)
+
     def updateImageShownArea(self,fileNameXZ,fileNameYZ):
         if fileNameXZ is not '': self.imageShownContainer.showXZDicom(fileNameXZ)
         if fileNameYZ is not '': self.imageShownContainer.showYZDicom(fileNameYZ)
+
+    def updateImageListArea(self,fileNames):
+        self.imageScrollContainer.updateListHeight(len(fileNames))
+        for index,fileName in enumerate(fileNames):
+            self.imageScrollContainer.addImageItem(fileName,index)
 
     def closeEvent(self,QCloseEvent):
         super().closeEvent(QCloseEvent)
