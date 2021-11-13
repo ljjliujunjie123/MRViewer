@@ -5,8 +5,6 @@ import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 class ImageShownContainer(QFrame):
-    imageViewers = []
-    qvtkWidgets = []
 
     def __init__(self, ParentWidget):
         QFrame.__init__(self, ParentWidget)
@@ -51,40 +49,95 @@ class ImageShownContainer(QFrame):
         self.crossYZContainer.setObjectName("crossYZContainer")
         self.imageGridShownContainer.addWidget(self.crossYZContainer, 1, 1, 1, 1)
 
-        self.showDicomInFrame(self.crossXZContainer, "E:/DCMTK/CT2.dcm")
-        self.showDicomInFrame(self.crossYZContainer, "E:/DCMTK/test10.dcm")
+        self.initXZandYZDicom()
 
-    def showDicomInFrame(self, container, fileName):
-        reader = vtk.vtkDICOMImageReader()
-        reader.SetDataByteOrderToLittleEndian()
-        reader.SetFileName(fileName)
-        reader.Update()
+        # self.showXZDicom("E:/DCMTK/test10.dcm")
+        # self.showYZDicom("E:/DCMTK/CT2.dcm")
 
-        self.imageViewers.append(vtk.vtkImageViewer2())
-        imageViewer = self.imageViewers[-1]
-        imageViewer.SetInputConnection(reader.GetOutputPort())
+    def initXZandYZDicom(self):
+        self.readerXZ = None
+        self.imageViewerXZ = None
+        self.renXZ = None
+        self.imageFrameXZ = None
+        self.qvtkWidgetXZ = None
 
-        ren = vtk.vtkRenderer()
+        self.readerYZ = None
+        self.imageViewerYZ = None
+        self.renYZ = None
+        self.imageFrameYZ = None
+        self.qvtkWidgetYZ = None
 
-        firstImageFrame = QFrame(container)
-        firstImageFrame.setFixedWidth(container.width())
-        firstImageFrame.setFixedHeight(container.height())
+    def showXZDicom(self, fileName):
+        print("showXZDicom begin")
+        if self.readerXZ is None:
+            self.readerXZ = vtk.vtkDICOMImageReader()
+        self.readerXZ.SetDataByteOrderToLittleEndian()
+        self.readerXZ.SetFileName(fileName)
+        self.readerXZ.Update()
 
-        self.qvtkWidgets.append(QVTKRenderWindowInteractor(firstImageFrame))
-        qvtkWidget = self.qvtkWidgets[-1]
-        qvtkWidget.GetRenderWindow().AddRenderer(ren)
+        if self.imageViewerXZ is None:
+            self.imageViewerXZ =  vtk.vtkImageViewer2()
+        self.imageViewerXZ.SetInputConnection(self.readerXZ.GetOutputPort())
 
-        imageViewer.SetRenderer(ren)
-        imageViewer.SetRenderWindow(qvtkWidget.GetRenderWindow())
-        imageViewer.UpdateDisplayExtent()
-        imageViewer.SetupInteractor(qvtkWidget.GetRenderWindow().GetInteractor())
+        if self.renXZ is None:
+            self.renXZ = vtk.vtkRenderer()
 
-        ren.ResetCamera()
-        qvtkWidget.GetRenderWindow().Render()
+        if self.imageFrameXZ is None:
+            self.imageFrameXZ = QFrame(self.crossXZContainer)
+        self.imageFrameXZ.setFixedWidth(self.crossXZContainer.width())
+        self.imageFrameXZ.setFixedHeight(self.crossXZContainer.height())
+
+        if self.qvtkWidgetXZ is None:
+            self.qvtkWidgetXZ = QVTKRenderWindowInteractor(self.imageFrameXZ)
+        self.qvtkWidgetXZ.GetRenderWindow().AddRenderer(self.renXZ)
+
+        self.imageViewerXZ.SetRenderer(self.renXZ)
+        self.imageViewerXZ.SetRenderWindow(self.qvtkWidgetXZ.GetRenderWindow())
+        self.imageViewerXZ.UpdateDisplayExtent()
+        self.imageViewerXZ.SetupInteractor(self.qvtkWidgetXZ.GetRenderWindow().GetInteractor())
+
+        self.renXZ.ResetCamera()
+        self.qvtkWidgetXZ.GetRenderWindow().Render()
+
+        if self.imageFrameXZ.isVisible() is False: self.imageFrameXZ.setVisible(True)
+        print("showXZDicom end")
+
+    def showYZDicom(self, fileName):
+        print("showYZDicom begin")
+        if self.readerYZ is None:
+            self.readerYZ = vtk.vtkDICOMImageReader()
+        self.readerYZ.SetDataByteOrderToLittleEndian()
+        self.readerYZ.SetFileName(fileName)
+        self.readerYZ.Update()
+
+        if self.imageViewerYZ is None:
+            self.imageViewerYZ =  vtk.vtkImageViewer2()
+        self.imageViewerYZ.SetInputConnection(self.readerYZ.GetOutputPort())
+
+        if self.renYZ is None:
+            self.renYZ = vtk.vtkRenderer()
+
+        if self.imageFrameYZ is None:
+            self.imageFrameYZ = QFrame(self.crossYZContainer)
+        self.imageFrameYZ.setFixedWidth(self.crossYZContainer.width())
+        self.imageFrameYZ.setFixedHeight(self.crossYZContainer.height())
+
+        if self.qvtkWidgetYZ is None:
+            self.qvtkWidgetYZ = QVTKRenderWindowInteractor(self.imageFrameYZ)
+        self.qvtkWidgetYZ.GetRenderWindow().AddRenderer(self.renYZ)
+
+        self.imageViewerYZ.SetRenderer(self.renYZ)
+        self.imageViewerYZ.SetRenderWindow(self.qvtkWidgetYZ.GetRenderWindow())
+        self.imageViewerYZ.UpdateDisplayExtent()
+        self.imageViewerYZ.SetupInteractor(self.qvtkWidgetYZ.GetRenderWindow().GetInteractor())
+
+        self.renYZ.ResetCamera()
+        self.qvtkWidgetYZ.GetRenderWindow().Render()
+
+        if self.imageFrameYZ.isVisible() is False: self.imageFrameYZ.setVisible(True)
+        print("showYZDicom end")
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
-        print("close 事件")
-        for qvtkWidget in self.qvtkWidgets:
-            print("closing")
-            qvtkWidget.Finalize()
+        if self.qvtkWidgetXZ is not None: self.qvtkWidgetXZ.Finalize()
+        if self.qvtkWidgetYZ is not None: self.qvtkWidgetYZ.Finalize()

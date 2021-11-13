@@ -1,28 +1,29 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
-class FileFolderWindow(object):
-    def setupUI(self, MainWindow):
-        MainWindow.setObjectName("FileFolderWindow")
-        MainWindow.resize(1500,1000)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.treeView = QtWidgets.QTreeView(self.centralwidget)
-        self.treeView.setGeometry(QtCore.QRect(0,0,1500,1000))
 
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        model = QtWidgets.QDirModel()
+# 模式对话窗口和非模式对话窗口 https://www.jb51.net/article/208142.htm
+
+class FileFolderWindow(QWidget):
+    def __init__(self):
+        QWidget.__init__(self)
+
+        self.setObjectName("FileFolderWindow")
+        self.setWindowTitle("FileFolderWindow")
+        self.resize(1500,1000)
+
+        self.treeView = QTreeView(self)
+        self.treeView.setGeometry(QRect(0,0,1500,1000))
+
+        QMetaObject.connectSlotsByName(self)
+        model = QDirModel()
         self.treeView.setModel(model)
-
         self.treeView.setColumnWidth(0,800)
-
-        self.treeView.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        self.treeView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-
-        self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked|QtWidgets.QAbstractItemView.EditKeyPressed)
-
-        self.treeView.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-
-        self.treeView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.treeView.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.treeView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.treeView.setEditTriggers(QAbstractItemView.DoubleClicked|QAbstractItemView.EditKeyPressed)
+        self.treeView.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.treeView.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.treeView.setAutoExpandDelay(-1)
         self.treeView.setItemsExpandable(True)
         self.treeView.setSortingEnabled(True)
@@ -32,9 +33,8 @@ class FileFolderWindow(object):
         self.treeView.setObjectName("treeView")
         self.treeView.header().setVisible(True)
 
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.retranslateUI(MainWindow)
+        self.retranslateUI()
 
-    def retranslateUI(self,MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow","FileFolderWindow"))
+    def retranslateUI(self):
+        _translate = QCoreApplication.translate
+        self.setWindowTitle(_translate("FileFolderWindow","FileFolderWindow"))

@@ -5,8 +5,10 @@ from ui.ImagesScrollContainer import ImageScrollContainer
 from ui.ToolsContainer import ToolsContainer
 from ui.ImageShownContainer import ImageShownContainer
 
-
 class LJJMainWindow(QMainWindow):
+
+    updateImageShownSignal = pyqtSignal(str,str)
+
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
 
@@ -24,6 +26,7 @@ class LJJMainWindow(QMainWindow):
         #抽象出左侧的image列表
         self.imageScrollContainer = ImageScrollContainer(self.centralwidget)
 
+        #菜单栏部分
         self.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(self)
         self.menubar.setGeometry(QRect(0, 0, 2000, 22))
@@ -39,6 +42,11 @@ class LJJMainWindow(QMainWindow):
         self.menu.addAction(self.actionopen_file)
         self.menubar.addAction(self.menu.menuAction())
 
+        #菜单-文件浏览窗口
+        self.fileFolderWindow = None
+
+        #信号绑定部分
+        self.updateImageShownSignal.connect(self.updateImageShownArea)
         self.actionopen_file.triggered.connect(self.openFileFolderWindow)
 
         self.retranslateUi(self)
@@ -55,14 +63,18 @@ class LJJMainWindow(QMainWindow):
         self.toolsContainer.retranslateUi()
 
     def openFileFolderWindow(self):
-        print("触发openFile")
-        fileExploreDialog = QFileDialog()
-        fileExploreDialog.setFileMode(QFileDialog.ExistingFiles)
-        fileExploreDialog.setFixedWidth(1800)
-        fileExploreDialog.setFixedHeight(1000)
-        fileExploreDialog.show()
-        if fileExploreDialog.exec_():
-            self.imageScrollContainer.initImages(fileExploreDialog.selectedFiles())
+        fileNames = QFileDialog.getOpenFileNames(self,'选择文件','','Dcm files(*.dcm)')[0]
+        fileCount = len(fileNames)
+        if fileCount < 1:
+            QMessageBox.information(None,"提示","请至少选择一个文件",QMessageBox.Ok)
+        elif fileCount < 2:
+            self.updateImageShownSignal.emit(fileNames[0],'')
+        else:
+            self.updateImageShownSignal.emit(fileNames[0],fileNames[1])
+
+    def updateImageShownArea(self,fileNameXZ,fileNameYZ):
+        if fileNameXZ is not '': self.imageShownContainer.showXZDicom(fileNameXZ)
+        if fileNameYZ is not '': self.imageShownContainer.showYZDicom(fileNameYZ)
 
     def closeEvent(self,QCloseEvent):
         super().closeEvent(QCloseEvent)
