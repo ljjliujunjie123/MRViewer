@@ -1,6 +1,10 @@
 from PyQt5 import QtWidgets,QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import *
 
 class ToolsContainer(QtWidgets.QFrame):
+
+    showInfoSig = pyqtSignal()
+
     def __init__(self, ParentWidget):
         QtWidgets.QFrame.__init__(self, ParentWidget)
 
@@ -65,6 +69,8 @@ class ToolsContainer(QtWidgets.QFrame):
         spacerItem8 = QtWidgets.QSpacerItem(40, 20)
         self.horizontalLayout.addItem(spacerItem8)
         self.toolsVerticalContainer.addLayout(self.horizontalLayout)
+
+        self.pushButton.clicked.connect(self.showInfoSig)
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate

@@ -75,6 +75,8 @@ class ImageShownContainer(QFrame):
         if self.imageViewerXZ is None:
             self.imageViewerXZ =  vtk.vtkImageViewer2()
         self.imageViewerXZ.SetInputConnection(self.readerXZ.GetOutputPort())
+        self.imageViewerXZ.SetColorLevel(315.5)
+        self.imageViewerXZ.SetColorWindow(315.5)
 
         if self.renXZ is None:
             self.renXZ = vtk.vtkRenderer()
@@ -110,6 +112,8 @@ class ImageShownContainer(QFrame):
         if self.imageViewerYZ is None:
             self.imageViewerYZ =  vtk.vtkImageViewer2()
         self.imageViewerYZ.SetInputConnection(self.readerYZ.GetOutputPort())
+        self.imageViewerYZ.SetColorLevel(315.5)
+        self.imageViewerYZ.SetColorWindow(315.5)
 
         if self.renYZ is None:
             self.renYZ = vtk.vtkRenderer()

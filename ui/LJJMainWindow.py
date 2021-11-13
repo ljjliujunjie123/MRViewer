@@ -52,6 +52,8 @@ class LJJMainWindow(QMainWindow):
         self.updateImageListSignal.connect(self.updateImageListArea)
         self.actionopen_file.triggered.connect(self.openFileFolderWindow)
 
+        self.toolsContainer.showInfoSig.connect(self.showLevelAndWindowInfo)
+
         self.retranslateUi(self)
         QMetaObject.connectSlotsByName(self)
 
@@ -66,7 +68,7 @@ class LJJMainWindow(QMainWindow):
         self.toolsContainer.retranslateUi()
 
     def openFileFolderWindow(self):
-        fileNames = QFileDialog.getOpenFileNames(self,'选择文件','','Dcm files(*.dcm)')[0]
+        fileNames = QFileDialog.getOpenFileNames(self,'选择文件','','')[0]
         fileCount = len(fileNames)
         if fileCount < 1:
             QMessageBox.information(None,"提示","请至少选择一个文件",QMessageBox.Ok)
@@ -90,6 +92,17 @@ class LJJMainWindow(QMainWindow):
         self.imageScrollContainer.clearImageList()
         for index,fileName in enumerate(fileNames):
             self.imageScrollContainer.addImageItem(fileName,index)
+
+    def showLevelAndWindowInfo(self):
+        levelXZ = self.imageShownContainer.imageViewerXZ.GetColorLevel()
+        windowXZ = self.imageShownContainer.imageViewerXZ.GetColorLevel()
+
+        levelYZ = self.imageShownContainer.imageViewerYZ.GetColorLevel()
+        windowYZ = self.imageShownContainer.imageViewerYZ.GetColorLevel()
+
+        info = "XZ:" + str(levelXZ) + " " + str(windowXZ) + " YZ:" + str(levelYZ) + " " + str(windowYZ)
+
+        QMessageBox.information(None,"展示信息",info, QMessageBox.Ok)
 
     def closeEvent(self,QCloseEvent):
         super().closeEvent(QCloseEvent)

@@ -95,6 +95,7 @@ class ImageScrollContainer(QFrame):
     def clearImageList(self):
         # 注意删除item时要先清除其所有的connect信号
         for index in range(self.imageVerticalScrollWidget.count()):
+            print("清除", index)
             item = self.imageVerticalScrollWidget.item(index)
             self.imageVerticalScrollWidget.takeItem(index)
             del item
