@@ -36,3 +36,25 @@
 
   <img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211105175927@2x.png" style="zoom:33%;" />
 
+2021-11-13
+
+- 实现了窗口页面的基本布局
+- 实现了左侧的Dicom列表读取。用到的技术点是
+  - QListWidget作为承载的容器，提供了一系列鼠标相关的事件回调
+  - QListWidgetItem作为渲染Dicom图像的容器，提供setIcon方法，允许用QIon展示图片
+  - QIcon是真正渲染Dicom图像的组件，接收一个Pixmap生成图像
+  - Pixmap的生成用到的是pydicom + PIL两个第三方库，能直接从dcm文件生成Pixmap
+- 实现了中间的Dicom展示区域中的两个子区域，即三视图中的左视图和俯视图。用到的技术点是
+  - vtkDicomImageReader提供读取dcm文件的能力
+  - vtkImageViewer2提供渲染图像的窗口
+
+> 在vtk的渲染中遇到很多问题，亟待解决。
+>
+> 一个是vtk 2d 以及 3d 图像的渲染机制，
+>
+> 二是为什么窗口加载了数据后默认是不展示图片的，必须要手动调一下visibility，这应该是个bug，
+>
+> 三是向vtk输入dicom数据，如何不使用vtkDicomImageReader，因为后续工程用的数据格式是h5
+
+<video src="D:\school_files\vedio\录制_2021_11_13_16_33_00_746.mp4" width="800px" height="600px" controls="controls"></video>
+

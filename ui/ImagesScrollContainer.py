@@ -2,14 +2,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QIcon
 
-
 import numpy as np
 import pydicom as pyd
 from PIL import Image, ImageOps, ImageEnhance
 from PIL.ImageQt import *
 
-import vtkmodules.all as vtk
-from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from utils.status import Status
 
 class ImageScrollContainer(QFrame):
 
@@ -90,5 +88,13 @@ class ImageScrollContainer(QFrame):
         self.listHeight = (self.iconSize.height() + self.itemSpace * 2) * itemCount
         if self.listHeight > 1e5:
             QMessageBox.information(None,"警告","选择的文件过多！请重新选择",QMessageBox.Ok)
-            return
+            return Status.bad
         self.imageVerticalScrollWidget.setFixedHeight(self.listHeight)
+        return Status.good
+
+    def clearImageList(self):
+        # 注意删除item时要先清除其所有的connect信号
+        for index in range(self.imageVerticalScrollWidget.count()):
+            item = self.imageVerticalScrollWidget.item(index)
+            self.imageVerticalScrollWidget.takeItem(index)
+            del item

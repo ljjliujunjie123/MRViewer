@@ -51,9 +51,6 @@ class ImageShownContainer(QFrame):
 
         self.initXZandYZDicom()
 
-        # self.showXZDicom("E:/DCMTK/test10.dcm")
-        # self.showYZDicom("E:/DCMTK/CT2.dcm")
-
     def initXZandYZDicom(self):
         self.readerXZ = None
         self.imageViewerXZ = None
@@ -141,3 +138,7 @@ class ImageShownContainer(QFrame):
         super().closeEvent(QCloseEvent)
         if self.qvtkWidgetXZ is not None: self.qvtkWidgetXZ.Finalize()
         if self.qvtkWidgetYZ is not None: self.qvtkWidgetYZ.Finalize()
+
+    def hideXZandYZDicom(self):
+        if self.imageFrameXZ is not None:self.imageFrameXZ.setVisible(False)
+        if self.imageFrameYZ is not None:self.imageFrameYZ.setVisible(False)

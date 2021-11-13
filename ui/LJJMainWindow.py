@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from ui.ImagesScrollContainer import ImageScrollContainer
 from ui.ToolsContainer import ToolsContainer
 from ui.ImageShownContainer import ImageShownContainer
+from utils.status import Status
 
 class LJJMainWindow(QMainWindow):
 
@@ -78,11 +79,15 @@ class LJJMainWindow(QMainWindow):
         self.updateImageListSignal.emit(fileNames)
 
     def updateImageShownArea(self,fileNameXZ,fileNameYZ):
+        self.imageShownContainer.hideXZandYZDicom()
         if fileNameXZ is not '': self.imageShownContainer.showXZDicom(fileNameXZ)
         if fileNameYZ is not '': self.imageShownContainer.showYZDicom(fileNameYZ)
 
     def updateImageListArea(self,fileNames):
-        self.imageScrollContainer.updateListHeight(len(fileNames))
+        status = self.imageScrollContainer.updateListHeight(len(fileNames))
+        if status is Status.bad:
+            return
+        self.imageScrollContainer.clearImageList()
         for index,fileName in enumerate(fileNames):
             self.imageScrollContainer.addImageItem(fileName,index)
 
