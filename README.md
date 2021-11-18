@@ -58,3 +58,10 @@
 
 <video src="D:\school_files\vedio\录制_2021_11_13_16_33_00_746.mp4" width="800px" height="600px" controls="controls"></video>
 
+2021-11-18
+
+- 实现从2d dicom序列图生成3d vtk图像
+  - 基本算法有三种，参考 https://github.com/tgpcai/Dicom_3D_Reconstruction
+  - 目前工程使用体绘制算法
+
+<video src="D:\school_files\vedio\录制_2021_11_18_21_19_31_696.mp4" width="800px" height="600px" controls="controls"></video>

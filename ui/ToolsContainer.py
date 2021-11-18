@@ -53,7 +53,6 @@ class ToolsContainer(QtWidgets.QFrame):
         self.horizontalLayout_3.addItem(spacerItem5)
         self.toolsVerticalContainer.addLayout(self.horizontalLayout_3)
 
-
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem6 = QtWidgets.QSpacerItem(40, 20)
