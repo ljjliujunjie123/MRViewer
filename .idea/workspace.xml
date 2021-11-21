@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5fc5154b-ef6d-42a0-b9da-ad7e1a33ebea" name="Default" comment="" />
+    <list default="true" id="5fc5154b-ef6d-42a0-b9da-ad7e1a33ebea" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/controller/OpenFileController.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ui/ImageScrollListWidget.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ui/ImageScrollTreeWidget.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ui/config.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ui/ImagesScrollContainer.py" afterPath="$PROJECT_DIR$/ui/ImagesScrollContainer.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ui/LJJMainWindow.py" afterPath="$PROJECT_DIR$/ui/LJJMainWindow.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/utils/util.py" afterPath="$PROJECT_DIR$/utils/util.py" />
+    </list>
     <ignored path="untitled.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path=".idea/dataSources.local.xml" />
@@ -14,7 +24,7 @@
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/untitled$main.coverage" NAME="main Coverage Results" MODIFIED="1637319895552" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/untitled$main.coverage" NAME="main Coverage Results" MODIFIED="1637497350416" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
@@ -32,30 +42,39 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-      <file leaf-file-name="ImagesScrollContainer.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ui/ImagesScrollContainer.py">
+      <file leaf-file-name="OpenFileController.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/controller/OpenFileController.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="51" column="44" selection-start-line="51" selection-start-column="44" selection-end-line="51" selection-end-column="44" />
+              <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
               <folding>
-                <element signature="e#0#29#0" expanded="true" />
-                <element signature="e#1745#2266#0" expanded="false" />
-                <element signature="e#2324#2564#0" expanded="false" />
-                <element signature="e#2669#3181#0" expanded="false" />
+                <element signature="e#271#415#0" expanded="false" />
+                <element signature="e#461#964#0" expanded="false" />
+                <element signature="e#1009#1662#0" expanded="false" />
+                <element signature="e#1706#2337#0" expanded="false" />
+                <element signature="e#2383#3496#0" expanded="false" />
+                <element signature="e#3548#3912#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ToolsContainer.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ui/ToolsContainer.py">
+      <file leaf-file-name="config.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ui/config.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="7" column="37" selection-start-line="7" selection-start-column="37" selection-end-line="7" selection-end-column="37" />
-              <folding>
-                <element signature="e#0#52#0" expanded="true" />
-                <element signature="e#200#3559#0" expanded="false" />
-              </folding>
+              <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="status.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/utils/status.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="6" column="11" selection-start-line="6" selection-start-column="11" selection-end-line="6" selection-end-column="11" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -63,27 +82,54 @@
       <file leaf-file-name="LJJMainWindow.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ui/LJJMainWindow.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="133" column="74" selection-start-line="133" selection-start-column="74" selection-end-line="133" selection-end-column="74" />
+            <state vertical-scroll-proportion="-66.31579">
+              <caret line="149" column="38" selection-start-line="149" selection-start-column="38" selection-end-line="149" selection-end-column="38" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
-                <element signature="e#3453#4106#0" expanded="false" />
+                <element signature="e#3230#3749#0" expanded="false" />
+                <element signature="e#3795#4298#0" expanded="false" />
+                <element signature="e#4343#4996#0" expanded="false" />
+                <element signature="e#5064#5271#0" expanded="false" />
+                <element signature="e#5328#5443#0" expanded="false" />
+                <element signature="e#6086#6546#0" expanded="false" />
+                <element signature="e#6594#6740#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ImageShownContainer.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/ui/ImageShownContainer.py">
+      <file leaf-file-name="ImagesScrollContainer.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ui/ImagesScrollContainer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.3545568">
-              <caret line="80" column="48" selection-start-line="80" selection-start-column="48" selection-end-line="80" selection-end-column="48" />
+            <state vertical-scroll-proportion="-27.157894">
+              <caret line="49" column="44" selection-start-line="49" selection-start-column="44" selection-end-line="49" selection-end-column="44" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
-                <element signature="e#401#2378#0" expanded="false" />
-                <element signature="e#2420#2747#0" expanded="false" />
-                <element signature="e#5552#8200#0" expanded="false" />
-                <element signature="e#8533#8678#0" expanded="false" />
+                <element signature="e#1168#1468#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ImageScrollListWidget.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ui/ImageScrollListWidget.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="35" column="33" selection-start-line="35" selection-start-column="33" selection-end-line="35" selection-end-column="33" />
+              <folding>
+                <element signature="e#0#29#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ImageScrollTreeWidget.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/ui/ImageScrollTreeWidget.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.34204274">
+              <caret line="8" column="41" selection-start-line="8" selection-start-column="41" selection-end-line="8" selection-end-column="41" />
+              <folding>
+                <element signature="e#0#29#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -93,228 +139,9 @@
         <entry file="file://$PROJECT_DIR$/utils/util.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="4" column="34" selection-start-line="4" selection-start-column="34" selection-end-line="4" selection-end-column="34" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="QBoxLayout.py" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QBoxLayout.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="186" column="8" selection-start-line="186" selection-start-column="8" selection-end-line="186" selection-end-column="8" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Reconstruction3DWindow.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ui/Reconstruction3DWindow.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="16" column="36" selection-start-line="16" selection-start-column="36" selection-end-line="16" selection-end-column="36" />
+              <caret line="33" column="17" selection-start-line="33" selection-start-column="10" selection-end-line="33" selection-end-column="17" />
               <folding>
-                <element signature="e#0#29#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/main.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="21" column="15" selection-start-line="21" selection-start-column="15" selection-end-line="21" selection-end-column="15" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PlaneAndBallWindow.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ui/PlaneAndBallWindow.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="53" column="30" selection-start-line="52" selection-start-column="8" selection-end-line="53" selection-end-column="30" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="vtkAlgorithm.py" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/vtkmodules/vtkCommonExecutionModel/vtkAlgorithm.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="989" column="19" selection-start-line="989" selection-start-column="19" selection-end-line="989" selection-end-column="19" />
-              <folding>
-                <element signature="e#332#1093#1" expanded="false" />
-                <element signature="e#1181#1449#0" expanded="false" />
-                <element signature="e#1181#1436#1" expanded="false" />
-                <element signature="e#1537#1803#0" expanded="false" />
-                <element signature="e#1537#1790#1" expanded="false" />
-                <element signature="e#1922#2613#0" expanded="false" />
-                <element signature="e#1922#2600#1" expanded="false" />
-                <element signature="e#2727#3213#0" expanded="false" />
-                <element signature="e#2727#3200#1" expanded="false" />
-                <element signature="e#3311#4115#0" expanded="false" />
-                <element signature="e#3311#4102#1" expanded="false" />
-                <element signature="e#4211#4709#0" expanded="false" />
-                <element signature="e#4211#4696#1" expanded="false" />
-                <element signature="e#4841#5150#0" expanded="false" />
-                <element signature="e#4841#5137#1" expanded="false" />
-                <element signature="e#5239#5525#0" expanded="false" />
-                <element signature="e#5239#5508#1" expanded="false" />
-                <element signature="e#5611#5840#0" expanded="false" />
-                <element signature="e#5611#5823#1" expanded="false" />
-                <element signature="e#5926#6163#0" expanded="false" />
-                <element signature="e#5926#6135#1" expanded="false" />
-                <element signature="e#6251#6458#0" expanded="false" />
-                <element signature="e#6251#6445#1" expanded="false" />
-                <element signature="e#6574#7104#0" expanded="false" />
-                <element signature="e#6574#7076#1" expanded="false" />
-                <element signature="e#7209#7451#0" expanded="false" />
-                <element signature="e#7209#7438#1" expanded="false" />
-                <element signature="e#7559#7817#0" expanded="false" />
-                <element signature="e#7559#7783#1" expanded="false" />
-                <element signature="e#7925#8206#0" expanded="false" />
-                <element signature="e#7925#8193#1" expanded="false" />
-                <element signature="e#8313#8663#0" expanded="false" />
-                <element signature="e#8313#8635#1" expanded="false" />
-                <element signature="e#8772#9409#0" expanded="false" />
-                <element signature="e#8772#9396#1" expanded="false" />
-                <element signature="e#9513#9939#0" expanded="false" />
-                <element signature="e#9513#9926#1" expanded="false" />
-                <element signature="e#10051#10720#0" expanded="false" />
-                <element signature="e#10051#10703#1" expanded="false" />
-                <element signature="e#10836#11511#0" expanded="false" />
-                <element signature="e#10836#11494#1" expanded="false" />
-                <element signature="e#11619#11829#0" expanded="false" />
-                <element signature="e#11619#11812#1" expanded="false" />
-                <element signature="e#11924#12108#0" expanded="false" />
-                <element signature="e#11924#12091#1" expanded="false" />
-                <element signature="e#12204#12395#0" expanded="false" />
-                <element signature="e#12204#12378#1" expanded="false" />
-                <element signature="e#12495#12737#0" expanded="false" />
-                <element signature="e#12495#12724#1" expanded="false" />
-                <element signature="e#12838#13292#0" expanded="false" />
-                <element signature="e#12838#13279#1" expanded="false" />
-                <element signature="e#13386#13927#0" expanded="false" />
-                <element signature="e#13386#13893#1" expanded="false" />
-                <element signature="e#14032#14448#0" expanded="false" />
-                <element signature="e#14032#14435#1" expanded="false" />
-                <element signature="e#14533#14707#0" expanded="false" />
-                <element signature="e#14533#14688#1" expanded="false" />
-                <element signature="e#14800#15380#0" expanded="false" />
-                <element signature="e#14800#15345#1" expanded="false" />
-                <element signature="e#15470#16255#0" expanded="false" />
-                <element signature="e#15470#16236#1" expanded="false" />
-                <element signature="e#16345#17130#0" expanded="false" />
-                <element signature="e#16345#17111#1" expanded="false" />
-                <element signature="e#17219#17676#0" expanded="false" />
-                <element signature="e#17219#17658#1" expanded="false" />
-                <element signature="e#17768#17956#0" expanded="false" />
-                <element signature="e#17768#17939#1" expanded="false" />
-                <element signature="e#18062#18265#0" expanded="false" />
-                <element signature="e#18062#18248#1" expanded="false" />
-                <element signature="e#18354#19309#0" expanded="false" />
-                <element signature="e#18354#19296#1" expanded="false" />
-                <element signature="e#19402#19768#0" expanded="false" />
-                <element signature="e#19402#19751#1" expanded="false" />
-                <element signature="e#19865#20247#0" expanded="false" />
-                <element signature="e#19865#20230#1" expanded="false" />
-                <element signature="e#20335#20681#0" expanded="false" />
-                <element signature="e#20335#20664#1" expanded="false" />
-                <element signature="e#20767#20987#0" expanded="false" />
-                <element signature="e#20767#20970#1" expanded="false" />
-                <element signature="e#21084#21323#0" expanded="false" />
-                <element signature="e#21084#21310#1" expanded="false" />
-                <element signature="e#21413#21605#0" expanded="false" />
-                <element signature="e#21413#21592#1" expanded="false" />
-                <element signature="e#21696#21943#0" expanded="false" />
-                <element signature="e#21696#21930#1" expanded="false" />
-                <element signature="e#22036#22234#0" expanded="false" />
-                <element signature="e#22036#22221#1" expanded="false" />
-                <element signature="e#22318#22498#0" expanded="false" />
-                <element signature="e#22318#22485#1" expanded="false" />
-                <element signature="e#22596#22827#0" expanded="false" />
-                <element signature="e#22596#22814#1" expanded="false" />
-                <element signature="e#22922#23157#0" expanded="false" />
-                <element signature="e#22922#23144#1" expanded="false" />
-                <element signature="e#23242#23566#0" expanded="false" />
-                <element signature="e#23242#23549#1" expanded="false" />
-                <element signature="e#23656#23992#0" expanded="false" />
-                <element signature="e#23656#23975#1" expanded="false" />
-                <element signature="e#24102#24603#0" expanded="false" />
-                <element signature="e#24102#24586#1" expanded="false" />
-                <element signature="e#24688#24812#0" expanded="false" />
-                <element signature="e#24688#24784#1" expanded="false" />
-                <element signature="e#24953#25353#0" expanded="false" />
-                <element signature="e#24953#25336#1" expanded="false" />
-                <element signature="e#25448#25607#0" expanded="false" />
-                <element signature="e#25448#25594#1" expanded="false" />
-                <element signature="e#25699#25869#0" expanded="false" />
-                <element signature="e#25699#25856#1" expanded="false" />
-                <element signature="e#25960#26128#0" expanded="false" />
-                <element signature="e#25960#26115#1" expanded="false" />
-                <element signature="e#26234#26413#0" expanded="false" />
-                <element signature="e#26234#26400#1" expanded="false" />
-                <element signature="e#26502#26638#0" expanded="false" />
-                <element signature="e#26502#26625#1" expanded="false" />
-                <element signature="e#26760#27452#0" expanded="false" />
-                <element signature="e#26760#27439#1" expanded="false" />
-                <element signature="e#27553#27715#0" expanded="false" />
-                <element signature="e#27553#27687#1" expanded="false" />
-                <element signature="e#27811#28098#0" expanded="false" />
-                <element signature="e#27811#28085#1" expanded="false" />
-                <element signature="e#28214#28509#0" expanded="false" />
-                <element signature="e#28214#28496#1" expanded="false" />
-                <element signature="e#28609#28932#0" expanded="false" />
-                <element signature="e#28609#28919#1" expanded="false" />
-                <element signature="e#29036#29244#0" expanded="false" />
-                <element signature="e#29036#29231#1" expanded="false" />
-                <element signature="e#29382#30633#0" expanded="false" />
-                <element signature="e#29382#30620#1" expanded="false" />
-                <element signature="e#30752#31692#0" expanded="false" />
-                <element signature="e#30752#31679#1" expanded="false" />
-                <element signature="e#31806#32557#0" expanded="false" />
-                <element signature="e#31806#32544#1" expanded="false" />
-                <element signature="e#32651#32867#0" expanded="false" />
-                <element signature="e#32651#32854#1" expanded="false" />
-                <element signature="e#32981#33532#0" expanded="false" />
-                <element signature="e#32981#33519#1" expanded="false" />
-                <element signature="e#33647#34455#0" expanded="false" />
-                <element signature="e#33647#34442#1" expanded="false" />
-                <element signature="e#34552#35008#0" expanded="false" />
-                <element signature="e#34552#34995#1" expanded="false" />
-                <element signature="e#35107#35291#0" expanded="false" />
-                <element signature="e#35107#35278#1" expanded="false" />
-                <element signature="e#35378#35836#0" expanded="false" />
-                <element signature="e#35378#35823#1" expanded="false" />
-                <element signature="e#35926#36070#0" expanded="false" />
-                <element signature="e#35926#36057#1" expanded="false" />
-                <element signature="e#36210#36505#0" expanded="false" />
-                <element signature="e#36210#36488#1" expanded="false" />
-                <element signature="e#36629#37243#0" expanded="false" />
-                <element signature="e#36629#37226#1" expanded="false" />
-                <element signature="e#37334#37501#0" expanded="false" />
-                <element signature="e#37334#37488#1" expanded="false" />
-                <element signature="e#37667#38172#0" expanded="false" />
-                <element signature="e#37667#38155#1" expanded="false" />
-                <element signature="e#38269#38582#0" expanded="false" />
-                <element signature="e#38269#38569#1" expanded="false" />
-                <element signature="e#38760#39327#0" expanded="false" />
-                <element signature="e#38760#39310#1" expanded="false" />
-                <element signature="e#39418#39582#0" expanded="false" />
-                <element signature="e#39418#39569#1" expanded="false" />
-                <element signature="e#39661#39712#0" expanded="false" />
-                <element signature="e#39796#39844#0" expanded="false" />
-                <element signature="e#39920#39924#0" expanded="false" />
-                <element signature="e#40035#40127#0" expanded="false" />
-                <element signature="e#40203#40242#0" expanded="false" />
-                <element signature="e#40321#40379#0" expanded="false" />
-                <element signature="e#40454#40492#0" expanded="false" />
+                <element signature="e#351#575#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -341,15 +168,22 @@
         <option value="$PROJECT_DIR$/ui/ScorllImageContainer.py" />
         <option value="$PROJECT_DIR$/ui/FileFolderWindow.py" />
         <option value="$PROJECT_DIR$/utils/status.py" />
-        <option value="$PROJECT_DIR$/ui/ImagesScrollContainer.py" />
         <option value="$PROJECT_DIR$/ui/3DRestructionWindow.py" />
         <option value="$PROJECT_DIR$/ui/Restruction3DWindow.py" />
         <option value="$PROJECT_DIR$/ui/ToolsContainer.py" />
         <option value="$PROJECT_DIR$/ui/Reconstruction3DWindow.py" />
         <option value="$PROJECT_DIR$/main.py" />
-        <option value="$PROJECT_DIR$/ui/LJJMainWindow.py" />
-        <option value="$PROJECT_DIR$/utils/util.py" />
         <option value="$PROJECT_DIR$/ui/ImageShownContainer.py" />
+        <option value="$PROJECT_DIR$/ui/ImageScrollTreeView.py" />
+        <option value="$PROJECT_DIR$/ui/ImageScrollListView.py" />
+        <option value="$PROJECT_DIR$/utils/util.py" />
+        <option value="$PROJECT_DIR$/config.py" />
+        <option value="$PROJECT_DIR$/ui/config.py" />
+        <option value="$PROJECT_DIR$/ui/LJJMainWindow.py" />
+        <option value="$PROJECT_DIR$/ui/ImagesScrollContainer.py" />
+        <option value="$PROJECT_DIR$/ui/ImageScrollTreeWidget.py" />
+        <option value="$PROJECT_DIR$/ui/ImageScrollListWidget.py" />
+        <option value="$PROJECT_DIR$/controller/OpenFileController.py" />
       </list>
     </option>
   </component>
@@ -389,6 +223,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -443,18 +279,30 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="untitled" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MRViewer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="controller" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="D:/python/envs/MRViewer/python.exe" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.tabs" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
-    <property name="SearchEverywhereHistoryKey" value="QListWidgetItem&#9;FILE&#9;file://C:/Users/19956875375/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QListWidgetItem.py" />
+    <property name="SearchEverywhereHistoryKey" value="QTreeWidgetItem&#9;FILE&#9;file://C:/Users/19956875375/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QTreeWidgetItem.py&#10;QListWidgetItem&#9;FILE&#9;file://C:/Users/19956875375/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QListWidgetItem.py" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -708,17 +556,17 @@
     <frame x="-13" y="-13" width="2586" height="1626" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28415522" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27405012" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32945454" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31272727" sideWeight="0.3892482" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32983023" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32983023" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3898182" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.38679245" sideWeight="0.6107518" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32945454" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32945454" sideWeight="0.6107518" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.328" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.37963638" sideWeight="0.9122878" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16363636" sideWeight="0.9122878" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -762,88 +610,21 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="12" />
+      <breakpoints-dialog>
+        <breakpoints-dialog />
+      </breakpoints-dialog>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+      <option name="time" value="103" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/vtkmodules/vtkInteractionWidgets/vtkAbstractWidget.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.027047332">
-          <caret line="14" column="46" selection-start-line="14" selection-start-column="46" selection-end-line="14" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/vtkmodules/vtkRenderingCore/vtkActor.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.027047332">
-          <caret line="187" column="8" selection-start-line="187" selection-start-column="8" selection-end-line="187" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/vtkmodules/vtkFiltersSources/vtkPlaneSource.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.027047332">
-          <caret line="112" column="32" selection-start-line="112" selection-start-column="8" selection-end-line="112" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QTreeWidget.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.27047333">
-          <caret line="448" column="39" selection-start-line="448" selection-start-column="32" selection-end-line="448" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QTreeView.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.027047332">
-          <caret line="426" column="35" selection-start-line="426" selection-start-column="35" selection-end-line="426" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/DICOM Viewer Demo  author-FJ/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.091216214">
-          <caret line="11" column="6" selection-start-line="11" selection-start-column="6" selection-end-line="11" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QMainWindow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.4864865">
-          <caret line="21" column="37" selection-start-line="21" selection-start-column="37" selection-end-line="21" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QApplication.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="6" selection-start-line="12" selection-start-column="6" selection-end-line="12" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/python/envs/MRViewer/Lib/site-packages/PyQt5/QtWidgets.pyi">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="6000" column="21" selection-start-line="6000" selection-start-column="6" selection-end-line="6000" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/__init__/QListWidgetItem.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.9502538">
-          <caret line="76" column="25" selection-start-line="76" selection-start-column="25" selection-end-line="76" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtCore/QCoreApplication.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="5.9774604">
-          <caret line="225" column="20" selection-start-line="225" selection-start-column="20" selection-end-line="225" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QFileDialog.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -887,13 +668,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="2406" column="0" selection-start-line="2406" selection-start-column="0" selection-end-line="2406" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://D:/python/envs/MRViewer/Lib/site-packages/PIL/ImageQt.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-12.385965">
@@ -922,24 +696,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QListView.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="30" selection-start-line="14" selection-start-column="30" selection-end-line="14" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtHelp.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33333334">
           <caret line="714" column="6" selection-start-line="714" selection-start-column="6" selection-end-line="714" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QAbstractItemView.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="52" selection-start-line="12" selection-start-column="52" selection-end-line="12" selection-end-column="52" />
         </state>
       </provider>
     </entry>
@@ -950,13 +710,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtGui/QIcon.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="126" column="8" selection-start-line="126" selection-start-column="8" selection-end-line="126" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QListWidgetItem.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -964,32 +717,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QListWidget.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="20" column="11" selection-start-line="20" selection-start-column="11" selection-end-line="20" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtCore/pyqtSignal.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="26" column="8" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QWidget.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33333334">
-          <caret line="703" column="8" selection-start-line="703" selection-start-column="8" selection-end-line="703" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utils/status.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="11" selection-start-line="6" selection-start-column="11" selection-end-line="6" selection-end-column="11" />
         </state>
       </provider>
     </entry>
@@ -1032,181 +763,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="989" column="19" selection-start-line="989" selection-start-column="19" selection-end-line="989" selection-end-column="19" />
-          <folding>
-            <element signature="e#332#1093#1" expanded="false" />
-            <element signature="e#1181#1449#0" expanded="false" />
-            <element signature="e#1181#1436#1" expanded="false" />
-            <element signature="e#1537#1803#0" expanded="false" />
-            <element signature="e#1537#1790#1" expanded="false" />
-            <element signature="e#1922#2613#0" expanded="false" />
-            <element signature="e#1922#2600#1" expanded="false" />
-            <element signature="e#2727#3213#0" expanded="false" />
-            <element signature="e#2727#3200#1" expanded="false" />
-            <element signature="e#3311#4115#0" expanded="false" />
-            <element signature="e#3311#4102#1" expanded="false" />
-            <element signature="e#4211#4709#0" expanded="false" />
-            <element signature="e#4211#4696#1" expanded="false" />
-            <element signature="e#4841#5150#0" expanded="false" />
-            <element signature="e#4841#5137#1" expanded="false" />
-            <element signature="e#5239#5525#0" expanded="false" />
-            <element signature="e#5239#5508#1" expanded="false" />
-            <element signature="e#5611#5840#0" expanded="false" />
-            <element signature="e#5611#5823#1" expanded="false" />
-            <element signature="e#5926#6163#0" expanded="false" />
-            <element signature="e#5926#6135#1" expanded="false" />
-            <element signature="e#6251#6458#0" expanded="false" />
-            <element signature="e#6251#6445#1" expanded="false" />
-            <element signature="e#6574#7104#0" expanded="false" />
-            <element signature="e#6574#7076#1" expanded="false" />
-            <element signature="e#7209#7451#0" expanded="false" />
-            <element signature="e#7209#7438#1" expanded="false" />
-            <element signature="e#7559#7817#0" expanded="false" />
-            <element signature="e#7559#7783#1" expanded="false" />
-            <element signature="e#7925#8206#0" expanded="false" />
-            <element signature="e#7925#8193#1" expanded="false" />
-            <element signature="e#8313#8663#0" expanded="false" />
-            <element signature="e#8313#8635#1" expanded="false" />
-            <element signature="e#8772#9409#0" expanded="false" />
-            <element signature="e#8772#9396#1" expanded="false" />
-            <element signature="e#9513#9939#0" expanded="false" />
-            <element signature="e#9513#9926#1" expanded="false" />
-            <element signature="e#10051#10720#0" expanded="false" />
-            <element signature="e#10051#10703#1" expanded="false" />
-            <element signature="e#10836#11511#0" expanded="false" />
-            <element signature="e#10836#11494#1" expanded="false" />
-            <element signature="e#11619#11829#0" expanded="false" />
-            <element signature="e#11619#11812#1" expanded="false" />
-            <element signature="e#11924#12108#0" expanded="false" />
-            <element signature="e#11924#12091#1" expanded="false" />
-            <element signature="e#12204#12395#0" expanded="false" />
-            <element signature="e#12204#12378#1" expanded="false" />
-            <element signature="e#12495#12737#0" expanded="false" />
-            <element signature="e#12495#12724#1" expanded="false" />
-            <element signature="e#12838#13292#0" expanded="false" />
-            <element signature="e#12838#13279#1" expanded="false" />
-            <element signature="e#13386#13927#0" expanded="false" />
-            <element signature="e#13386#13893#1" expanded="false" />
-            <element signature="e#14032#14448#0" expanded="false" />
-            <element signature="e#14032#14435#1" expanded="false" />
-            <element signature="e#14533#14707#0" expanded="false" />
-            <element signature="e#14533#14688#1" expanded="false" />
-            <element signature="e#14800#15380#0" expanded="false" />
-            <element signature="e#14800#15345#1" expanded="false" />
-            <element signature="e#15470#16255#0" expanded="false" />
-            <element signature="e#15470#16236#1" expanded="false" />
-            <element signature="e#16345#17130#0" expanded="false" />
-            <element signature="e#16345#17111#1" expanded="false" />
-            <element signature="e#17219#17676#0" expanded="false" />
-            <element signature="e#17219#17658#1" expanded="false" />
-            <element signature="e#17768#17956#0" expanded="false" />
-            <element signature="e#17768#17939#1" expanded="false" />
-            <element signature="e#18062#18265#0" expanded="false" />
-            <element signature="e#18062#18248#1" expanded="false" />
-            <element signature="e#18354#19309#0" expanded="false" />
-            <element signature="e#18354#19296#1" expanded="false" />
-            <element signature="e#19402#19768#0" expanded="false" />
-            <element signature="e#19402#19751#1" expanded="false" />
-            <element signature="e#19865#20247#0" expanded="false" />
-            <element signature="e#19865#20230#1" expanded="false" />
-            <element signature="e#20335#20681#0" expanded="false" />
-            <element signature="e#20335#20664#1" expanded="false" />
-            <element signature="e#20767#20987#0" expanded="false" />
-            <element signature="e#20767#20970#1" expanded="false" />
-            <element signature="e#21084#21323#0" expanded="false" />
-            <element signature="e#21084#21310#1" expanded="false" />
-            <element signature="e#21413#21605#0" expanded="false" />
-            <element signature="e#21413#21592#1" expanded="false" />
-            <element signature="e#21696#21943#0" expanded="false" />
-            <element signature="e#21696#21930#1" expanded="false" />
-            <element signature="e#22036#22234#0" expanded="false" />
-            <element signature="e#22036#22221#1" expanded="false" />
-            <element signature="e#22318#22498#0" expanded="false" />
-            <element signature="e#22318#22485#1" expanded="false" />
-            <element signature="e#22596#22827#0" expanded="false" />
-            <element signature="e#22596#22814#1" expanded="false" />
-            <element signature="e#22922#23157#0" expanded="false" />
-            <element signature="e#22922#23144#1" expanded="false" />
-            <element signature="e#23242#23566#0" expanded="false" />
-            <element signature="e#23242#23549#1" expanded="false" />
-            <element signature="e#23656#23992#0" expanded="false" />
-            <element signature="e#23656#23975#1" expanded="false" />
-            <element signature="e#24102#24603#0" expanded="false" />
-            <element signature="e#24102#24586#1" expanded="false" />
-            <element signature="e#24688#24812#0" expanded="false" />
-            <element signature="e#24688#24784#1" expanded="false" />
-            <element signature="e#24953#25353#0" expanded="false" />
-            <element signature="e#24953#25336#1" expanded="false" />
-            <element signature="e#25448#25607#0" expanded="false" />
-            <element signature="e#25448#25594#1" expanded="false" />
-            <element signature="e#25699#25869#0" expanded="false" />
-            <element signature="e#25699#25856#1" expanded="false" />
-            <element signature="e#25960#26128#0" expanded="false" />
-            <element signature="e#25960#26115#1" expanded="false" />
-            <element signature="e#26234#26413#0" expanded="false" />
-            <element signature="e#26234#26400#1" expanded="false" />
-            <element signature="e#26502#26638#0" expanded="false" />
-            <element signature="e#26502#26625#1" expanded="false" />
-            <element signature="e#26760#27452#0" expanded="false" />
-            <element signature="e#26760#27439#1" expanded="false" />
-            <element signature="e#27553#27715#0" expanded="false" />
-            <element signature="e#27553#27687#1" expanded="false" />
-            <element signature="e#27811#28098#0" expanded="false" />
-            <element signature="e#27811#28085#1" expanded="false" />
-            <element signature="e#28214#28509#0" expanded="false" />
-            <element signature="e#28214#28496#1" expanded="false" />
-            <element signature="e#28609#28932#0" expanded="false" />
-            <element signature="e#28609#28919#1" expanded="false" />
-            <element signature="e#29036#29244#0" expanded="false" />
-            <element signature="e#29036#29231#1" expanded="false" />
-            <element signature="e#29382#30633#0" expanded="false" />
-            <element signature="e#29382#30620#1" expanded="false" />
-            <element signature="e#30752#31692#0" expanded="false" />
-            <element signature="e#30752#31679#1" expanded="false" />
-            <element signature="e#31806#32557#0" expanded="false" />
-            <element signature="e#31806#32544#1" expanded="false" />
-            <element signature="e#32651#32867#0" expanded="false" />
-            <element signature="e#32651#32854#1" expanded="false" />
-            <element signature="e#32981#33532#0" expanded="false" />
-            <element signature="e#32981#33519#1" expanded="false" />
-            <element signature="e#33647#34455#0" expanded="false" />
-            <element signature="e#33647#34442#1" expanded="false" />
-            <element signature="e#34552#35008#0" expanded="false" />
-            <element signature="e#34552#34995#1" expanded="false" />
-            <element signature="e#35107#35291#0" expanded="false" />
-            <element signature="e#35107#35278#1" expanded="false" />
-            <element signature="e#35378#35836#0" expanded="false" />
-            <element signature="e#35378#35823#1" expanded="false" />
-            <element signature="e#35926#36070#0" expanded="false" />
-            <element signature="e#35926#36057#1" expanded="false" />
-            <element signature="e#36210#36505#0" expanded="false" />
-            <element signature="e#36210#36488#1" expanded="false" />
-            <element signature="e#36629#37243#0" expanded="false" />
-            <element signature="e#36629#37226#1" expanded="false" />
-            <element signature="e#37334#37501#0" expanded="false" />
-            <element signature="e#37334#37488#1" expanded="false" />
-            <element signature="e#37667#38172#0" expanded="false" />
-            <element signature="e#37667#38155#1" expanded="false" />
-            <element signature="e#38269#38582#0" expanded="false" />
-            <element signature="e#38269#38569#1" expanded="false" />
-            <element signature="e#38760#39327#0" expanded="false" />
-            <element signature="e#38760#39310#1" expanded="false" />
-            <element signature="e#39418#39582#0" expanded="false" />
-            <element signature="e#39418#39569#1" expanded="false" />
-            <element signature="e#39661#39712#0" expanded="false" />
-            <element signature="e#39796#39844#0" expanded="false" />
-            <element signature="e#39920#39924#0" expanded="false" />
-            <element signature="e#40035#40127#0" expanded="false" />
-            <element signature="e#40203#40242#0" expanded="false" />
-            <element signature="e#40321#40379#0" expanded="false" />
-            <element signature="e#40454#40492#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ui/FileFolderWindow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.17623763">
-          <caret line="12" column="30" selection-start-line="12" selection-start-column="30" selection-end-line="12" selection-end-column="30" />
         </state>
       </provider>
     </entry>
@@ -1214,25 +770,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="53" column="30" selection-start-line="52" selection-start-column="8" selection-end-line="53" selection-end-column="30" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="21" column="15" selection-start-line="21" selection-start-column="15" selection-end-line="21" selection-end-column="15" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QFrame.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="7.469741">
-          <caret line="221" column="8" selection-start-line="221" selection-start-column="8" selection-end-line="221" selection-end-column="8" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1243,39 +780,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QBoxLayout.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="186" column="8" selection-start-line="186" selection-start-column="8" selection-end-line="186" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QGridLayout.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.62247837">
           <caret line="98" column="41" selection-start-line="98" selection-start-column="41" selection-end-line="98" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ui/ImagesScrollContainer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="51" column="44" selection-start-line="51" selection-start-column="44" selection-end-line="51" selection-end-column="44" />
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#1745#2266#0" expanded="false" />
-            <element signature="e#2324#2564#0" expanded="false" />
-            <element signature="e#2669#3181#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utils/util.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="4" column="34" selection-start-line="4" selection-start-column="34" selection-end-line="4" selection-end-column="34" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1284,9 +792,24 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="7" column="37" selection-start-line="7" selection-start-column="37" selection-end-line="7" selection-end-column="37" />
           <folding>
-            <element signature="e#0#52#0" expanded="true" />
+            <element signature="e#0#52#0" expanded="false" />
             <element signature="e#200#3559#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtGui/QPixmap.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.243426">
+          <caret line="13" column="6" selection-start-line="13" selection-start-column="6" selection-end-line="13" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QBoxLayout.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.27315915">
+          <caret line="186" column="8" selection-start-line="186" selection-start-column="8" selection-end-line="186" selection-end-column="8" />
         </state>
       </provider>
     </entry>
@@ -1295,32 +818,234 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="16" column="36" selection-start-line="16" selection-start-column="36" selection-end-line="16" selection-end-column="36" />
           <folding>
-            <element signature="e#0#29#0" expanded="true" />
+            <element signature="e#0#29#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ui/LJJMainWindow.py">
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QFrame.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="133" column="74" selection-start-line="133" selection-start-column="74" selection-end-line="133" selection-end-column="74" />
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#3453#4106#0" expanded="false" />
-          </folding>
+          <caret line="14" column="6" selection-start-line="14" selection-start-column="6" selection-end-line="14" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QScrollArea.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="14" column="31" selection-start-line="14" selection-start-column="31" selection-end-line="14" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QAbstractScrollArea.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334">
+          <caret line="14" column="6" selection-start-line="14" selection-start-column="6" selection-end-line="14" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QAbstractItemView.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="14" column="33" selection-start-line="14" selection-start-column="33" selection-end-line="14" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QListView.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="12" column="48" selection-start-line="12" selection-start-column="48" selection-end-line="12" selection-end-column="48" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ui/ImageShownContainer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3545568">
-          <caret line="80" column="48" selection-start-line="80" selection-start-column="48" selection-end-line="80" selection-end-column="48" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="24" column="62" selection-start-line="24" selection-start-column="8" selection-end-line="24" selection-end-column="64" />
+          <folding>
+            <element signature="e#0#29#0" expanded="false" />
+            <element signature="e#2420#2747#0" expanded="false" />
+            <element signature="e#2794#4129#0" expanded="false" />
+            <element signature="e#4176#5515#0" expanded="false" />
+            <element signature="e#5552#8200#0" expanded="false" />
+            <element signature="e#8249#8491#0" expanded="false" />
+            <element signature="e#8533#8678#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QTreeView.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334">
+          <caret line="172" column="8" selection-start-line="172" selection-start-column="8" selection-end-line="172" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/FileFolderWindow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="39" column="75" selection-start-line="39" selection-start-column="59" selection-end-line="39" selection-end-column="75" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QWidget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334">
+          <caret line="703" column="8" selection-start-line="703" selection-start-column="8" selection-end-line="703" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtGui/QIcon.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334">
+          <caret line="20" column="8" selection-start-line="20" selection-start-column="8" selection-end-line="20" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QTreeWidget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="32" column="0" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="2406" column="0" selection-start-line="2406" selection-start-column="0" selection-end-line="2406" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/python/envs/MRViewer/Lib/site-packages/cv2/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="16" column="9" selection-start-line="16" selection-start-column="9" selection-end-line="16" selection-end-column="9" />
+          <folding>
+            <element signature="e#431#1423#0" expanded="false" />
+            <element signature="e#2100#6496#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QListWidget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33254156">
+          <caret line="36" column="8" selection-start-line="36" selection-start-column="8" selection-end-line="36" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/890149065/PyQt5/QtWidgets/QTreeWidgetItem.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="172" column="8" selection-start-line="172" selection-start-column="8" selection-end-line="172" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="33" column="17" selection-start-line="33" selection-start-column="10" selection-end-line="33" selection-end-column="17" />
+          <folding>
+            <element signature="e#351#575#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/controller/OpenFileController.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+          <folding>
+            <element signature="e#271#415#0" expanded="false" />
+            <element signature="e#461#964#0" expanded="false" />
+            <element signature="e#1009#1662#0" expanded="false" />
+            <element signature="e#1706#2337#0" expanded="false" />
+            <element signature="e#2383#3496#0" expanded="false" />
+            <element signature="e#3548#3912#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/status.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="11" selection-start-line="6" selection-start-column="11" selection-end-line="6" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/LJJMainWindow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-66.31579">
+          <caret line="149" column="38" selection-start-line="149" selection-start-column="38" selection-end-line="149" selection-end-column="38" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#401#2378#0" expanded="false" />
-            <element signature="e#2420#2747#0" expanded="false" />
-            <element signature="e#5552#8200#0" expanded="false" />
-            <element signature="e#8533#8678#0" expanded="false" />
+            <element signature="e#3230#3749#0" expanded="false" />
+            <element signature="e#3795#4298#0" expanded="false" />
+            <element signature="e#4343#4996#0" expanded="false" />
+            <element signature="e#5064#5271#0" expanded="false" />
+            <element signature="e#5328#5443#0" expanded="false" />
+            <element signature="e#6086#6546#0" expanded="false" />
+            <element signature="e#6594#6740#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/ImagesScrollContainer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-27.157894">
+          <caret line="49" column="44" selection-start-line="49" selection-start-column="44" selection-end-line="49" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+            <element signature="e#1168#1468#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/ImageScrollListWidget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="35" column="33" selection-start-line="35" selection-start-column="33" selection-end-line="35" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/ImageScrollTreeWidget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.34204274">
+          <caret line="8" column="41" selection-start-line="8" selection-start-column="41" selection-end-line="8" selection-end-column="41" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
           </folding>
         </state>
       </provider>

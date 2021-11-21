@@ -118,3 +118,25 @@
 - 右栏工具区
   - 可能的功能，如鼠标监听效果的切换，窗口数目的布局，Reset功能，Clear功能...
 
+2021-11-21
+
+- 实现了文件缩略图列表的渲染部分
+  - 在菜单栏新增了两个action，openStudy打开一次实验的结果，openPatient打开一个病人的多次实验的结果
+  - 两种情况用不同布局实现。study用QListWidget实现，patient用QTreeWidget实现
+  - 缩略图选择默认为每个series的第一张图，空series不展示
+- 遗留问题
+  - UI的美化。包括行高、行间距、字体样式等等
+  - series的计数问题，表示当前缩略图在该series中的index
+  - 缩略图的resize方法暂用opencv的库函数，会导致最后的软件大小膨胀。所以resize函数后期优化时需要自己实现
+- 下一步目标
+  - 实现series拖动到文件渲染区，然后加载该series这一功能
+
+加载一个Study
+
+<img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211121202247@2x.png" style="zoom:33%;" />
+
+加载一个Patient
+
+<img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211121202319@2x.png" style="zoom:33%;" />
+
+<img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211121202337@2x.png" style="zoom:33%;" />

@@ -1,6 +1,8 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
+from controller.OpenFileController import OpenFileController
+from ui.config import *
 from ui.ImagesScrollContainer import ImageScrollContainer
 from ui.ToolsContainer import ToolsContainer
 from ui.ImageShownContainer import ImageShownContainer
@@ -11,7 +13,7 @@ import os
 class LJJMainWindow(QMainWindow):
 
     updateImageShownSignal = pyqtSignal(str,str)
-    updateImageListSignal = pyqtSignal(list)
+    updateImageListSignal = pyqtSignal(dict,int)
     updateImage3DShownSignal = pyqtSignal(str)
 
     def __init__(self, parent=None):
@@ -46,12 +48,23 @@ class LJJMainWindow(QMainWindow):
         self.actionopen_file.setObjectName("actionopen_file")
         self.actionopen_directory = QAction(self)
         self.actionopen_directory.setObjectName("actionopen_directory")
+        self.actionopen_study = QAction(self)
+        self.actionopen_study.setObjectName("actionopen_study")
+        self.actionopen_patient = QAction(self)
+        self.actionopen_patient.setObjectName("actionopen_patient")
+
         self.menu.addAction(self.actionopen_file)
         self.menu.addAction(self.actionopen_directory)
+        self.menu.addAction(self.actionopen_study)
+        self.menu.addAction(self.actionopen_patient)
         self.menubar.addAction(self.menu.menuAction())
 
-        #菜单-文件浏览窗口
-        self.fileFolderWindow = None
+        #初始化controllers
+        self.openFileController = OpenFileController(
+            self,
+            self.imageScrollContainer,
+            self.updateImageListSignal
+        )
 
         #信号绑定部分
         self.updateImageShownSignal.connect(self.updateImageShownArea)
@@ -59,6 +72,8 @@ class LJJMainWindow(QMainWindow):
         self.updateImage3DShownSignal.connect(self.updateImage3DShownArea)
         self.actionopen_file.triggered.connect(self.openFileFolderWindow)
         self.actionopen_directory.triggered.connect(self.openDirectoryWindow)
+        self.actionopen_study.triggered.connect(self.openFileController.openStudyDirectory)
+        self.actionopen_patient.triggered.connect(self.openFileController.openPatientDirectory)
         self.toolsContainer.showInfoSig.connect(self.showLevelAndWindowInfo)
 
         self.retranslateUi(self)
@@ -72,6 +87,8 @@ class LJJMainWindow(QMainWindow):
         self.menu.setTitle(_translate("MainWindow", "文件"))
         self.actionopen_file.setText(_translate("MainWindow", "打开文件"))
         self.actionopen_directory.setText(_translate("MainWindow", "打开文件夹"))
+        self.actionopen_study.setText(_translate("MainWindow", "打开Study"))
+        self.actionopen_patient.setText(_translate("MainWindow", "打开Patient"))
 
         self.toolsContainer.retranslateUi()
 
@@ -118,13 +135,19 @@ class LJJMainWindow(QMainWindow):
         self.imageShownContainer.filePath = filePath
         self.imageShownContainer.show3DDicom()
 
-    def updateImageListArea(self,fileNames):
-        status = self.imageScrollContainer.updateListHeight(len(fileNames))
-        if status is Status.bad:
-            return
-        self.imageScrollContainer.clearImageList()
-        for index,fileName in enumerate(fileNames):
-            self.imageScrollContainer.addImageItem(fileName,index)
+    def updateImageListArea(self, dict, tag):
+        self.imageScrollContainer.initImageListView(tag)
+        if tag is studyTag:
+            status = self.imageScrollContainer.updateListHeight(len(dict.keys()))
+            if status is Status.bad: return
+
+        if tag is patientTag:
+            count = sum([len(study.keys()) for study in list(dict.values())])
+            status = self.imageScrollContainer.updateListHeight(count)
+            if status is Status.bad: return
+
+        # self.imageScrollContainer.clearImageList()
+        self.imageScrollContainer.showImageList(dict, tag)
 
     def showLevelAndWindowInfo(self):
         levelXZ = self.imageShownContainer.imageViewerXZ.GetColorLevel()
