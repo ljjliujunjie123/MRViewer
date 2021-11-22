@@ -14,8 +14,8 @@ class ImageScrollListWidget(QListWidget):
 
         self.setObjectName("ImageScrollListWidget")
 
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setFixedHeight(listHeight)
@@ -43,8 +43,6 @@ class ImageScrollListWidget(QListWidget):
         }
         imageItem.setData(3,itemExtraData)
         self.addItem(imageItem)
-        print(fileName)
-        print(self.iconSize())
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

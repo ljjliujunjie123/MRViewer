@@ -51,8 +51,8 @@ class OpenFileController():
         self.updateImage3DShownSignal.emit(filePath)
 
     def openStudyDirectory(self):
-        # filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
-        filePath = r'D:/respository/MRViewer_Scource/dicom_for_UItest'
+        filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
+        # filePath = r'D:/respository/MRViewer_Scource/dicom_for_UItest'
         if self.checkDirValidity(filePath) is Status.bad: return
         seriesPaths = os.listdir(filePath)
         dict = {}
@@ -66,8 +66,8 @@ class OpenFileController():
         self.updateImageListSignal.emit(dict, studyTag)
 
     def openPatientDirectory(self):
-        # filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Patient的目录",'')
-        filePath = r'D:/respository/MRViewer_Scource/Patient_Test_data'
+        filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Patient的目录",'')
+        # filePath = r'D:/respository/MRViewer_Scource/Patient_Test_data'
         if self.checkDirValidity(filePath) is Status.bad: return
 
         resDict = {}

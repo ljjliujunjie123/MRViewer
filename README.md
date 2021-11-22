@@ -145,14 +145,17 @@
 
 - 实现了文件缩略图列表向文件渲染区的基本拖拽功能
   - 用户左键选中一个series item，移动到文件渲染区
-  - 文件渲染区目前只保留一个2d渲染窗口，默认加载该series的第一张图
+  - 文件渲染区目前只保留一个2d渲染窗口和一个3d窗口，默认加载该series的第一张图
 - 实现难点
   - 重写鼠标监听事件，重写dropevent相关事件
   - 自定义QMimeData传递数据
 - 下一步目标
   - 2d渲染窗口的附加信息，如TR等
   - 文件渲染区的布局管理，目标是1x1，1x2，2x1，2x2四种选择
-  - 3d渲染窗口的加载问题，实现逻辑和2d的要分开
 
 <video src="D:\school_files\vedio\录制_2021_11_22_20_00_54_405.mp4" width="800px" height="600px" controls="controls"></video>
+
+- 重新优化了下文件缩略图的效果，实现了3d文件渲染区的基本拖拽功能
+
+<video src="D:\school_files\vedio\录制_2021_11_22_21_48_23_424.mp4" width="800px" height="600px" controls="controls"></video>
 

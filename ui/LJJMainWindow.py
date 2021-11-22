@@ -20,7 +20,7 @@ class LJJMainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)
 
         self.setObjectName("MainWindow")
-        self.resize(2000, 1200)
+        self.resize(2400, 1600)
         self.centralwidget = QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
 
@@ -36,7 +36,7 @@ class LJJMainWindow(QMainWindow):
         #菜单栏部分
         self.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(self)
-        self.menubar.setGeometry(QRect(0, 0, 2000, 22))
+        self.menubar.setGeometry(QRect(0, 0, 2400, 22))
         self.menubar.setObjectName("menubar")
         self.menu = QMenu(self.menubar)
         self.menu.setObjectName("menu")
