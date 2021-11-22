@@ -124,11 +124,11 @@
   - 在菜单栏新增了两个action，openStudy打开一次实验的结果，openPatient打开一个病人的多次实验的结果
   - 两种情况用不同布局实现。study用QListWidget实现，patient用QTreeWidget实现
   - 缩略图选择默认为每个series的第一张图，空series不展示
-- 遗留问题
-  - UI的美化。包括行高、行间距、字体样式等等
-  - series的计数问题，表示当前缩略图在该series中的index
+- 引入问题
   - 缩略图的resize方法暂用opencv的库函数，会导致最后的软件大小膨胀。所以resize函数后期优化时需要自己实现
 - 下一步目标
+  - UI的美化。包括行高、行间距、字体样式等等
+  - series的计数问题，表示当前缩略图在该series中的index
   - 实现series拖动到文件渲染区，然后加载该series这一功能
 
 加载一个Study
@@ -140,3 +140,19 @@
 <img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211121202319@2x.png" style="zoom:33%;" />
 
 <img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211121202337@2x.png" style="zoom:33%;" />
+
+2021-11-22
+
+- 实现了文件缩略图列表向文件渲染区的基本拖拽功能
+  - 用户左键选中一个series item，移动到文件渲染区
+  - 文件渲染区目前只保留一个2d渲染窗口，默认加载该series的第一张图
+- 实现难点
+  - 重写鼠标监听事件，重写dropevent相关事件
+  - 自定义QMimeData传递数据
+- 下一步目标
+  - 2d渲染窗口的附加信息，如TR等
+  - 文件渲染区的布局管理，目标是1x1，1x2，2x1，2x2四种选择
+  - 3d渲染窗口的加载问题，实现逻辑和2d的要分开
+
+<video src="D:\school_files\vedio\录制_2021_11_22_20_00_54_405.mp4" width="800px" height="600px" controls="controls"></video>
+

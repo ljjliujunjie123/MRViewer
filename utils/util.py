@@ -2,6 +2,7 @@ from pydicom import *
 
 import numpy as np
 import pydicom as pyd
+import os
 from PIL import Image, ImageOps, ImageEnhance
 from PIL.ImageQt import *
 from PyQt5.QtCore import *
@@ -33,3 +34,6 @@ def dicom_to_qt(dcm_file, factor_contrast, factor_bright, auto_mode, inversion_m
         image = ImageOps.invert(image.convert('L'))
     qim = ImageQt(image)
     return (qim)
+
+def getSeriesPathFromFileName(fileName):
+    return os.path.split(fileName)[0]
