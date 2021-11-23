@@ -62,7 +62,7 @@ class ToolsContainer(QtWidgets.QFrame):
         self.horizontalLayout.addItem(spacerItem8)
         self.toolsVerticalContainer.addLayout(self.horizontalLayout)
 
-        self.pushButton.clicked.connect(self.showInfoSig)
+        # self.pushButton.clicked.connect(self.showInfoSig)
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate

@@ -1,16 +1,13 @@
-from pydicom import *
-
 import numpy as np
 import pydicom as pyd
 import os
-from PIL import Image, ImageOps, ImageEnhance
+from PIL import ImageOps, ImageEnhance
 from PIL.ImageQt import *
-from PyQt5.QtCore import *
 
 import cv2
 
 def getDicomWindowCenterAndLevel(fileName):
-    dcmFile = dcmread(fileName)
+    dcmFile = pyd.dcmread(fileName)
     return (dcmFile.WindowCenter, dcmFile.WindowWidth)
 
 def extract_grayscale_image(mri_file):
