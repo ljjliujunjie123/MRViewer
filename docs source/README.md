@@ -192,3 +192,4 @@
 
   - 问题四：自定义的包在运行时import error。解决方法是自定义包下的`__init__`文件配置一下`__all__`属性，从而使from module import *能被正常解释
 
+- 提交git遇到个小问题，打包后的文件超过100M被github禁掉了，如果想传大文件，参考https://git-lfs.github.com./。如果只是误传大文件，会导致后续git push一直过不了，因为大文件被github给缓存了，参考https://blog.csdn.net/u014110320/article/details/82841561清缓存，重新push
