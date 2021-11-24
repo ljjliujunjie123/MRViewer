@@ -1,6 +1,6 @@
 import sys
+from PyQt5.QtWidgets import QApplication
 from ui.LJJMainWindow import LJJMainWindow
-from ui.FileFolderWindow import *
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

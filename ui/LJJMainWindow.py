@@ -44,17 +44,11 @@ class LJJMainWindow(QMainWindow):
         self.statusbar = QStatusBar(self)
         self.statusbar.setObjectName("statusbar")
         self.setStatusBar(self.statusbar)
-        # self.actionopen_file = QAction(self)
-        # self.actionopen_file.setObjectName("actionopen_file")
-        # self.actionopen_directory = QAction(self)
-        # self.actionopen_directory.setObjectName("actionopen_directory")
         self.actionopen_study = QAction(self)
         self.actionopen_study.setObjectName("actionopen_study")
         self.actionopen_patient = QAction(self)
         self.actionopen_patient.setObjectName("actionopen_patient")
 
-        # self.menu.addAction(self.actionopen_file)
-        # self.menu.addAction(self.actionopen_directory)
         self.menu.addAction(self.actionopen_study)
         self.menu.addAction(self.actionopen_patient)
         self.menubar.addAction(self.menu.menuAction())
@@ -67,11 +61,7 @@ class LJJMainWindow(QMainWindow):
         )
 
         #信号绑定部分
-        self.updateImageShownSignal.connect(self.updateImageShownArea)
         self.updateImageListSignal.connect(self.updateImageListArea)
-        self.updateImage3DShownSignal.connect(self.updateImage3DShownArea)
-        # self.actionopen_file.triggered.connect(self.openFileFolderWindow)
-        # self.actionopen_directory.triggered.connect(self.openDirectoryWindow)
         self.actionopen_study.triggered.connect(self.openFileController.openStudyDirectory)
         self.actionopen_patient.triggered.connect(self.openFileController.openPatientDirectory)
         self.toolsContainer.showInfoSig.connect(self.showLevelAndWindowInfo)
@@ -85,55 +75,10 @@ class LJJMainWindow(QMainWindow):
         _translate = QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.menu.setTitle(_translate("MainWindow", "文件"))
-        # self.actionopen_file.setText(_translate("MainWindow", "打开文件"))
-        # self.actionopen_directory.setText(_translate("MainWindow", "打开文件夹"))
         self.actionopen_study.setText(_translate("MainWindow", "打开Study"))
         self.actionopen_patient.setText(_translate("MainWindow", "打开Patient"))
 
         self.toolsContainer.retranslateUi()
-
-    def openFileFolderWindow(self):
-        fileNames = QFileDialog.getOpenFileNames(self,'选择文件','','')[0]
-        print(fileNames)
-        fileCount = len(fileNames)
-        if fileCount < 1:
-            QMessageBox.information(None,"提示","请至少选择一个文件",QMessageBox.Ok)
-            return
-        elif fileCount < 2:
-            self.updateImageShownSignal.emit(fileNames[0],'')
-        else:
-            self.updateImageShownSignal.emit(fileNames[0],fileNames[1])
-
-        self.updateImageListSignal.emit(fileNames)
-        print("发射 fileFolder 信号")
-
-    def openDirectoryWindow(self):
-        filePath = QFileDialog.getExistingDirectory(self, "选择Dicom列表文件夹",'')
-        #无效检查
-        if not os.path.isdir(filePath):
-            QMessageBox.information(None,"提示","请选择有效的文件夹",QMessageBox.Ok)
-            return
-        subFilePaths = os.listdir(filePath)
-        #空检查
-        if len(subFilePaths) is 0:
-            QMessageBox.information(None,"提示","请选择有效的文件夹",QMessageBox.Ok)
-            return
-        #子目录检查
-        for subFilePath in subFilePaths:
-            if os.path.isdir(subFilePath):
-                QMessageBox.information(None,"提示","请选择有效的文件夹",QMessageBox.Ok)
-                return
-        self.updateImage3DShownSignal.emit(filePath)
-
-    def updateImageShownArea(self,fileNameXZ,fileNameYZ):
-        self.imageShownContainer.hideXZandYZDicom()
-        if fileNameXZ is not '': self.imageShownContainer.showXZDicom(fileNameXZ)
-        if fileNameYZ is not '': self.imageShownContainer.showYZDicom(fileNameYZ)
-
-    def updateImage3DShownArea(self,filePath):
-        print(filePath)
-        self.imageShownContainer.filePath = filePath
-        self.imageShownContainer.show3DDicom()
 
     def updateImageListArea(self, dict, tag):
         self.imageScrollContainer.initImageListView(tag)
@@ -146,7 +91,7 @@ class LJJMainWindow(QMainWindow):
             status = self.imageScrollContainer.updateListHeight(count)
             if status is Status.bad: return
 
-        # self.imageScrollContainer.clearImageList()
+        self.imageScrollContainer.clearImageList()
         self.imageScrollContainer.showImageList(dict, tag)
 
     def showLevelAndWindowInfo(self):

@@ -17,39 +17,6 @@ class OpenFileController():
         self.imageScrollContainer = imageScrollContainer
         self.updateImageListSignal = updateImageListSignal
 
-    def openFileFolderWindow(self):
-        fileNames = QFileDialog.getOpenFileNames(self,'选择文件','','')[0]
-        print(fileNames)
-        fileCount = len(fileNames)
-        if fileCount < 1:
-            QMessageBox.information(None,"提示","请至少选择一个文件",QMessageBox.Ok)
-            return
-        elif fileCount < 2:
-            self.updateImageShownSignal.emit(fileNames[0],'')
-        else:
-            self.updateImageShownSignal.emit(fileNames[0],fileNames[1])
-
-        self.updateImageListSignal.emit(fileNames)
-        print("发射 fileFolder 信号")
-
-    def openDirectoryWindow(self):
-        filePath = QFileDialog.getExistingDirectory(self, "选择Dicom列表文件夹",'')
-        #无效检查
-        if not os.path.isdir(filePath):
-            QMessageBox.information(None,"提示","请选择有效的文件夹",QMessageBox.Ok)
-            return
-        subFilePaths = os.listdir(filePath)
-        #空检查
-        if len(subFilePaths) is 0:
-            QMessageBox.information(None,"提示","请选择有效的文件夹",QMessageBox.Ok)
-            return
-        #子目录检查
-        for subFilePath in subFilePaths:
-            if os.path.isdir(subFilePath):
-                QMessageBox.information(None,"提示","请选择有效的文件夹",QMessageBox.Ok)
-                return
-        self.updateImage3DShownSignal.emit(filePath)
-
     def openStudyDirectory(self):
         filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
         # filePath = r'D:/respository/MRViewer_Scource/dicom_for_UItest'
@@ -94,11 +61,13 @@ class OpenFileController():
     def checkDirValidity(self, filePath):
         #非文件夹检查
         if not os.path.isdir(filePath):
-            QMessageBox.information(None,"提示","请选择文件夹而非文件",QMessageBox.Ok)
+            # QMessageBox.information(None,"提示","请选择文件夹而非文件",QMessageBox.Ok)
+            print("Warning:", filePath, "should be a directory not a file!")
             return Status.bad
         subPaths = os.listdir(filePath)
         #空检查
         if len(subPaths) is 0:
-            QMessageBox.information(None,"提示","有空文件夹！",QMessageBox.Ok)
+            # QMessageBox.information(None,"提示","有空文件夹！",QMessageBox.Ok)
+            print("Warning:", filePath, "is a empty directory!")
             return Status.bad
         return Status.good

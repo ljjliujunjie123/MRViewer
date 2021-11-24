@@ -4,7 +4,9 @@ from PyQt5.QtCore import *
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
-
+'''
+    用来测试3种不同的3D绘制算法
+'''
 class Reconstruction3DWindow(QMainWindow):
 
     # filePath = r'D:\respository\MRViewer_Scource\CT_source'

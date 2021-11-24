@@ -24,39 +24,35 @@ class ImageShownContainer(QFrame):
         self.imageGridShownContainer.setSpacing(10)
         self.imageGridShownContainer.setObjectName("imageGridShownContainer")
 
-        self.crossXZContainer = m2DImageShownWidget()
-        self.crossXZContainer.setGeometry(0,0,800,800)
-        self.crossXZContainer.setFixedSize(800,800)
-        self.crossXZContainer.setObjectName("crossXZContainer")
-        self.imageGridShownContainer.addWidget(self.crossXZContainer, 0, 0, 1, 1)
+        self.RealTimeContainer = m2DImageShownWidget()
+        self.RealTimeContainer.setGeometry(0,0,800,800)
+        self.RealTimeContainer.setFixedSize(800,800)
+        self.RealTimeContainer.setObjectName("RealTimeContainer")
+        self.imageGridShownContainer.addWidget(self.RealTimeContainer, 0, 0, 1, 1)
 
-        # self.RealTimeContainer = QWidget(self.gridLayoutWidget)
-        # self.RealTimeContainer.setGeometry(0,0,500,500)
-        # self.RealTimeContainer.setFixedSize(500,500)
-        # self.RealTimeContainer.setObjectName("RealTimeContainer")
-        # self.imageGridShownContainer.addWidget(self.RealTimeContainer, 0, 0, 1, 1)
-        #
         self.vtk3DContainer = m3DImageShownWidget()
         self.vtk3DContainer.setGeometry(800,0,800,800)
         self.vtk3DContainer.setFixedSize(800,800)
         self.vtk3DContainer.setObjectName("vtk3DContainer")
         self.imageGridShownContainer.addWidget(self.vtk3DContainer, 0, 1, 1, 1)
-        #
-        # self.crossXZContainer = QWidget(self.gridLayoutWidget)
-        # self.crossXZContainer.setGeometry(0,250,500,500)
-        # self.crossXZContainer.setFixedSize(500,500)
-        # self.crossXZContainer.setObjectName("crossXZContainer")
-        # self.imageGridShownContainer.addWidget(self.crossXZContainer, 1, 0, 1, 1)
-        #
-        # self.crossYZContainer = QWidget(self.gridLayoutWidget)
-        # self.crossYZContainer.setGeometry(250,250,500,500)
-        # self.crossYZContainer.setFixedSize(500,500)
-        # self.crossYZContainer.setObjectName("crossYZContainer")
-        # self.imageGridShownContainer.addWidget(self.crossYZContainer, 1, 1, 1, 1)
+
+        self.crossXZContainer = m2DImageShownWidget()
+        self.crossXZContainer.setGeometry(0,0,800,800)
+        self.crossXZContainer.setFixedSize(800,800)
+        self.crossXZContainer.setObjectName("crossXZContainer")
+        self.imageGridShownContainer.addWidget(self.crossXZContainer, 1, 0, 1, 1)
+
+        self.crossYZContainer = m2DImageShownWidget()
+        self.crossYZContainer.setGeometry(800,800,800,800)
+        self.crossYZContainer.setFixedSize(800,800)
+        self.crossYZContainer.setObjectName("crossYZContainer")
+        self.imageGridShownContainer.addWidget(self.crossYZContainer, 1, 1, 1, 1)
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
+        if self.RealTimeContainer.qvtkWidget is not None: self.RealTimeContainer.qvtkWidget.Finalize()
         if self.crossXZContainer.qvtkWidget is not None: self.crossXZContainer.qvtkWidget.Finalize()
+        if self.crossYZContainer.qvtkWidget is not None: self.crossYZContainer.qvtkWidget.Finalize()
         if self.vtk3DContainer.vtk3DWidget is not None: self.vtk3DContainer.vtk3DWidget.Finalize()
     #
     # def hideXZandYZDicom(self):

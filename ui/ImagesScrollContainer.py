@@ -43,9 +43,9 @@ class ImageScrollContainer(QFrame):
         self.imageVerticalScrollWidget.setParent(self.imageVerticalScrollContainer)
         self.imageVerticalScrollWidget.show()
 
-    # def clearImageList(self):
-    #     # 注意删除item时要先清除其所有的connect信号
-    #     self.imageVerticalScrollWidget.clear()
+    def clearImageList(self):
+        # 注意删除item时要先清除其所有的connect信号
+        self.imageVerticalScrollWidget.clear()
 
     def showImageList(self, dict, tag):
         self.imageVerticalScrollWidget.showImageList(dict)
