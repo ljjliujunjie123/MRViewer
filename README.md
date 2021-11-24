@@ -2,6 +2,61 @@
 
 这是一个辅助心血管导航的GUI软件，提供实时的MR图像渲染
 
+## Follow Me
+
+##### Windows
+
+Please check your computer if anaconda or miniconda has been installed. It would be easier to manage this project with conda virtual environment. But if not, you can also try the project by installing all packages needed.
+
+Open your Anaconda Prompt console
+
+```
+D:  #select a disk
+```
+
+```
+cd your_directory_path #select a empty directory to store project
+```
+
+```
+git clone git@github.com:ljjliujunjie123/MRViewer.git
+```
+
+```
+cd MRViewer 
+```
+
+```
+conda create -n MRViewer #create a virtual python environment, name is "MRViewer"
+```
+
+```
+conda activate MRViewer #activate this virtual env
+```
+
+```
+conda install --yes --file requirements.txt #install all packages needed
+```
+
+> in this step, if any wrong occurs, please check requirements.txt. May some packages' version too old
+>
+> If installing processing is too long, you can manually install these critical packages: 
+>
+> `python3, vtk, opencv-python, pydicom, pillow, pyqt5`
+
+Open your Pycharm or other IDE
+
+- open this project
+- change the python interpreter. You should replace the path in picture with your own env python path. You can find it by serach in your file explorer. 
+
+![](D:\respository\MRViewer\pictures source\星愿浏览器截图20211124093000@2x.png)
+
+- run this project
+
+##### Mac or Linux
+
+to do
+
 ## Development records
 
 2021-11-1
@@ -10,7 +65,7 @@
 - pyqt5提供GUI逻辑层，pyqt5-tools自带designer工具，提供UI层，vtk基于C++核心库，提供3D渲染效果
 - 复现教程demo https://blog.csdn.net/weixin_34471817/article/details/89714949
 
-<img src="..\pictures source\星愿浏览器截图20211101183136@2x.png" style="zoom:33%;" />
+<img src="\pictures source\星愿浏览器截图20211101183136@2x.png" style="zoom:33%;" />
 
 2021-11-3
 
@@ -18,7 +73,7 @@
 
 - 在该分支上使用pyinstaller将程序打包成exe免安装程序
 
-  <img src="..\pictures source\星愿浏览器截图20211105174842@2x.png" style="zoom: 50%;" />
+  <img src="\pictures source\星愿浏览器截图20211105174842@2x.png" style="zoom: 50%;" />
 
 2021-11-4
 
@@ -26,7 +81,7 @@
 
 - 如何实现平面把一个3D物体切开，呈现断面的效果，比较难做
 
-  <img src="..\pictures source\星愿浏览器截图20211105175723@2x.png" style="zoom:33%;" />
+  <img src="\pictures source\星愿浏览器截图20211105175723@2x.png" style="zoom:33%;" />
 
 2021-11-5
 
