@@ -49,7 +49,7 @@ Open your Pycharm or other IDE
 - open this project
 - change the python interpreter. You should replace the path in picture with your own env python path. You can find it by serach in your file explorer. 
 
-![](D:\respository\MRViewer\pictures source\星愿浏览器截图20211124093000@2x.png)
+![](\pictures source\星愿浏览器截图20211124093000@2x.png)
 
 - run this project
 
