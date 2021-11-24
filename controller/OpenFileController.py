@@ -57,8 +57,8 @@ class OpenFileController():
         seriesPaths = os.listdir(filePath)
         dict = {}
         for _seriesPath in seriesPaths:
-            if os.path.isdir(_seriesPath): continue
             seriesPath = filePath + '/' + _seriesPath
+            if self.checkDirValidity(seriesPath) is Status.bad:continue
             fileNames = os.listdir(seriesPath)
             if len(fileNames) > 0:
                 dict[_seriesPath] = seriesPath + '/' + fileNames[0]
