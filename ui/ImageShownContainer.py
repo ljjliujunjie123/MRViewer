@@ -1,52 +1,44 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
 
 from ui.m2DImageShownWidget import m2DImageShownWidget
 from ui.m3DImageShownWidget import m3DImageShownWidget
+from ui.config import uiConfig
+from controller.ImageShownLayoutController import ImageShownLayoutController
 
 class ImageShownContainer(QFrame):
-
-    filePath = r'D:\respository\MRViewer_Scource\dicom_for_UItest\3D_vessel_phantom_transversal'
 
     def __init__(self, ParentWidget):
         QFrame.__init__(self, ParentWidget)
 
-        self.setGeometry(QRect(600, 0, 1600, 1600))
+        self.setGeometry(uiConfig.calcShownContainerGeometry())
+        print("ImageShownContainer Geometry:")
+        print(self.geometry())
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Plain)
         self.setObjectName("imageShownContainer")
 
-        self.gridLayoutWidget = QWidget(self)
-        self.gridLayoutWidget.setGeometry(QRect(0, 0, 1600, 1600))
-        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
-        self.imageGridShownContainer = QGridLayout(self.gridLayoutWidget)
-        self.imageGridShownContainer.setContentsMargins(0,0,0,0)
-        self.imageGridShownContainer.setSpacing(10)
-        self.imageGridShownContainer.setObjectName("imageGridShownContainer")
+        self.imageShownContainerWidget = QWidget(self)
+        self.imageShownContainerWidget.setFixedSize(self.size())
+        self.imageShownContainerWidget.setObjectName("imageShownContainerWidget")
+
+        self.imageShownContainerLayout = QGridLayout(self.imageShownContainerWidget)
+
+        #初始化controller
+        self.imageShownLayoutController = ImageShownLayoutController(
+            self.imageShownContainerWidget,
+            self.imageShownContainerLayout
+        )
+        self.imageShownLayoutController.initLayoutParams(uiConfig)
 
         self.RealTimeContainer = m2DImageShownWidget()
-        self.RealTimeContainer.setGeometry(0,0,800,800)
-        self.RealTimeContainer.setFixedSize(800,800)
-        self.RealTimeContainer.setObjectName("RealTimeContainer")
-        self.imageGridShownContainer.addWidget(self.RealTimeContainer, 0, 0, 1, 1)
-
         self.vtk3DContainer = m3DImageShownWidget()
-        self.vtk3DContainer.setGeometry(800,0,800,800)
-        self.vtk3DContainer.setFixedSize(800,800)
-        self.vtk3DContainer.setObjectName("vtk3DContainer")
-        self.imageGridShownContainer.addWidget(self.vtk3DContainer, 0, 1, 1, 1)
-
         self.crossXZContainer = m2DImageShownWidget()
-        self.crossXZContainer.setGeometry(0,0,800,800)
-        self.crossXZContainer.setFixedSize(800,800)
-        self.crossXZContainer.setObjectName("crossXZContainer")
-        self.imageGridShownContainer.addWidget(self.crossXZContainer, 1, 0, 1, 1)
-
         self.crossYZContainer = m2DImageShownWidget()
-        self.crossYZContainer.setGeometry(800,800,800,800)
-        self.crossYZContainer.setFixedSize(800,800)
-        self.crossYZContainer.setObjectName("crossYZContainer")
-        self.imageGridShownContainer.addWidget(self.crossYZContainer, 1, 1, 1, 1)
+
+        self.imageShownLayoutController.addWidget(self.RealTimeContainer, 0, 0)
+        self.imageShownLayoutController.addWidget(self.vtk3DContainer, 0, 1)
+        self.imageShownLayoutController.addWidget(self.crossXZContainer, 1, 0)
+        self.imageShownLayoutController.addWidget(self.crossYZContainer, 1, 1)
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
@@ -54,7 +46,3 @@ class ImageShownContainer(QFrame):
         if self.crossXZContainer.qvtkWidget is not None: self.crossXZContainer.qvtkWidget.Finalize()
         if self.crossYZContainer.qvtkWidget is not None: self.crossYZContainer.qvtkWidget.Finalize()
         if self.vtk3DContainer.vtk3DWidget is not None: self.vtk3DContainer.vtk3DWidget.Finalize()
-    #
-    # def hideXZandYZDicom(self):
-    #     if self.qvtkWidgetXZ is not None:self.qvtkWidgetXZ.setVisible(False)
-    #     if self.qvtkWidgetYZ is not None:self.qvtkWidgetYZ.setVisible(False)

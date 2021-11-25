@@ -1,6 +1,8 @@
 from PyQt5 import QtWidgets,QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 
+from ui.config import uiConfig
+
 class ToolsContainer(QtWidgets.QFrame):
 
     showInfoSig = pyqtSignal()
@@ -8,7 +10,9 @@ class ToolsContainer(QtWidgets.QFrame):
     def __init__(self, ParentWidget):
         QtWidgets.QFrame.__init__(self, ParentWidget)
 
-        self.setGeometry(QtCore.QRect(2200, 0, 200, 1600))
+        self.setGeometry(uiConfig.calcToolsContainerGeometry())
+        print("ToolsContainer Geometry:")
+        print(self.geometry())
         self.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.setFrameShadow(QtWidgets.QFrame.Plain)
         self.setObjectName("toolsContainer")

@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QIcon,QDrag
 
 from PIL.ImageQt import *
-from ui.config import *
+from ui.config import uiConfig
 from utils.util import dicom_to_qt,getSeriesPathFromFileName
 from utils.ImageItemMimeData import ImageItemMimeData
 
@@ -18,21 +18,21 @@ class ImageScrollListWidget(QListWidget):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        self.setFixedHeight(listHeight)
-        self.setIconSize(iconSize)
+        self.setFixedHeight(uiConfig.listHeight)
+        self.setIconSize(uiConfig.iconSize)
         self.setDragEnabled(True)
         self.setUniformItemSizes(True)
-        self.setSpacing(itemSpace)
+        self.setSpacing(uiConfig.itemSpace)
 
     def showImageList(self, dict):
         for seriesName,imageFileName in dict.items():
             self.addImageItem(imageFileName, seriesName)
 
     def addImageItem(self, fileName, text):
-        qim = dicom_to_qt(fileName, factor_contrast,
-                          factor_bright, autocontrast_mode, inversion_mode)
+        qim = dicom_to_qt(fileName,uiConfig.factor_contrast,
+                          uiConfig.factor_bright, uiConfig.autocontrast_mode,uiConfig.inversion_mode)
         pix = QPixmap.fromImage(qim)
-        pixmap_resized = pix.scaled(iconSize, Qt.KeepAspectRatio)
+        pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
         imageIcon = QIcon()
         imageIcon.addPixmap(pixmap_resized)
         imageItem = QListWidgetItem()

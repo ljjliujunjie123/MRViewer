@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 
 import os
 
-from ui.config import *
+from ui.config import uiConfig
 from utils.status import Status
 
 class OpenFileController():
@@ -30,7 +30,7 @@ class OpenFileController():
             if len(fileNames) > 0:
                 dict[_seriesPath] = seriesPath + '/' + fileNames[0]
 
-        self.updateImageListSignal.emit(dict, studyTag)
+        self.updateImageListSignal.emit(dict, uiConfig.studyTag)
 
     def openPatientDirectory(self):
         filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Patient的目录",'')
@@ -56,7 +56,7 @@ class OpenFileController():
             #把studyDict加入resDict，key为_studyPath
             resDict[_studyPath] = studyDict
 
-        self.updateImageListSignal.emit(resDict, patientTag)
+        self.updateImageListSignal.emit(resDict,uiConfig.patientTag)
 
     def checkDirValidity(self, filePath):
         #非文件夹检查

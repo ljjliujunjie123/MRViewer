@@ -58,4 +58,6 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.qvtkWidget.GetRenderWindow().Render()
 
         if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
+        print(self.pos())
+        print(self.qvtkWidget.pos())
         print("showXZDicom end")

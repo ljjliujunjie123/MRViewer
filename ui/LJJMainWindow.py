@@ -2,13 +2,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from controller.OpenFileController import OpenFileController
-from ui.config import *
+from ui.config import uiConfig
 from ui.ImagesScrollContainer import ImageScrollContainer
 from ui.ToolsContainer import ToolsContainer
 from ui.ImageShownContainer import ImageShownContainer
 from utils.status import Status
-
-import os
 
 class LJJMainWindow(QMainWindow):
 
@@ -20,30 +18,57 @@ class LJJMainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)
 
         self.setObjectName("MainWindow")
-        self.resize(2400, 1600)
+        self.resize(uiConfig.screenWidth, uiConfig.screenHeight)
         self.centralwidget = QWidget(self)
+        self.centralwidget.setGeometry(uiConfig.calcCenterWidgetGeometry())
         self.centralwidget.setObjectName("centralwidget")
 
-        #抽象出右侧的工具栏
-        self.toolsContainer = ToolsContainer(self.centralwidget)
+        self.mainWindowWidget = QWidget(self.centralwidget)
+        self.mainWindowWidget.setGeometry(self.centralwidget.geometry())
+        self.mainWindowWidget.setObjectName("mainWindowWidget")
 
-        #抽象出中间的image展示区域
-        self.imageShownContainer = ImageShownContainer(self.centralwidget)
+        self.mainWindowLayout = QGridLayout(self.mainWindowWidget)
+        self.mainWindowLayout.setContentsMargins(0,0,0,0)
+        self.mainWindowLayout.setSpacing(0)
+        self.mainWindowLayout.setObjectName("mainWindowLayout")
+
+        print("MainWindow CentralWidget Geometry：")
+        print(self.centralwidget.geometry())
 
         #抽象出左侧的image列表
-        self.imageScrollContainer = ImageScrollContainer(self.centralwidget)
+        self.imageScrollContainer = ImageScrollContainer(self.mainWindowWidget)
+        #抽象出中间的image展示区域
+        self.imageShownContainer = ImageShownContainer(self.mainWindowWidget)
+        #抽象出右侧的工具栏
+        self.toolsContainer = ToolsContainer(self.mainWindowWidget)
+
+        #收敛子页面
+        self.mainWindowLayout.addWidget(self.imageScrollContainer, 0, 0)
+        self.mainWindowLayout.addWidget(self.imageShownContainer, 0, 1)
+        self.mainWindowLayout.addWidget(self.toolsContainer, 0, 2)
+        self.mainWindowLayout.setColumnStretch(0, uiConfig.scrollContinerColRatio)
+        self.mainWindowLayout.setColumnStretch(1, uiConfig.shownContainerColRatio)
+        self.mainWindowLayout.setColumnStretch(2, uiConfig.toolsContainerColRation)
+
+        # print(self.geometry())
+        # print(self.mainWindowWidget.geometry())
+        # print(self.imageScrollContainer.geometry())
+        # print(self.imageShownContainer.geometry())
+        # print(self.toolsContainer.geometry())
 
         #菜单栏部分
         self.setCentralWidget(self.centralwidget)
-        self.menubar = QMenuBar(self)
-        self.menubar.setGeometry(QRect(0, 0, 2400, 22))
-        self.menubar.setObjectName("menubar")
-        self.menu = QMenu(self.menubar)
+        self.menuBar = QMenuBar(self)
+        self.menuBar.setGeometry(QRect(0, 0, uiConfig.screenWidth, uiConfig.menuHeight))
+        self.menuBar.setObjectName("menubar")
+        self.menu = QMenu(self.menuBar)
         self.menu.setObjectName("menu")
-        self.setMenuBar(self.menubar)
-        self.statusbar = QStatusBar(self)
-        self.statusbar.setObjectName("statusbar")
-        self.setStatusBar(self.statusbar)
+        self.setMenuBar(self.menuBar)
+
+        #标题栏部分
+        # self.titleBar = QStyleOptionTitleBar()
+        # self.titleBar.initFrom()
+
         self.actionopen_study = QAction(self)
         self.actionopen_study.setObjectName("actionopen_study")
         self.actionopen_patient = QAction(self)
@@ -51,13 +76,13 @@ class LJJMainWindow(QMainWindow):
 
         self.menu.addAction(self.actionopen_study)
         self.menu.addAction(self.actionopen_patient)
-        self.menubar.addAction(self.menu.menuAction())
+        self.menuBar.addAction(self.menu.menuAction())
 
         #初始化controllers
         self.openFileController = OpenFileController(
-            self,
-            self.imageScrollContainer,
-            self.updateImageListSignal
+                self,
+                self.imageScrollContainer,
+                self.updateImageListSignal
         )
 
         #信号绑定部分
@@ -82,11 +107,11 @@ class LJJMainWindow(QMainWindow):
 
     def updateImageListArea(self, dict, tag):
         self.imageScrollContainer.initImageListView(tag)
-        if tag is studyTag:
+        if tag is uiConfig.studyTag:
             status = self.imageScrollContainer.updateListHeight(len(dict.keys()))
             if status is Status.bad: return
 
-        if tag is patientTag:
+        if tag is uiConfig.patientTag:
             count = sum([len(study.keys()) for study in list(dict.values())])
             status = self.imageScrollContainer.updateListHeight(count)
             if status is Status.bad: return
