@@ -14,7 +14,7 @@ class m3DImageShownWidget(AbstractImageShownWidget):
         self.seriesPath = ""
         #初始化逻辑
         self.update3DImageShownSignal = None
-        self.vtk3DWidget = None
+        self.qvtkWidget = None
 
     def dropEvent(self, event):
         super().dropEvent(event)
@@ -24,11 +24,11 @@ class m3DImageShownWidget(AbstractImageShownWidget):
 
     def show3DImage(self, seriesPath):
         print("show 3D Dicom Window Begin")
-        if self.vtk3DWidget is None: self.vtk3DWidget = QVTKRenderWindowInteractor(self)
-        self.vtk3DWidget.setFixedSize(self.size())
+        if self.qvtkWidget is None: self.qvtkWidget = QVTKRenderWindowInteractor(self)
+        self.qvtkWidget.setFixedSize(self.size())
 
         ren3D = vtk.vtkRenderer()
-        renWin = self.vtk3DWidget.GetRenderWindow()
+        renWin = self.qvtkWidget.GetRenderWindow()
         renWin.AddRenderer(ren3D)
 
         # v16 = vtk.vtkVolume16Reader()
@@ -83,9 +83,9 @@ class m3DImageShownWidget(AbstractImageShownWidget):
         camera.SetPosition(c[0] + 400, c[1], c[2])
         camera.SetViewUp(0, 0, -1)
         # Interact with the data.
-        self.vtk3DWidget.Initialize()
+        self.qvtkWidget.Initialize()
         renWin.Render()
-        self.vtk3DWidget.Start()
+        self.qvtkWidget.Start()
 
-        if not self.vtk3DWidget.isVisible(): self.vtk3DWidget.setVisible(True)
+        if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
         print("show 3D Dicom Window End")

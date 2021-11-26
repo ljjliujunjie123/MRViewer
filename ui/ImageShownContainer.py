@@ -29,20 +29,11 @@ class ImageShownContainer(QFrame):
             self.imageShownContainerLayout
         )
         self.imageShownLayoutController.initLayoutParams(uiConfig)
-
-        self.RealTimeContainer = m2DImageShownWidget()
-        self.vtk3DContainer = m3DImageShownWidget()
-        self.crossXZContainer = m2DImageShownWidget()
-        self.crossYZContainer = m2DImageShownWidget()
-
-        self.imageShownLayoutController.addWidget(self.RealTimeContainer, 0, 0)
-        self.imageShownLayoutController.addWidget(self.vtk3DContainer, 0, 1)
-        self.imageShownLayoutController.addWidget(self.crossXZContainer, 1, 0)
-        self.imageShownLayoutController.addWidget(self.crossYZContainer, 1, 1)
+        self.imageShownLayoutController.initWidget()
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
-        if self.RealTimeContainer.qvtkWidget is not None: self.RealTimeContainer.qvtkWidget.Finalize()
-        if self.crossXZContainer.qvtkWidget is not None: self.crossXZContainer.qvtkWidget.Finalize()
-        if self.crossYZContainer.qvtkWidget is not None: self.crossYZContainer.qvtkWidget.Finalize()
-        if self.vtk3DContainer.vtk3DWidget is not None: self.vtk3DContainer.vtk3DWidget.Finalize()
+        self.imageShownLayoutController.RealTimeContainer.closeEvent(QCloseEvent)
+        self.imageShownLayoutController.crossXZContainer.closeEvent(QCloseEvent)
+        self.imageShownLayoutController.crossYZContainer.closeEvent(QCloseEvent)
+        self.imageShownLayoutController.vtk3DContainer.closeEvent(QCloseEvent)

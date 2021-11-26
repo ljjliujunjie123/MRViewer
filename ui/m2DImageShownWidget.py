@@ -1,3 +1,6 @@
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+
 import os
 from ui.AbstractImageShownWidget import AbstractImageShownWidget
 import vtkmodules.all as vtk

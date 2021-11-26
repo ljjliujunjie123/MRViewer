@@ -258,3 +258,16 @@ to do
   - 未来的可能实现：在第一次渲染窗口后，重绘一次
 
 ![](\pictures source\星愿浏览器截图20211125212723@2x.png)
+
+2021-11-26
+
+- 实现了文件渲染区的布局管理，支持1x1，1x2，2x1，2x2四种选择
+  - 基本实现思路继承imageShownLayoutController，逻辑放在这个辅助类里
+- 遇到的问题：
+  - 问题一：如何实现仿Excel的表格选择效果。查阅一番资料后选择用QT中tableWidget实现，去掉它的表格头，调整表格item大小。因为tableWidget自带selectedRange回调，能直接拿到用户选择了哪些item这个信息。
+  - 问题二：如何实现文件渲染区中，widget自适应layout大小这一功能。正常的实现思路是，嵌套两个布局，把子布局的sizePolicy设置成expanding，这样父布局变化时子布局随之变化。但经一番调试后发现vtk的渲染Widget无论如何也无法自动调整大小，无奈之下，只好使用“危险“的实现方式，重写图像渲染Widget的resizeEvent回调方法，用setFixedSize方法手动调整vtk的渲染窗口大小
+- 下一步目标
+  - vtk窗口附加信息的丰富，以及其中图片大小和角度等参数的自动化调整
+  - 多个窗口之间的信息交互，首先是指示线的渲染
+
+<video src="D:\school_files\vedio\录制_2021_11_26_17_49_57_685.mp4" width="800px" height="600px" controls="controls"></video>

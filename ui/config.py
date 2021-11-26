@@ -15,6 +15,10 @@ class UIConfig():
     shownContainerMargins = QMargins(0,0,0,0)
     shownContainerContentSpace = 4
 
+    toolsSelectRegionCol = 2
+    toolsSelectRegionRow = 2
+    toolsSelectRegionItemSize = QSize(80,80)
+
     totalColRation = scrollContinerColRatio + shownContainerColRatio + toolsContainerColRation
 
     studyTag = 1
@@ -63,7 +67,7 @@ class UIConfig():
             (self.screenWidth // self.totalColRation) * self.scrollContinerColRatio +
             (self.screenWidth // self.totalColRation) * self.shownContainerColRatio,
             0,
-            self.screenWidth // self.toolsContainerColRation,
+            (self.screenWidth // self.totalColRation) * self.toolsContainerColRation,
             self.calcCenterWidgetHeight()
         )
 
