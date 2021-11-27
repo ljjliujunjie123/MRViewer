@@ -271,3 +271,21 @@ to do
   - 多个窗口之间的信息交互，首先是指示线的渲染
 
 <video src="D:\school_files\vedio\录制_2021_11_26_17_49_57_685.mp4" width="800px" height="600px" controls="controls"></video>
+
+2021-11-27
+
+- 实现了文件渲染区中，2d图像基本的附加信息
+  - 以标注的形式，在原图上添加一些文本，标记该张dcm文件的一些重要信息
+  - 目前只添加了MR的关键参数 TR 和 TE
+- 实现思路：
+  - 标注性的文本应该依附于图像所在的Widget，同时又要保持背景透明效果。依次尝试以下思路
+  - 思路一：用QLabel承载文本，设置背景透明。失败。因为QLabel透明后，背景色继承其父Widget，也就是QFrame的背景色，而不是继承其下一个layer：QVtkWidget的颜色。所以QLabel会遮挡图像
+  - 思路二：用QPainter直接绘制文本，设置背景透明。失败。因为本质上QLabel其实调用的就是QPainter，没有太大区别，同样会遮挡图像
+  - 思路三：用QGraphicView重新绘制整个图像，添加一个text图元来展示文本。失败。其实这个思路实现普通的qt程序应该是可以的，而且这个机制可以绘制大量图元而不卡顿，性能很好。但遗憾的是本程序的图像用QVtkWidget绘制，不太方便嵌入到QGraphicView中（应该也可以，只是我不会）
+  - 思路四：直接调用VTK的VTKTextActor，直接在qvtkWidget中生成一个文本。这个是VTK的原生功能，查阅一圈才发现。成功！
+- 下一步目标：
+  - 支持多行文本
+  - 封装更完善更易用的附加信息类
+  - 优化文本的Position控制
+
+![](\pictures source\星愿浏览器截图20211127204902@2x.png)

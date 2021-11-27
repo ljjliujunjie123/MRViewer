@@ -10,6 +10,19 @@ def getDicomWindowCenterAndLevel(fileName):
     dcmFile = pyd.dcmread(fileName)
     return (dcmFile.WindowCenter, dcmFile.WindowWidth)
 
+def getImageExtraInfoFromDicom(fileName):
+    dcmFile = pyd.dcmread(fileName)
+    TR = str(dcmFile.RepetitionTime)
+    TE = str(dcmFile.EchoTime)
+    dict = {
+        "TR": TR,
+        "TE": TE
+    }
+    res = ""
+    for key,value in dict.items():
+        res += (key + ": " + value + " ")
+    return res
+
 def extract_grayscale_image(mri_file):
     plan = pyd.read_file(mri_file)
     image_2d = plan.pixel_array.astype(float)

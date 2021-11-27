@@ -7,6 +7,7 @@ class AbstractImageShownWidget(QWidget):
         QWidget.__init__(self)
         self.setAcceptDrops(True)
         self.qvtkWidget = None
+        self.resizeFlag = False
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasText():
@@ -32,11 +33,13 @@ class AbstractImageShownWidget(QWidget):
             event.ignore()
 
     def resizeEvent(self, QResizeEvent):
-        print("resizeEvent")
         print('parentWidgetSize:', self.width(), self.height())
         if self.qvtkWidget is not None and self.qvtkWidget.size() != self.size():
+            self.resizeFlag = True
             self.qvtkWidget.setFixedSize(self.size())
             print('qvtkSize', self.qvtkWidget.size())
+        else:
+            self.resizeFlag = False
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
