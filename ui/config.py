@@ -14,6 +14,8 @@ class UIConfig():
 
     shownContainerMargins = QMargins(0,0,0,0)
     shownContainerContentSpace = 4
+    shownTextInfoMarginWidth = 20
+    shownTextInfoMarginHeight = 0
 
     toolsSelectRegionCol = 2
     toolsSelectRegionRow = 2

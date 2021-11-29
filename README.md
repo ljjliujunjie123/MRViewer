@@ -289,3 +289,11 @@ to do
   - 优化文本的Position控制
 
 ![](\pictures source\星愿浏览器截图20211127204902@2x.png)
+
+2021-11-29
+
+- 实现文件渲染区的多行文本，附加信息暂时用Dict去描述，文本的Position控制暂定左下角
+- 遇到的问题：
+  - 原计划重构文件渲染区中的m2DImageShownWidget结构，反复调试后始终被一个Bug卡住。即当QVTKRenderWindowInteractor被m2DImageShownWidget固定持有时，会发现在调整渲染区布局时，一个widget的内容会被渲染到其余的widget中，猜测是vtk进行渲染时做了什么优化引起的。暂无修复思路
+
+![](D:\respository\MRViewer\pictures source\星愿浏览器截图20211129151353@2x.png)

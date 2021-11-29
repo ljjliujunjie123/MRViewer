@@ -14,11 +14,7 @@ class m3DImageShownWidget(AbstractImageShownWidget):
         self.seriesPath = ""
         #初始化逻辑
         self.update3DImageShownSignal = None
-
-        self.initVtkSupportObjects()
-
-    def initVtkSupportObjects(self):
-        self.qvtkWidget = QVTKRenderWindowInteractor(self)
+        self.qvtkWidget = None
 
     def dropEvent(self, event):
         super().dropEvent(event)
@@ -28,6 +24,7 @@ class m3DImageShownWidget(AbstractImageShownWidget):
 
     def show3DImage(self, seriesPath):
         print("show 3D Dicom Window Begin")
+        if self.qvtkWidget is None: self.qvtkWidget = QVTKRenderWindowInteractor(self)
         self.qvtkWidget.setFixedSize(self.size())
 
         ren3D = vtk.vtkRenderer()
