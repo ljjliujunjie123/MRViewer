@@ -297,3 +297,8 @@ to do
   - 原计划重构文件渲染区中的m2DImageShownWidget结构，反复调试后始终被一个Bug卡住。即当QVTKRenderWindowInteractor被m2DImageShownWidget固定持有时，会发现在调整渲染区布局时，一个widget的内容会被渲染到其余的widget中，猜测是vtk进行渲染时做了什么优化引起的。暂无修复思路
 
 ![](D:\respository\MRViewer\pictures source\星愿浏览器截图20211129151353@2x.png)
+
+- **[陶然]** 实现了文件渲染区的滚动切换slice功能
+  - 基本思路是重写相关widget的wheelEvent方法
+
+<video src="D:\school_files\vedio\录制_2021_11_29_16_30_53_323.mp4" width="800px" height="600px" controls="controls"></video>
