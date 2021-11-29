@@ -14,16 +14,92 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.seriesPath = ""
         self.filePaths = []
         self.curFilePath = ""
+        self.text = "2D"
         #初始化逻辑
         self.update2DImageShownSignal = None
-        self.reader = None
-        self.imageViewer = None
-        self.qvtkWidget = None
-        self.renImage = None
-        self.renText = None
-        self.textActor = None
 
-        self.text = "2D"
+        self.initVtkSupportObjects()
+
+    def initVtkSupportObjects(self):
+        self.qvtkWidget = QVTKRenderWindowInteractor(self)
+        self.qvtkWidget.setFixedSize(self.size())
+
+        self.renImage = vtk.vtkRenderer()
+        self.renText = vtk.vtkRenderer()
+
+        self.reader = vtk.vtkDICOMImageReader()
+        self.reader.SetDataByteOrderToLittleEndian()
+
+        self.textActor = vtk.vtkTextActor()
+        # self.textActor.GetActualPosition2Coordinate().SetCoordinateSystemToNormalizedViewport()
+        # self.textActor.GetPosition2Coordinate().SetValue(0.6, 0.1)
+        self.textActor.GetTextProperty().SetFontSize(20)
+        # self.textActor.GetTextProperty().SetFontFamilyToArial()
+        # self.textActor.GetTextProperty().SetJustificationToCentered()
+        self.textActor.GetTextProperty().BoldOn()
+        # self.textActor.GetTextProperty().ItalicOn()
+        self.textActor.GetTextProperty().ShadowOn()
+        self.textActor.GetTextProperty().SetColor(1, 1, 1)
+
+        self.imageViewer =  vtk.vtkImageViewer2()
+        self.imageViewer.SetInputConnection(self.reader.GetOutputPort())
+        self.imageViewer.SetRenderer(self.renImage)
+        self.imageViewer.SetRenderWindow(self.qvtkWidget.GetRenderWindow())
+
+    def show2DImageVtkView(self, filePath):
+        self.reader.SetFileName(filePath)
+        self.reader.Update()
+
+        level,width = getDicomWindowCenterAndLevel(filePath)
+        self.imageViewer.SetColorLevel(level)
+        self.imageViewer.SetColorWindow(width)
+        self.imageViewer.UpdateDisplayExtent()
+
+        self.renImage.SetLayer(0)
+        self.renImage.ResetCamera()
+
+        self.qvtkWidget.GetRenderWindow().AddRenderer(self.renImage)
+
+    def showImageExtraInfoVtkView(self, text):
+        # self.textActor.SetTextScaleModeToProp()
+        self.updateImageExtraInfoPos()
+        self.textActor.SetInput(self.text)
+
+        self.renText.SetLayer(1)
+        self.renText.AddViewProp(self.textActor)
+
+        self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
+
+    def updateImageExtraInfoPos(self):
+        self.textActor.SetDisplayPosition(
+            self.calcImageExtraInfoWidthPos(),
+            self.calcImageExtraInfoHeightPos()
+        )
+
+    # def hideImageExtraInfo(self):
+    #     self.qvtkWidget.GetRenderWindow().RemoveRenderer(self.renText)
+    #     self.renderVtkWindow(1)
+
+    def calcImageExtraInfoWidthPos(self):
+        return 10
+
+    def calcImageExtraInfoHeightPos(self):
+        return 10
+
+    def renderVtkWindow(self, layerCount):
+        self.imageViewer.SetupInteractor(self.qvtkWidget.GetRenderWindow().GetInteractor())
+
+        self.qvtkWidget.setFixedSize(self.size())
+        self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(layerCount)
+        self.qvtkWidget.GetRenderWindow().Render()
+
+        if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
+
+    def resizeEvent(self, QResizeEvent):
+        super().resizeEvent(QResizeEvent)
+        print("resize: ",self.geometry())
+        if self.resizeFlag:
+            self.updateImageExtraInfoPos()
 
     def dropEvent(self, event):
         super().dropEvent(event)
@@ -36,81 +112,7 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.text = getImageExtraInfoFromDicom(self.curFilePath)
 
         print("showXZDicom begin")
-        self.initImageExtraInfoVtkView(self.text)
-        self.init2DImageVtkView(self.curFilePath)
-        self.renderVtkWindow()
+        self.show2DImageVtkView(self.curFilePath)
+        self.showImageExtraInfoVtkView(self.text)
+        self.renderVtkWindow(2)
         print("showXZDicom end")
-
-    def init2DImageVtkView(self, filePath):
-        if self.qvtkWidget is None:self.qvtkWidget = QVTKRenderWindowInteractor(self)
-        if self.reader is None: self.reader = vtk.vtkDICOMImageReader()
-        if self.imageViewer is None:self.imageViewer =  vtk.vtkImageViewer2()
-        if self.renImage is None:self.renImage = vtk.vtkRenderer()
-
-        self.reader.SetDataByteOrderToLittleEndian()
-        self.reader.SetFileName(filePath)
-        self.reader.Update()
-
-        self.imageViewer.SetInputConnection(self.reader.GetOutputPort())
-        level,width = getDicomWindowCenterAndLevel(filePath)
-        self.imageViewer.SetColorLevel(level)
-        self.imageViewer.SetColorWindow(width)
-        self.imageViewer.SetRenderer(self.renImage)
-        self.imageViewer.SetRenderWindow(self.qvtkWidget.GetRenderWindow())
-        self.imageViewer.UpdateDisplayExtent()
-        self.imageViewer.SetupInteractor(self.qvtkWidget.GetRenderWindow().GetInteractor())
-
-        self.renImage.SetLayer(0)
-        self.renImage.ResetCamera()
-
-        self.qvtkWidget.GetRenderWindow().AddRenderer(self.renImage)
-
-    def initImageExtraInfoVtkView(self, text):
-        if self.qvtkWidget is None:self.qvtkWidget = QVTKRenderWindowInteractor(self)
-        if self.renText is None:self.renText = vtk.vtkRenderer()
-        if self.textActor is None:self.textActor = vtk.vtkTextActor()
-
-        #添加文本注释
-        # self.textActor.SetTextScaleModeToProp()
-        self.textActor.SetDisplayPosition(
-            self.calcImageExtraInfoWidthPos(),
-            self.calcImageExtraInfoHeightPos()
-        )
-        self.textActor.SetInput(self.text)
-        # self.textActor.GetActualPosition2Coordinate().SetCoordinateSystemToNormalizedViewport()
-        # self.textActor.GetPosition2Coordinate().SetValue(0.6, 0.1)
-        self.textActor.GetTextProperty().SetFontSize(20)
-        # self.textActor.GetTextProperty().SetFontFamilyToArial()
-        # self.textActor.GetTextProperty().SetJustificationToCentered()
-        self.textActor.GetTextProperty().BoldOn()
-        # self.textActor.GetTextProperty().ItalicOn()
-        self.textActor.GetTextProperty().ShadowOn()
-        self.textActor.GetTextProperty().SetColor(1, 1, 1)
-
-        self.renText.SetLayer(1)
-        self.renText.AddViewProp(self.textActor)
-
-        self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
-
-    def renderVtkWindow(self):
-        self.qvtkWidget.setFixedSize(self.size())
-        self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(2)
-        self.qvtkWidget.GetRenderWindow().Render()
-
-        if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
-
-    def updateImageExtraInfo(self):
-        self.initImageExtraInfoVtkView(self.text)
-        self.renText.Render()
-
-    def resizeEvent(self, QResizeEvent):
-        super().resizeEvent(QResizeEvent)
-        print("resize: ",self.geometry())
-        if self.resizeFlag:
-            self.updateImageExtraInfo()
-
-    def calcImageExtraInfoWidthPos(self):
-        return self.size().width() * 2 // 5
-
-    def calcImageExtraInfoHeightPos(self):
-        return self.size().height() * 1 // 10
