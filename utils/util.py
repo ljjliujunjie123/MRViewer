@@ -12,7 +12,6 @@ def getDicomWindowCenterAndLevel(fileName):
 
 def getImageExtraInfoFromDicom(fileName):
     dcmFile = pyd.dcmread(fileName)
-    print(dcmFile)
     normalKeyDict = {
         "PatientName": "",
         "StudyDescription": "Study: ",

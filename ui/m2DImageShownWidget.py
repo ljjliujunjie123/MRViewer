@@ -9,6 +9,7 @@ from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom
 class m2DImageShownWidget(AbstractImageShownWidget):
 
     sigWheelChanged = pyqtSignal(object)
+    update2DImageShownSignal = pyqtSignal()
 
     def __init__(self):
         AbstractImageShownWidget.__init__(self)
@@ -19,8 +20,8 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.filePaths = []
         self.curFilePath = ""
         self.currentIndex = 0
+        self.crossViewColRatio = 0
         #初始化逻辑
-        self.update2DImageShownSignal = None
         self.reader = None
         self.imageViewer = None
         self.qvtkWidget = None
@@ -81,6 +82,23 @@ class m2DImageShownWidget(AbstractImageShownWidget):
 
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
 
+    def showCrossView(self):
+        self.crossView = vtk.vtkBorderWidget()
+        self.crossView.SetInteractor(self.qvtkWidget.GetRenderWindow().GetInteractor())
+        self.crossView.CreateDefaultRepresentation()
+        self.crossView.GetRepresentation().SetPosition(self.crossViewColRatio,0.05)
+        self.crossView.GetRepresentation().SetPosition2(0.01,0.9)
+        self.crossView.GetRepresentation().GetBorderProperty().SetColor(1,0,0)
+        self.crossView.GetRepresentation().GetBorderProperty().SetLineWidth(3)
+        self.crossView.ResizableOff()
+        # self.crossView.SelectableOff() 设置是否可拖动
+        self.crossView.On()
+        # self.renCrossView = vtk.vtkRenderer()
+        # self.renCrossView.SetLayer(1)
+        # self.crossView.SetCurrentRenderer(self.renCrossView)
+        # self.qvtkWidget.GetRenderWindow().AddRenderer(self.renCrossView)
+        self.renderVtkWindow()
+
     def renderVtkWindow(self):
         self.qvtkWidget.setFixedSize(self.size())
         self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(2)
@@ -110,6 +128,7 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         print("showXZDicom begin")
         self.showImageExtraInfoVtkView()
         self.show2DImageVtkView()
+        self.update2DImageShownSignal.emit()
         self.renderVtkWindow()
         print("showXZDicom end")
 
@@ -125,8 +144,8 @@ class m2DImageShownWidget(AbstractImageShownWidget):
 
     def wheelChangeEvent(self, angleDelta):
         self.setCurrentIndex(self.currentIndex+(angleDelta.y()//120))
-        print(angleDelta.y()//120)
-        print(self.currentIndex+(angleDelta.y()//120))
+        # print(angleDelta.y()//120)
+        # print(self.currentIndex+(angleDelta.y()//120))
 
     def setCurrentIndex(self, ind):
         """Set the currently displayed frame index."""
@@ -136,5 +155,6 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.currentIndex = ind
         self.show2DImageVtkView()
         self.showImageExtraInfoVtkView()
+        self.update2DImageShownSignal.emit()
         self.renderVtkWindow()
         print("setIndex")

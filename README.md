@@ -302,3 +302,109 @@ to do
   - 基本思路是重写相关widget的wheelEvent方法
 
 <video src="D:\school_files\vedio\录制_2021_11_29_16_30_53_323.mp4" width="800px" height="600px" controls="controls"></video>
+
+2021-11-30
+
+- 实现了基本的CrossView功能，能支持CrossXZ和CrossYZ之间的同步
+- 遇到的问题
+  - 问题一：VTK的四个坐标系统的概念，没搞明白
+  - 问题二：VTK的四个坐标系之间如何变换，也没搞明白
+- 暂时的实现方式：
+  - 交线的求取：复现别人的代码，思路还没搞明白
+  - 交线坐标映射到Display坐标系：用的一些列骚操作，有很多隐患
+  - 线框View的渲染：用的是vtkBorderWidget，这个非常好用，还支持拖拽等事件监听
+- 剩余问题：
+  - 第一次初始化时，由于目前的映射操作依赖于Render，而目前的初始化时机不佳，执行映射操作时Render还未初始化结束，所以CrossYZ的初始化位置不正确
+  - 同样是因为映射操作的不完善，如果用户拖动了图像的缩放中心，映射结果就会有问题
+  - Study Test数据存在Crash，原因未知
+- 下一步实现
+  - 加上安全保护，使得如果两个Series没有交线，则隐藏vtkBorderWidget
+  - 重构映射操作
+  - 可能要支持vtkBorderWidget的拖放事件
+
+```python
+ def getX(self,f1,f2):
+        #get info
+        img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
+        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= self.getinfo(f1)
+        img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
+        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.getinfo(f2)
+
+        #建立方程组
+        sp.init_printing(use_unicode=True)
+        x, y, z = sp.symbols('x, y, z')
+        eq=[normalvector1[0] * (x - ImagePosition1[0]) + normalvector1[1] * (y - ImagePosition1[1]) + normalvector1[2] * (z - ImagePosition1[2]),\
+            normalvector2[0] * (x - ImagePosition2[0]) + normalvector2[1] * (y - ImagePosition2[1]) + normalvector2[2] * (z - ImagePosition2[2])]
+
+         #解方程
+        s = list(sp.linsolve(eq, [x, y]))
+        if len(s) < 1: return Status.bad
+
+        #求2d交线
+        x, y, z = sp.symbols('x, y, z')
+        x1_3d = s[0][0]
+        y1_3d = s[0][1]
+
+        pos=[x1_3d,y1_3d,z]
+		
+        #x1,x2即为交线投影在两个Image中的col坐标
+        differ1=pos-ImagePosition1
+        differ1_x=np.dot(differ1,ImageOrientationX1)
+        x1 = differ1_x/PixelSpacing1[0]
+
+        differ2=pos-ImagePosition2
+        differ2_x=np.dot(differ2,ImageOrientationX2)
+        x2 = differ2_x/PixelSpacing2[0]
+
+        #计算Display坐标系下，Image的中心位置和右下角边界位置
+        #然后得到Image的ColWidth
+        imageCenterPoint1,imageBoundPoint1 = self.getImageCenterAndBoundPos(self.crossXZContainer)
+        imageWidth1 = 2 * (imageBoundPoint1[0] - imageCenterPoint1[0])
+        imageCenterPoint2,imageBoundPoint2 = self.getImageCenterAndBoundPos(self.crossYZContainer)
+        imageWidth2 = 2 * (imageBoundPoint2[0] - imageCenterPoint2[0])
+		
+        #计算交线的col坐标在Display坐标系下的对应位置
+        x1 = int((x1 / Cols1)*imageWidth1 + imageCenterPoint1[0] - imageWidth1/2)
+        x2 = int((x2 / Cols2)*imageWidth2 + imageCenterPoint2[0] - imageWidth2/2)
+        
+        #除以总的窗口宽度得到比例值
+        x1 = x1 / self.crossXZContainer.width()
+        x2 = x2 / self.crossYZContainer.width()
+        return (x1,x2)
+
+def getImageCenterAndBoundPos(self, m2DWidget):
+        focal = m2DWidget.renImage.GetActiveCamera().GetFocalPoint()
+        m2DWidget.renImage.SetWorldPoint(focal[0],focal[1],focal[2],0)
+        m2DWidget.renImage.WorldToDisplay()
+        imageCenterPoint = m2DWidget.renImage.GetDisplayPoint()
+
+        bounds = m2DWidget.imageViewer.GetImageActor().GetBounds()
+        colBound,rowBound = bounds[1],bounds[3]
+        m2DWidget.renImage.SetWorldPoint(colBound,rowBound,focal[2],0)
+        m2DWidget.renImage.WorldToDisplay()
+        imageBoundPoint = m2DWidget.renImage.GetDisplayPoint()
+
+        return (imageCenterPoint,imageBoundPoint)
+
+def showCrossView(self):
+        self.crossView = vtk.vtkBorderWidget()
+        self.crossView.SetInteractor(self.qvtkWidget.GetRenderWindow().GetInteractor())
+        self.crossView.CreateDefaultRepresentation()
+        #这里的position是左下角的比例位置, position2是宽和高
+        self.crossView.GetRepresentation().SetPosition(self.crossViewColRatio,0.05)
+        self.crossView.GetRepresentation().SetPosition2(0.01,0.9)
+        self.crossView.GetRepresentation().GetBorderProperty().SetColor(1,0,0)
+        self.crossView.GetRepresentation().GetBorderProperty().SetLineWidth(3)
+        self.crossView.ResizableOff()
+        # self.crossView.SelectableOff() 设置是否可拖动
+        self.crossView.On()
+        #
+        # self.renCrossView = vtk.vtkRenderer()
+        # self.renCrossView.SetLayer(1)
+        # self.crossView.SetCurrentRenderer(self.renCrossView)
+        # self.qvtkWidget.GetRenderWindow().AddRenderer(self.renCrossView)
+        self.renderVtkWindow()
+```
+
+<video src="D:\school_files\vedio\录制_2021_11_30_21_41_43_998.mp4" width="800px" height="600px" controls="controls"></video>
+

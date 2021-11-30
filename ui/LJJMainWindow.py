@@ -134,20 +134,21 @@ class LJJMainWindow(QMainWindow):
         QMessageBox.information(None,"展示信息",info, QMessageBox.Ok)
 
     def showImageShownLayoutInfo(self):
-        info = ""
-        count = self.imageShownContainer.imageShownContainerLayout.count()
-        g =  self.imageShownContainer.imageShownContainerWidget.geometry()
-        g1 = self.imageShownContainer.imageShownContainerLayout.itemAt(0).widget().geometry()
-        g2 = self.imageShownContainer.imageShownContainerLayout.itemAt(1).widget().geometry()
-
-        g1_sub = self.imageShownContainer.imageShownContainerLayout.itemAt(0).widget().qvtkWidget.geometry()
-        g2_sub = self.imageShownContainer.imageShownContainerLayout.itemAt(1).widget().qvtkWidget.geometry()
-
-        info = str(count) + " g: " + str(g.width()) + " " + str(g.height()) \
-               + " g1: " + str(g1.width()) + " " + str(g1.height()) \
-               + " g2: " + str(g2.width()) + " " + str(g2.height()) \
-               + " g1: " + str(g1_sub.width()) + " " + str(g1_sub.height()) \
-               + " g2: " + str(g2_sub.width()) + " " + str(g2_sub.height())
+        # info = ""
+        # count = self.imageShownContainer.imageShownContainerLayout.count()
+        # g =  self.imageShownContainer.imageShownContainerWidget.geometry()
+        # g1 = self.imageShownContainer.imageShownContainerLayout.itemAt(0).widget().geometry()
+        # g2 = self.imageShownContainer.imageShownContainerLayout.itemAt(1).widget().geometry()
+        #
+        # g1_sub = self.imageShownContainer.imageShownContainerLayout.itemAt(0).widget().qvtkWidget.geometry()
+        # g2_sub = self.imageShownContainer.imageShownContainerLayout.itemAt(1).widget().qvtkWidget.geometry()
+        #
+        # info = str(count) + " g: " + str(g.width()) + " " + str(g.height()) \
+        #        + " g1: " + str(g1.width()) + " " + str(g1.height()) \
+        #        + " g2: " + str(g2.width()) + " " + str(g2.height()) \
+        #        + " g1: " + str(g1_sub.width()) + " " + str(g1_sub.height()) \
+        #        + " g2: " + str(g2_sub.width()) + " " + str(g2_sub.height())
+        info = str(self.imageShownContainer.imageShownLayoutController.crossXZContainer.renImage.GetActiveCamera().GetParallelScale())
         QMessageBox.information(None,"展示信息",info, QMessageBox.Ok)
 
     def closeEvent(self,QCloseEvent):
