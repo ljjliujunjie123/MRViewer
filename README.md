@@ -42,7 +42,7 @@ conda install --yes --file requirements.txt #install all packages needed
 >
 > If installing processing is too long, you can manually install these critical packages: 
 >
-> `python3, vtk, opencv-python, pydicom, pillow, pyqt5`
+> `python3, vtk, opencv-python, pydicom, pillow, pyqt5, sympy`
 
 Open your Pycharm or other IDE
 
@@ -188,13 +188,13 @@ to do
 
 加载一个Study
 
-<img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211121202247@2x.png" style="zoom:33%;" />
+<img src="\pictures source\星愿浏览器截图20211121202247@2x.png" style="zoom:33%;" />
 
 加载一个Patient
 
-<img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211121202319@2x.png" style="zoom:33%;" />
+<img src="\pictures source\星愿浏览器截图20211121202319@2x.png" style="zoom:33%;" />
 
-<img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211121202337@2x.png" style="zoom:33%;" />
+<img src="\pictures source\星愿浏览器截图20211121202337@2x.png" style="zoom:33%;" />
 
 2021-11-22
 
@@ -234,13 +234,13 @@ to do
 
       - **cv2只用到了一个resize功能，且大小高达100M，必须砍掉**
 
-        ![](D:\respository\MRViewer\pictures source\星愿浏览器截图20211123160231@2x.png)
+        <img src="\pictures source\星愿浏览器截图20211123160231@2x.png" style="zoom:33%;" />
 
     - pyinstaller提供了两种打包模式，一是开箱即用，即产物只有一个exe，所有内容全部封装进去，二是提供一个文件夹，里面包含一个exe文件和一堆依赖文件。两种对比
 
       |          | 开箱即用                                                     | 文件夹封装                                                   |
       | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-      | 样式     | <img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211123155535@2x.png" style="zoom:33%;" /> | <img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211123155621@2x.png" style="zoom:33%;" /> |
+      | 样式     | <img src="\pictures source\星愿浏览器截图20211123155535@2x.png" style="zoom:33%;" /> | <img src="\pictures source\星愿浏览器截图20211123155621@2x.png" style="zoom:33%;" /> |
       | 大小     | 116M                                                         | 331M                                                         |
       | 启动速度 | 30s-60s之间                                                  | 10s以内                                                      |
       | 便携程度 | 非常好                                                       | 较差                                                         |
@@ -257,7 +257,7 @@ to do
   - 暂时的实现：手动加一个小量 10 pix作为补充
   - 未来的可能实现：在第一次渲染窗口后，重绘一次
 
-![](\pictures source\星愿浏览器截图20211125212723@2x.png)
+<img src="\pictures source\星愿浏览器截图20211125212723@2x.png" style="zoom:33%;" />
 
 2021-11-26
 
@@ -288,7 +288,7 @@ to do
   - 封装更完善更易用的附加信息类
   - 优化文本的Position控制
 
-![](\pictures source\星愿浏览器截图20211127204902@2x.png)
+<img src="\pictures source\星愿浏览器截图20211127204902@2x.png" style="zoom:33%;" />
 
 2021-11-29
 
@@ -296,7 +296,7 @@ to do
 - 遇到的问题：
   - 原计划重构文件渲染区中的m2DImageShownWidget结构，反复调试后始终被一个Bug卡住。即当QVTKRenderWindowInteractor被m2DImageShownWidget固定持有时，会发现在调整渲染区布局时，一个widget的内容会被渲染到其余的widget中，猜测是vtk进行渲染时做了什么优化引起的。暂无修复思路
 
-![](D:\respository\MRViewer\pictures source\星愿浏览器截图20211129151353@2x.png)
+<img src="\pictures source\星愿浏览器截图20211129151353@2x.png" style="zoom:33%;" />
 
 - **[陶然]** 实现了文件渲染区的滚动切换slice功能
   - 基本思路是重写相关widget的wheelEvent方法
@@ -414,4 +414,5 @@ def showCrossView(self):
 - 实现了横纵两个方向的CrossView
   - 交线求取的代码搞懂了原理，并重新实现了一遍
 
-![](D:\respository\MRViewer\pictures source\星愿浏览器截图20211201093205@2x.png)
+<img src="\pictures source\星愿浏览器截图20211201093205@2x.png" style="zoom:33%;" />
+

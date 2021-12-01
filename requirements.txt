@@ -1,3 +1,6 @@
+# This file may be used to create an environment using:
+# $ conda create --name <env> --file <this file>
+# platform: win-64
 aiohttp=3.8.0=pypi_0
 aiosignal=1.2.0=pypi_0
 altgraph=0.17.2=pypi_0
@@ -21,6 +24,7 @@ importlib-metadata=4.8.1=pypi_0
 incremental=21.3.0=pypi_0
 kiwisolver=1.3.2=pypi_0
 matplotlib=3.4.3=pypi_0
+mpmath=1.2.1=pypi_0
 multidict=5.2.0=pypi_0
 numpy=1.21.3=pypi_0
 opencv-python=4.5.4.58=pypi_0
@@ -48,6 +52,7 @@ qt5-tools=5.15.2.1.2=pypi_0
 setuptools=58.4.0=py37h03978a9_1
 six=1.16.0=pypi_0
 sqlite=3.36.0=h8ffe710_2
+sympy=1.9=pypi_0
 twisted=21.7.0=pypi_0
 twisted-iocpsupport=1.0.2=pypi_0
 txaio=21.2.1=pypi_0
