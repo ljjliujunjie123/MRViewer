@@ -408,3 +408,10 @@ def showCrossView(self):
 
 <video src="D:\school_files\vedio\录制_2021_11_30_21_41_43_998.mp4" width="800px" height="600px" controls="controls"></video>
 
+2021-12-1
+
+- 修复了Study Case崩溃的bug
+- 实现了横纵两个方向的CrossView
+  - 交线求取的代码搞懂了原理，并重新实现了一遍
+
+![](D:\respository\MRViewer\pictures source\星愿浏览器截图20211201093205@2x.png)

@@ -21,6 +21,7 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.curFilePath = ""
         self.currentIndex = 0
         self.crossViewColRatio = 0
+        self.crossViewRowRatio = 0
         #初始化逻辑
         self.reader = None
         self.imageViewer = None
@@ -86,8 +87,12 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.crossView = vtk.vtkBorderWidget()
         self.crossView.SetInteractor(self.qvtkWidget.GetRenderWindow().GetInteractor())
         self.crossView.CreateDefaultRepresentation()
-        self.crossView.GetRepresentation().SetPosition(self.crossViewColRatio,0.05)
-        self.crossView.GetRepresentation().SetPosition2(0.01,0.9)
+        if self.crossViewColRatio is not None:
+            self.crossView.GetRepresentation().SetPosition(self.crossViewColRatio,0.05)
+            self.crossView.GetRepresentation().SetPosition2(0.01,0.9)
+        elif self.crossViewRowRatio is not None:
+            self.crossView.GetRepresentation().SetPosition(0.05,self.crossViewRowRatio)
+            self.crossView.GetRepresentation().SetPosition2(0.9,0.01)
         self.crossView.GetRepresentation().GetBorderProperty().SetColor(1,0,0)
         self.crossView.GetRepresentation().GetBorderProperty().SetLineWidth(3)
         self.crossView.ResizableOff()

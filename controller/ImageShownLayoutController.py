@@ -77,9 +77,10 @@ class ImageShownLayoutController():
         crossYZFile = self.crossYZContainer.curFilePath
 
         if len(crossXZFile) < 1 or len(crossYZFile) < 1:return
-        res = self.getX(crossXZFile, crossYZFile)
+        res = self.getCrossPos(crossXZFile, crossYZFile)
         if res == Status.bad: return
-        self.crossXZContainer.crossViewColRatio, self.crossYZContainer.crossViewColRatio = res
+        self.crossXZContainer.crossViewColRatio, self.crossXZContainer.crossViewRowRatio,\
+        self.crossYZContainer.crossViewColRatio, self.crossYZContainer.crossViewRowRatio = res
 
         self.crossXZContainer.showCrossView()
         self.crossYZContainer.showCrossView()
@@ -88,7 +89,7 @@ class ImageShownLayoutController():
         RefDs = pydicom.read_file(img_file)
         img_array = RefDs.pixel_array# indexes are z,y,x
         ImagePosition =np.array(RefDs.ImagePositionPatient)
-        ImageOrientation=np.array(RefDs.ImageOrientationPatient)
+        ImageOrientation=np.array(RefDs.ImageOrientationPatient,dtype = int)
         PixelSpacing =RefDs.PixelSpacing
         SliceThickness=RefDs.SliceThickness
         ImageOrientationX=ImageOrientation[0:3]
@@ -101,7 +102,7 @@ class ImageShownLayoutController():
         normalvector=np.cross(ImageOrientationX,ImageOrientationY)
         return img_array,normalvector,ImagePosition,PixelSpacing,ImageOrientationX,ImageOrientationY,Rows,Cols
 
-    def getX(self,f1,f2):
+    def getCrossPos(self,f1,f2):
         #get info
         img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
         ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= self.getinfo(f1)
@@ -115,38 +116,54 @@ class ImageShownLayoutController():
             normalvector2[0] * (x - ImagePosition2[0]) + normalvector2[1] * (y - ImagePosition2[1]) + normalvector2[2] * (z - ImagePosition2[2])]
 
          #解方程
-        s = list(sp.linsolve(eq, [x, y]))
+        s = list(sp.linsolve(eq, [x, y, z]))
         if len(s) < 1: return Status.bad
 
         #求2d交线
         x, y, z = sp.symbols('x, y, z')
         x1_3d = s[0][0]
         y1_3d = s[0][1]
+        z1_3d = s[0][2]
 
-        pos=[x1_3d,y1_3d,z]
+        pos=[x1_3d,y1_3d,z1_3d]
 
         differ1=pos-ImagePosition1
         differ1_x=np.dot(differ1,ImageOrientationX1)
         x1 = differ1_x/PixelSpacing1[0]
+        differ1_y=np.dot(differ1,ImageOrientationY1)
+        y1 = differ1_y/PixelSpacing1[1]
 
         differ2=pos-ImagePosition2
         differ2_x=np.dot(differ2,ImageOrientationX2)
         x2 = differ2_x/PixelSpacing2[0]
-        # differ_y=np.dot(differ,ImageOrientationY1)
-        # pos_2d=[differ_x/PixelSpacing1[0],differ_y/PixelSpacing1[1]]
+        differ2_y=np.dot(differ2,ImageOrientationY2)
+        y2 = differ2_y/PixelSpacing2[1]
 
         #这样能拿到中心点坐标
         imageCenterPoint1,imageBoundPoint1 = self.getImageCenterAndBoundPos(self.crossXZContainer)
         imageWidth1 = 2 * (imageBoundPoint1[0] - imageCenterPoint1[0])
+        imageHeight1 = 2 * (imageBoundPoint1[1] - imageCenterPoint1[1])
         imageCenterPoint2,imageBoundPoint2 = self.getImageCenterAndBoundPos(self.crossYZContainer)
         imageWidth2 = 2 * (imageBoundPoint2[0] - imageCenterPoint2[0])
+        imageHeight2 = 2 * (imageBoundPoint2[1] - imageCenterPoint2[1])
 
-        x1 = int((x1 / Cols1)*imageWidth1 + imageCenterPoint1[0] - imageWidth1/2)
-        x2 = int((x2 / Cols2)*imageWidth2 + imageCenterPoint2[0] - imageWidth2/2)
-        print(x1,x2)
-        x1 = x1 / self.crossXZContainer.width()
-        x2 = x2 / self.crossYZContainer.width()
-        return (x1,x2)
+        #计算Display坐标系的比例
+        if sp.sign(x1) == 1:
+            x1 = int((x1 / Cols1)*imageWidth1 + imageCenterPoint1[0] - imageWidth1/2) / self.crossXZContainer.width()
+        else: x1 = None
+        if sp.sign(y1) == 1:
+            y1 = int((y1 / Rows1)*imageHeight1 + imageCenterPoint1[1] - imageHeight1/2) / self.crossXZContainer.height()
+        else: y1 = None
+        if sp.sign(x2) == 1:
+            x2 = int((x2 / Cols2)*imageWidth2 + imageCenterPoint2[0] - imageWidth2/2) / self.crossYZContainer.width()
+        else: x2 = None
+        if sp.sign(y2) == 1:
+            y2 = int((y2 / Rows2)*imageHeight2 + imageCenterPoint2[1] - imageHeight2/2) / self.crossYZContainer.height()
+        else: y2 = None
+
+        return (x1,y1,x2,y2)
+
+
 
     def getImageCenterAndBoundPos(self, m2DWidget):
         focal = m2DWidget.renImage.GetActiveCamera().GetFocalPoint()
