@@ -143,23 +143,28 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         if self.resizeFlag:
             self.updateImageExtraInfo()
 
+    #滚轮调用sigWheelChanged
     def wheelEvent(self, ev):
+        if len(self.filePaths) <= 0:
+            return
         print("wheelEvent")
         self.sigWheelChanged.emit(ev.angleDelta())
 
+    #滚轮改变事件
     def wheelChangeEvent(self, angleDelta):
         self.setCurrentIndex(self.currentIndex+(angleDelta.y()//120))
-        # print(angleDelta.y()//120)
-        # print(self.currentIndex+(angleDelta.y()//120))
 
+    #切换到第ind张图
     def setCurrentIndex(self, ind):
         """Set the currently displayed frame index."""
-        while ind >= len(self.filePaths): ind = ind - len(self.filePaths)
-        while ind < 0: ind = ind + len(self.filePaths)
+        #ind调节到可用范围
+        ind = ind % len(self.filePaths)
+        if ind < 0: 
+            ind = ind + len(self.filePaths)
         self.curFilePath = self.filePaths[ind]
         self.currentIndex = ind
         self.show2DImageVtkView()
         self.showImageExtraInfoVtkView()
         self.update2DImageShownSignal.emit()
         self.renderVtkWindow()
-        print("setIndex")
+        #print("setIndex")

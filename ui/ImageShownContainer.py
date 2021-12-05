@@ -37,3 +37,4 @@ class ImageShownContainer(QFrame):
         self.imageShownLayoutController.crossXZContainer.closeEvent(QCloseEvent)
         self.imageShownLayoutController.crossYZContainer.closeEvent(QCloseEvent)
         self.imageShownLayoutController.vtk3DContainer.closeEvent(QCloseEvent)
+        self.imageShownLayoutController.imageSlideshow.closeEvent(QCloseEvent)

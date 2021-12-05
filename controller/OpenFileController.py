@@ -61,7 +61,7 @@ class OpenFileController():
     def checkDirValidity(self, filePath):
         #非文件夹检查
         if not os.path.isdir(filePath):
-            # QMessageBox.information(None,"提示","请选择文件夹而非文件",QMessageBox.Ok)
+            QMessageBox.information(None,"提示","请选择文件夹而非文件",QMessageBox.Ok)
             print("Warning:", filePath, "should be a directory not a file!")
             return Status.bad
         subPaths = os.listdir(filePath)
