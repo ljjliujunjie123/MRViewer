@@ -9,6 +9,7 @@ class ToolsContainer(QFrame):
     showInfoSig = pyqtSignal()
 
     updateImageShownLayoutSignal = pyqtSignal(tuple)
+    enableImageSlideshowSignal = pyqtSignal(bool)
 
     def __init__(self, ParentWidget):
         QFrame.__init__(self, ParentWidget)
@@ -86,6 +87,13 @@ class ToolsContainer(QFrame):
     #
     #     # self.pushButton.clicked.connect(self.showInfoSig)
     #
+        #功能2 by evermg42
+        #图像的自动轮播开启
+        self.enableImageSlideshow = QCheckBox('跑马灯效果',self)
+        self.enableImageSlideshow.setGeometry(0, self.selectImageShownRegionTableWidget.height() + self.testButton.height() + self.pushButton.height(), 150, 30)
+        self.enableImageSlideshow.setEnabled(True) #设置是否启用,可自动变灰色
+        self.enableImageSlideshow.setCheckState(False) #设置初始状态
+        self.enableImageSlideshow.stateChanged.connect(self.enableImageSlideshowSignalHandler) #打勾就送信
 
     def updateImageShownLayoutSignalHandler(self):
         if len(self.selectImageShownRegionTableWidget.selectedRanges()) < 1:
@@ -107,3 +115,6 @@ class ToolsContainer(QFrame):
         # self.pushButton_2.setText(_translate("MainWindow", "功能2"))
         # self.pushButton_3.setText(_translate("MainWindow", "功能3"))
         self.testButton.setText(_translate("MainWindow", "确认布局"))
+
+    def enableImageSlideshowSignalHandler(self):
+        self.enableImageSlideshowSignal.emit(self.enableImageSlideshow.isChecked())

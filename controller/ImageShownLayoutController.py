@@ -1,8 +1,10 @@
+from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import vtkmodules.all as vtk
 from ui.m2DImageShownWidget import m2DImageShownWidget
 from ui.m3DImageShownWidget import m3DImageShownWidget
+from ui.SlideshowContainer import SlideshowContainer
 from ui.config import uiConfig
 
 from copy import deepcopy
@@ -179,4 +181,20 @@ class ImageShownLayoutController():
 
         return (imageCenterPoint,imageBoundPoint)
 
+    #走马灯播放控制器(得搬到container里)evermg42
+    def imageSlideshowControl(self,isShown):
+        if(isShown):
+            
+            self.imageSlideshow=SlideshowContainer()
+
+            self.imageSlideshow.setWindowFlags(
+                Qt.FramelessWindowHint|Qt.WindowStaysOnTopHint
+            )#隐藏标题栏|在主窗口前
+            #self.dialog.setWindowModality(Qt.ApplicationModal)#只有该dialog关闭，才可以关闭父界面
+
+
+            self.imageSlideshow.setWindowModality(Qt.NonModal)
+            self.imageSlideshow.show()
+        else:
+            self.imageSlideshow.close()#直觉如此
 

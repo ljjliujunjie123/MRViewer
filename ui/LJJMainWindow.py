@@ -13,6 +13,7 @@ class LJJMainWindow(QMainWindow):
     updateImageShownSignal = pyqtSignal(str,str)
     updateImageListSignal = pyqtSignal(dict,int)
     updateImage3DShownSignal = pyqtSignal(str)
+    enableImageSlideshow = pyqtSignal(bool) #图像走马灯开关
 
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
@@ -93,7 +94,9 @@ class LJJMainWindow(QMainWindow):
         self.toolsContainer.updateImageShownLayoutSignal.connect(
             self.imageShownContainer.imageShownLayoutController.updateLayout
         )
-
+        self.toolsContainer.enableImageSlideshowSignal.connect(
+            self.imageShownContainer.imageShownLayoutController.imageSlideshowControl
+        ) #evermg42
         self.retranslateUi(self)
         QMetaObject.connectSlotsByName(self)
 
