@@ -198,3 +198,10 @@ class ImageShownLayoutController():
         else:
             self.imageSlideshow.close()#直觉如此
 
+    def closeEvent(self, QCloseEvent):
+        self.RealTimeContainer.closeEvent(QCloseEvent)
+        self.crossXZContainer.closeEvent(QCloseEvent)
+        self.crossYZContainer.closeEvent(QCloseEvent)
+        self.vtk3DContainer.closeEvent(QCloseEvent)
+        if hasattr(self, 'imageSlideshow'):self.imageSlideshow.closeEvent(QCloseEvent)
+

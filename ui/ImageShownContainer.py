@@ -33,8 +33,4 @@ class ImageShownContainer(QFrame):
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
-        self.imageShownLayoutController.RealTimeContainer.closeEvent(QCloseEvent)
-        self.imageShownLayoutController.crossXZContainer.closeEvent(QCloseEvent)
-        self.imageShownLayoutController.crossYZContainer.closeEvent(QCloseEvent)
-        self.imageShownLayoutController.vtk3DContainer.closeEvent(QCloseEvent)
-        self.imageShownLayoutController.imageSlideshow.closeEvent(QCloseEvent)
+        self.imageShownLayoutController.closeEvent(QCloseEvent)
