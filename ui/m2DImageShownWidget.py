@@ -1,8 +1,10 @@
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal,Qt
+from PyQt5.QtGui import *
 import os
 from ui.AbstractImageShownWidget import AbstractImageShownWidget
 from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
+from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 import vtkmodules.all as vtk
 from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom
 
@@ -37,7 +39,6 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         if self.reader is None: self.reader = vtk.vtkDICOMImageReader()
         if self.imageViewer is None:self.imageViewer =  vtk.vtkImageViewer2()
         if self.renImage is None:self.renImage = vtk.vtkRenderer()
-
         self.reader.SetDataByteOrderToLittleEndian()
         self.reader.SetFileName(self.curFilePath)
         self.reader.Update()
@@ -84,6 +85,22 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
 
     def showCrossView(self):
+        #方法一
+        # self.crossView = CustomCrossBoxWidget()
+        # self.crossView.setParent(self)
+        # self.crossView.raise_()
+        # self.crossView.show()
+        #方法二
+        # if self.crossView is None: self.crossView = vtk.vtkBoxWidget()
+        # self.crossView.SetInteractor(self.qvtkWidget.GetRenderWindow().GetInteractor())
+        # # self.crossView.CreateDefaultRepresentation()
+        # self.renCrossView = vtk.vtkRenderer()
+        # self.renCrossView.SetLayer(1)
+        # self.crossView.SetCurrentRenderer(self.renCrossView)
+        # self.qvtkWidget.GetRenderWindow().AddRenderer(self.renCrossView)
+        # self.crossView.On()
+        # self.renderVtkWindow()
+        #方法三
         self.crossView = vtk.vtkBorderWidget()
         self.crossView.SetInteractor(self.qvtkWidget.GetRenderWindow().GetInteractor())
         self.crossView.CreateDefaultRepresentation()
@@ -95,13 +112,11 @@ class m2DImageShownWidget(AbstractImageShownWidget):
             self.crossView.GetRepresentation().SetPosition2(0.9,0.01)
         self.crossView.GetRepresentation().GetBorderProperty().SetColor(1,0,0)
         self.crossView.GetRepresentation().GetBorderProperty().SetLineWidth(3)
-        self.crossView.ResizableOff()
-        # self.crossView.SelectableOff() 设置是否可拖动
+        self.crossView.GetRepresentation().SetMinimumSize(100, 100)
+        self.crossView.GetRepresentation().SetMaximumSize(200, 200)
+        self.crossView.ResizableOn()
+        self.crossView.SelectableOff()
         self.crossView.On()
-        # self.renCrossView = vtk.vtkRenderer()
-        # self.renCrossView.SetLayer(1)
-        # self.crossView.SetCurrentRenderer(self.renCrossView)
-        # self.qvtkWidget.GetRenderWindow().AddRenderer(self.renCrossView)
         self.renderVtkWindow()
 
     def renderVtkWindow(self):

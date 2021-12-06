@@ -153,17 +153,17 @@ class ImageShownLayoutController():
         else: x1 = None
         if sp.sign(y1) == 1:
             y1 = int((y1 / Rows1)*imageHeight1 + imageCenterPoint1[1] - imageHeight1/2) / self.crossXZContainer.height()
+            y1 = 1 - y1
         else: y1 = None
         if sp.sign(x2) == 1:
             x2 = int((x2 / Cols2)*imageWidth2 + imageCenterPoint2[0] - imageWidth2/2) / self.crossYZContainer.width()
         else: x2 = None
         if sp.sign(y2) == 1:
             y2 = int((y2 / Rows2)*imageHeight2 + imageCenterPoint2[1] - imageHeight2/2) / self.crossYZContainer.height()
+            y2 = 1 - y2
         else: y2 = None
 
         return (x1,y1,x2,y2)
-
-
 
     def getImageCenterAndBoundPos(self, m2DWidget):
         focal = m2DWidget.renImage.GetActiveCamera().GetFocalPoint()
