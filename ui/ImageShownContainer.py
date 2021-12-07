@@ -22,6 +22,7 @@ class ImageShownContainer(QFrame):
         self.imageShownContainerWidget.setObjectName("imageShownContainerWidget")
 
         self.imageShownContainerLayout = QGridLayout(self.imageShownContainerWidget)
+        self.imageShownContainerWidget.setLayout(self.imageShownContainerLayout)
 
         #初始化controller
         self.imageShownLayoutController = ImageShownLayoutController(
@@ -34,3 +35,7 @@ class ImageShownContainer(QFrame):
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
         self.imageShownLayoutController.closeEvent(QCloseEvent)
+
+    def resizeEvent(self, *args, **kwargs):
+        print("ImageShonwContainer ", self.rect())
+        self.imageShownContainerWidget.setFixedSize(self.size())

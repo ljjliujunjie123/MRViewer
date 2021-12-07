@@ -192,7 +192,6 @@ class ImageShownLayoutController():
             )#隐藏标题栏|在主窗口前
             #self.dialog.setWindowModality(Qt.ApplicationModal)#只有该dialog关闭，才可以关闭父界面
 
-
             self.imageSlideshow.setWindowModality(Qt.NonModal)
             self.imageSlideshow.show()
         else:

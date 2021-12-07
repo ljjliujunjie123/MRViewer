@@ -80,6 +80,11 @@ class LJJMainWindow(QMainWindow):
         self.menu.addAction(self.actionopen_patient)
         self.menuBar.addAction(self.menu.menuAction())
 
+        #跟踪鼠标
+        self.setMouseTracking(True)
+        self.centralwidget.setMouseTracking(True)
+        self.toolsContainer.setMouseTracking(True)
+
         #初始化controllers
         self.openFileController = OpenFileController(
                 self,

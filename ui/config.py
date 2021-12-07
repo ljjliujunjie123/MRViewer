@@ -9,7 +9,7 @@ class UIConfig():
     menuHeight = 22
 
     scrollContinerColRatio = 1
-    shownContainerColRatio = 5
+    shownContainerColRatio = 4
     toolsContainerColRation = 1
 
     shownContainerMargins = QMargins(0,0,0,0)

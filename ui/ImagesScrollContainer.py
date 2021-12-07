@@ -22,12 +22,6 @@ class ImageScrollContainer(QFrame):
         self.imageVerticalScrollLayout.setContentsMargins(0,0,0,0)
         self.setLayout(self.imageVerticalScrollLayout)
 
-        self.imageVerticalScrollContainer = QWidget()
-        self.imageVerticalScrollContainer.setFixedSize(self.size())
-        self.imageVerticalScrollContainer.setGeometry(self.geometry())
-        self.imageVerticalScrollLayout.addWidget(self.imageVerticalScrollContainer)
-
-
     def updateListHeight(self, itemCount):
         listHeight = (uiConfig.iconSize.height() + uiConfig.itemSpace * 2) * itemCount
         if listHeight > 1e5:
