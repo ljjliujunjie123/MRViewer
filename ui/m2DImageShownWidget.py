@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSignal,Qt
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import *
 import os
 from ui.AbstractImageShownWidget import AbstractImageShownWidget
@@ -7,6 +7,7 @@ from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 import vtkmodules.all as vtk
 from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom
+from utils.cycleSyncThread import CycleSyncThread
 
 class m2DImageShownWidget(AbstractImageShownWidget):
 
@@ -31,6 +32,8 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.renImage = None
         self.renText = None
         self.textActor = None
+
+        self.timerThread = None
 
         self.sigWheelChanged.connect(self.wheelChangeEvent)
 
@@ -173,13 +176,47 @@ class m2DImageShownWidget(AbstractImageShownWidget):
     def setCurrentIndex(self, ind):
         """Set the currently displayed frame index."""
         #ind调节到可用范围
+        print("set current index")
         ind = ind % len(self.filePaths)
         if ind < 0: 
             ind = ind + len(self.filePaths)
-        self.curFilePath = self.filePaths[ind]
         self.currentIndex = ind
+        self.curFilePath = self.filePaths[self.currentIndex]
         self.show2DImageVtkView()
         self.showImageExtraInfoVtkView()
         self.update2DImageShownSignal.emit()
         self.renderVtkWindow()
         #print("setIndex")
+
+    def canSlideShow(self):
+        if self.qvtkWidget is None:
+            return False
+        if len(self.filePaths) <= 0:
+            return False
+        return True
+
+    def setCurrentIndexMore(self, val):
+        self.setCurrentIndex(self.currentIndex + 1)
+
+    def controlSlideShow(self, flag):
+        if flag:
+            self.timerThread = CycleSyncThread(0.3)
+            self.timerThread.signal.connect(lambda x:self.setCurrentIndex(self.currentIndex + 1))
+            self.timerThread.start()
+        else:
+            self.timerThread.requestInterruption()
+            self.timerThread.quit()
+            self.timerThread.wait()
+
+    def controlSlideShowSpeed(self, delta):
+        if self.timerThread is not None:
+            newSpeed = self.timerThread.interval + delta
+            newSpeed = max(min(newSpeed,1),0.1)
+            self.timerThread.interval = newSpeed
+
+    def closeEvent(self, QCloseEvent):
+        super().closeEvent(QCloseEvent)
+        if self.timerThread is not None and not self.timerThread.isFinished():
+            self.timerThread.requestInterruption()
+            self.timerThread.quit()
+            self.timerThread.wait()

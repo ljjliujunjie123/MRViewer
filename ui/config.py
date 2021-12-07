@@ -17,6 +17,8 @@ class UIConfig():
     shownTextInfoMarginWidth = 20
     shownTextInfoMarginHeight = 0
 
+    shownSlideShowDialogSize = QSize(300,100)
+
     toolsSelectRegionCol = 2
     toolsSelectRegionRow = 2
     toolsSelectRegionItemSize = QSize(80,80)

@@ -26,6 +26,8 @@ class ImageShownLayoutController():
         self.curlayout = (0, 0, 1, 1)
         self.imageShownWidgetPool = { }
 
+        self.imageSlideShowPlayFlag = False
+
     def initLayoutParams(self, uiConfig):
         self.imageShownContainerLayout.setContentsMargins(uiConfig.shownContainerMargins)
         self.imageShownContainerLayout.setSpacing(uiConfig.shownContainerContentSpace)
@@ -185,7 +187,11 @@ class ImageShownLayoutController():
     def imageSlideshowControl(self,isShown):
         if(isShown):
             
-            self.imageSlideshow=SlideshowContainer()
+            self.imageSlideshow=SlideshowContainer(
+                self.imageSlideShowSlowHandler,
+                self.imageSlideShowPlayHandler,
+                self.imageSlideShowFasterHandler
+            )
 
             self.imageSlideshow.setWindowFlags(
                 Qt.FramelessWindowHint|Qt.WindowStaysOnTopHint
@@ -196,6 +202,19 @@ class ImageShownLayoutController():
             self.imageSlideshow.show()
         else:
             self.imageSlideshow.close()#直觉如此
+
+    def imageSlideShowPlayHandler(self):
+        if self.crossXZContainer.canSlideShow():
+            self.crossXZContainer.controlSlideShow(not self.imageSlideShowPlayFlag)
+            self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
+
+    def imageSlideShowSlowHandler(self):
+        print("slow")
+        self.crossXZContainer.controlSlideShowSpeed(0.1)
+
+    def imageSlideShowFasterHandler(self):
+        print("fasr")
+        self.crossXZContainer.controlSlideShowSpeed(-0.1)
 
     def closeEvent(self, QCloseEvent):
         self.RealTimeContainer.closeEvent(QCloseEvent)

@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
+from ui.config import uiConfig
 
 # Thanks to https://blog.csdn.net/gumenghua_com1/article/details/111318926
 # https://www.cnblogs.com/ygzhaof/p/10064851.html
@@ -9,30 +10,38 @@ from PyQt5.QtGui import *
 
 class SlideshowContainer(QDialog):
 
-    def __init__(self):
-        QFrame.__init__(self)
+    def __init__(self,
+        slowHandler,
+        playHandler,
+        fastHandler
+    ):
+        QDialog.__init__(self)
 
         # self.setGeometry()#未设置初始位置evermg42
         print("SlideshowContainer Geometry:")
         print(self.geometry())
         self.setObjectName("slideshowContainer")
 
-        self.resize(400,200)
+        self.resize(uiConfig.shownSlideShowDialogSize)
+        self.setStyleSheet("QDialog{background-color:rgb(100,100,100);}")
+
+        self.hBoxLayout = QHBoxLayout(self)
+        self.setLayout(self.hBoxLayout)
 
         #放慢速度的button
         self.slowBtn = QPushButton('-',self)
-        self.slowBtn.setGeometry(0, 0, 70, 70)
-        # self.slowBtn.clicked.connect()
+        self.hBoxLayout.addWidget(self.slowBtn)
+        self.slowBtn.clicked.connect(slowHandler)
         
         #暂停播放的button
         self.playBtn = QPushButton('播放',self)
-        self.playBtn.setGeometry(self.slowBtn.width(), 0, 70, 70)
-        # self.playBtn.clicked.connect()
+        self.hBoxLayout.addWidget(self.playBtn)
+        self.playBtn.clicked.connect(playHandler)
 
         #加快速度的button
         self.fastBtn = QPushButton('+',self)
-        self.fastBtn.setGeometry(self.slowBtn.width() + self.playBtn.width(), 0, 70, 70)
-        # self.fastBtn.clicked.connect()
+        self.hBoxLayout.addWidget(self.fastBtn)
+        self.fastBtn.clicked.connect(fastHandler)
     
     def mousePressEvent(self, event):
         # 重写鼠标点击的事件
