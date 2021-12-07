@@ -18,8 +18,8 @@ class OpenFileController():
         self.updateImageListSignal = updateImageListSignal
 
     def openStudyDirectory(self):
-        filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
-        # filePath = r'D:/respository/MRViewer_Scource/study_Test_data'
+        # filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
+        filePath = r'D:/respository/MRViewer_Scource/study_Test_data'
         if self.checkDirValidity(filePath) is Status.bad: return
         seriesPaths = os.listdir(filePath)
         dict = {}
@@ -33,8 +33,8 @@ class OpenFileController():
         self.updateImageListSignal.emit(dict, uiConfig.studyTag)
 
     def openPatientDirectory(self):
-        filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Patient的目录",'')
-        # filePath = r'D:/respository/MRViewer_Scource/Patient_Test_data'
+        # filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Patient的目录",'')
+        filePath = r'D:/respository/MRViewer_Scource/Patient_Test_data'
         if self.checkDirValidity(filePath) is Status.bad: return
 
         resDict = {}
@@ -61,7 +61,7 @@ class OpenFileController():
     def checkDirValidity(self, filePath):
         #非文件夹检查
         if not os.path.isdir(filePath):
-            QMessageBox.information(None,"提示","请选择文件夹而非文件",QMessageBox.Ok)
+            # QMessageBox.information(None,"提示","请选择文件夹而非文件",QMessageBox.Ok)
             print("Warning:", filePath, "should be a directory not a file!")
             return Status.bad
         subPaths = os.listdir(filePath)

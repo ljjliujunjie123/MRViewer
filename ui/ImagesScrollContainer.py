@@ -41,8 +41,12 @@ class ImageScrollContainer(QFrame):
             self.imageVerticalScrollWidget = ImageScrollListWidget()
         if tag is uiConfig.patientTag:
             self.imageVerticalScrollWidget = ImageScrollTreeWidget()
-        self.imageVerticalScrollWidget.setFixedSize(self.imageVerticalScrollContainer.size())
-        self.imageVerticalScrollWidget.setParent(self.imageVerticalScrollContainer)
+        for i in range(self.imageVerticalScrollLayout.count()):
+            widget = self.imageVerticalScrollLayout.itemAt(i).widget()
+            widget.setParent(None)
+        self.imageVerticalScrollWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
+        self.imageVerticalScrollWidget.setFixedHeight(self.height())
+        self.imageVerticalScrollLayout.addWidget(self.imageVerticalScrollWidget)
         self.imageVerticalScrollWidget.show()
 
     def clearImageList(self):

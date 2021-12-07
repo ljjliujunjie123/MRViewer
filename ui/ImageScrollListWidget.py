@@ -4,7 +4,8 @@ from PyQt5.QtGui import QIcon,QDrag
 
 from PIL.ImageQt import *
 from ui.config import uiConfig
-from utils.util import dicom_to_qt,getSeriesPathFromFileName
+from ui.ImageScrollItemDelegate import ImageScrollItemDelegate
+from utils.util import dicom_to_qt,getSeriesPathFromFileName,getSeriesImageCountFromSeriesPath
 from utils.ImageItemMimeData import ImageItemMimeData
 
 class ImageScrollListWidget(QListWidget):
@@ -24,6 +25,8 @@ class ImageScrollListWidget(QListWidget):
         self.setUniformItemSizes(True)
         self.setSpacing(uiConfig.itemSpace)
 
+        self.setItemDelegate(ImageScrollItemDelegate(self))
+
     def showImageList(self, dict):
         for seriesName,imageFileName in dict.items():
             self.addImageItem(imageFileName, seriesName)
@@ -38,8 +41,11 @@ class ImageScrollListWidget(QListWidget):
         imageItem = QListWidgetItem()
         imageItem.setIcon(imageIcon)
         imageItem.setText(text)
+        seriesPath = getSeriesPathFromFileName(fileName)
+        seriesImageCount = getSeriesImageCountFromSeriesPath(seriesPath)
         itemExtraData = {
-            "seriesPath":getSeriesPathFromFileName(fileName)
+            "seriesPath": seriesPath,
+            "seriesImageCount": seriesImageCount
         }
         imageItem.setData(3,itemExtraData)
         self.addItem(imageItem)

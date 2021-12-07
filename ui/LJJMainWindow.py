@@ -28,7 +28,7 @@ class LJJMainWindow(QMainWindow):
         self.mainWindowWidget.setGeometry(self.centralwidget.geometry())
         self.mainWindowWidget.setObjectName("mainWindowWidget")
 
-        self.mainWindowLayout = QGridLayout(self.mainWindowWidget)
+        self.mainWindowLayout = QHBoxLayout(self.mainWindowWidget)
         self.mainWindowLayout.setContentsMargins(0,0,0,0)
         self.mainWindowLayout.setSpacing(0)
         self.mainWindowLayout.setObjectName("mainWindowLayout")
@@ -43,13 +43,14 @@ class LJJMainWindow(QMainWindow):
         #抽象出右侧的工具栏
         self.toolsContainer = ToolsContainer(self.mainWindowWidget)
 
-        #收敛子页面
-        self.mainWindowLayout.addWidget(self.imageScrollContainer, 0, 0)
-        self.mainWindowLayout.addWidget(self.imageShownContainer, 0, 1)
-        self.mainWindowLayout.addWidget(self.toolsContainer, 0, 2)
-        self.mainWindowLayout.setColumnStretch(0, uiConfig.scrollContinerColRatio)
-        self.mainWindowLayout.setColumnStretch(1, uiConfig.shownContainerColRatio)
-        self.mainWindowLayout.setColumnStretch(2, uiConfig.toolsContainerColRation)
+        #添加splitter
+        self.splitter =  QSplitter(Qt.Horizontal)
+        self.splitter.addWidget(self.imageScrollContainer)
+        self.splitter.addWidget(self.imageShownContainer)
+        self.splitter.addWidget(self.toolsContainer)
+
+        #收敛子组件
+        self.mainWindowLayout.addWidget(self.splitter)
 
         # print(self.geometry())
         # print(self.mainWindowWidget.geometry())

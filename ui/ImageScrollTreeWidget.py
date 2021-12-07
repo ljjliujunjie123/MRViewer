@@ -4,7 +4,8 @@ from PyQt5.QtGui import QIcon,QDrag
 
 from PIL.ImageQt import *
 from ui.config import uiConfig
-from utils.util import dicom_to_qt,getSeriesPathFromFileName
+from ui.ImageScrollItemDelegate import ImageScrollItemDelegate
+from utils.util import dicom_to_qt,getSeriesPathFromFileName,getSeriesImageCountFromSeriesPath
 from utils.ImageItemMimeData import ImageItemMimeData
 
 class ImageScrollTreeWidget(QTreeWidget):
@@ -23,6 +24,7 @@ class ImageScrollTreeWidget(QTreeWidget):
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setIconSize(uiConfig.iconSize)
         self.setDragEnabled(True)
+        self.setItemDelegateForColumn(0, ImageScrollItemDelegate(self))
 
     def showImageList(self, dict):
 
@@ -35,8 +37,11 @@ class ImageScrollTreeWidget(QTreeWidget):
                 child = QTreeWidgetItem(root)
                 child.setText(0,seriesName)
                 child.setIcon(0,self.getImageIcon(seriesValue))
+                seriesPath = getSeriesPathFromFileName(seriesValue)
+                seriesImageCount = getSeriesImageCountFromSeriesPath(seriesPath)
                 itemExtraData = {
-                    "seriesPath": getSeriesPathFromFileName(seriesValue)
+                    "seriesPath": seriesPath,
+                    "seriesImageCount": seriesImageCount
                 }
                 child.setData(0,3,itemExtraData)
             self.roots.append(root)

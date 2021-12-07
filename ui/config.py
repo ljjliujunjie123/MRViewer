@@ -8,7 +8,7 @@ class UIConfig():
 
     menuHeight = 22
 
-    scrollContinerColRatio = 2
+    scrollContinerColRatio = 1
     shownContainerColRatio = 5
     toolsContainerColRation = 1
 
@@ -26,8 +26,11 @@ class UIConfig():
     studyTag = 1
     patientTag = 2
 
-    itemSpace = 10
-    iconSize = QSize(200,200)
+    itemSpace = 2
+    iconSize = QSize(280,280)
+    textHeight = 40
+    annotationSize = QSize(40,20)
+    iconTextSpace = 10
     listHeight = 1000
 
     factor_bright = 1

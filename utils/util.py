@@ -53,3 +53,6 @@ def dicom_to_qt(dcm_file, factor_contrast, factor_bright, auto_mode, inversion_m
 
 def getSeriesPathFromFileName(fileName):
     return os.path.split(fileName)[0]
+
+def getSeriesImageCountFromSeriesPath(seriesPath):
+    return len(os.listdir(seriesPath))
