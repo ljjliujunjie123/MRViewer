@@ -6,13 +6,7 @@ from PIL.ImageQt import *
 
 import cv2
 
-def getDicomWindowCenterAndLevel(fileName):
-    dcmFile = pyd.dcmread(fileName)
-    return (dcmFile.WindowCenter, dcmFile.WindowWidth)
-
-def getImageExtraInfoFromDicom(fileName):
-    dcmFile = pyd.dcmread(fileName)
-    normalKeyDict = {
+normalKeyDict = {
         "PatientName": "",
         "StudyDescription": "Study: ",
         "SeriesDescription": "Series: ",
@@ -21,6 +15,22 @@ def getImageExtraInfoFromDicom(fileName):
         "EchoTime": "TE: ",
         "SliceThickness": "Slice Thickness: "
     }
+
+def getDicomWindowCenterAndLevel(fileName):
+    dcmFile = pyd.dcmread(fileName)
+    return (dcmFile.WindowCenter, dcmFile.WindowWidth)
+
+def getImageTileInfoFromDicom(fileName):
+    dcmFile = pyd.dcmread(fileName)
+    res = ""
+    res += (normalKeyDict["PatientName"] +  str(dcmFile["PatientName"].value))
+    res += " - "
+    res += (normalKeyDict["SeriesDescription"] +  str(dcmFile["SeriesDescription"].value))
+    return res
+
+def getImageExtraInfoFromDicom(fileName):
+    dcmFile = pyd.dcmread(fileName)
+
     res = ""
     valueDict = {}
     for key,value in normalKeyDict.items():

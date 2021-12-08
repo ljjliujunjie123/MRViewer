@@ -2,14 +2,14 @@ import os
 from ui.AbstractImageShownWidget import AbstractImageShownWidget
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from utils.util import getDicomWindowCenterAndLevel
+from utils.util import getDicomWindowCenterAndLevel,getImageTileInfoFromDicom
 
 class m3DImageShownWidget(AbstractImageShownWidget):
 
     def __init__(self):
         AbstractImageShownWidget.__init__(self)
         #初始化GUI配置
-        # self.setFixedSize(500,500)
+        self.label.setText("This is a 3D image based on series.")
         #初始化数据
         self.seriesPath = ""
         #初始化逻辑
@@ -19,13 +19,15 @@ class m3DImageShownWidget(AbstractImageShownWidget):
     def dropEvent(self, event):
         super().dropEvent(event)
         self.seriesPath = event.mimeData().getImageExtraData()["seriesPath"]
+        fileNames = os.listdir(self.seriesPath)
+        if len(fileNames) > 0: self.setTileText(getImageTileInfoFromDicom(self.seriesPath + '/' + fileNames[0]))
         event.mimeData().setText("")
         self.show3DImage(self.seriesPath)
 
     def show3DImage(self, seriesPath):
         print("show 3D Dicom Window Begin")
-        if self.qvtkWidget is None: self.qvtkWidget = QVTKRenderWindowInteractor(self)
-        self.qvtkWidget.setFixedSize(self.size())
+        if self.qvtkWidget is None: self.qvtkWidget = QVTKRenderWindowInteractor(self.imageContainer)
+        self.qvtkWidget.setFixedSize(self.imageContainer.size())
 
         ren3D = vtk.vtkRenderer()
         renWin = self.qvtkWidget.GetRenderWindow()

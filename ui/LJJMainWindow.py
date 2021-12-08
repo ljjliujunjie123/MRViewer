@@ -83,6 +83,7 @@ class LJJMainWindow(QMainWindow):
         #跟踪鼠标
         self.setMouseTracking(True)
         self.centralwidget.setMouseTracking(True)
+        self.imageShownContainer.setMouseTracking(True)
         self.toolsContainer.setMouseTracking(True)
 
         #初始化controllers
@@ -96,7 +97,7 @@ class LJJMainWindow(QMainWindow):
         self.updateImageListSignal.connect(self.updateImageListArea)
         self.actionopen_study.triggered.connect(self.openFileController.openStudyDirectory)
         self.actionopen_patient.triggered.connect(self.openFileController.openPatientDirectory)
-        self.toolsContainer.showInfoSig.connect(self.showImageShownLayoutInfo)
+        # self.toolsContainer.showInfoSig.connect(self.showImageShownLayoutInfo)
         self.toolsContainer.updateImageShownLayoutSignal.connect(
             self.imageShownContainer.imageShownLayoutController.updateLayout
         )
@@ -130,35 +131,6 @@ class LJJMainWindow(QMainWindow):
 
         self.imageScrollContainer.clearImageList()
         self.imageScrollContainer.showImageList(dict, tag)
-
-    def showLevelAndWindowInfo(self):
-        levelXZ = self.imageShownContainer.imageViewerXZ.GetColorLevel()
-        windowXZ = self.imageShownContainer.imageViewerXZ.GetColorWindow()
-
-        levelYZ = self.imageShownContainer.imageViewerYZ.GetColorLevel()
-        windowYZ = self.imageShownContainer.imageViewerYZ.GetColorWindow()
-
-        info = "XZ:" + str(levelXZ) + " " + str(windowXZ) + " YZ:" + str(levelYZ) + " " + str(windowYZ)
-
-        QMessageBox.information(None,"展示信息",info, QMessageBox.Ok)
-
-    def showImageShownLayoutInfo(self):
-        # info = ""
-        # count = self.imageShownContainer.imageShownContainerLayout.count()
-        # g =  self.imageShownContainer.imageShownContainerWidget.geometry()
-        # g1 = self.imageShownContainer.imageShownContainerLayout.itemAt(0).widget().geometry()
-        # g2 = self.imageShownContainer.imageShownContainerLayout.itemAt(1).widget().geometry()
-        #
-        # g1_sub = self.imageShownContainer.imageShownContainerLayout.itemAt(0).widget().qvtkWidget.geometry()
-        # g2_sub = self.imageShownContainer.imageShownContainerLayout.itemAt(1).widget().qvtkWidget.geometry()
-        #
-        # info = str(count) + " g: " + str(g.width()) + " " + str(g.height()) \
-        #        + " g1: " + str(g1.width()) + " " + str(g1.height()) \
-        #        + " g2: " + str(g2.width()) + " " + str(g2.height()) \
-        #        + " g1: " + str(g1_sub.width()) + " " + str(g1_sub.height()) \
-        #        + " g2: " + str(g2_sub.width()) + " " + str(g2_sub.height())
-        info = str(self.imageShownContainer.imageShownLayoutController.crossXZContainer.renImage.GetActiveCamera().GetParallelScale())
-        QMessageBox.information(None,"展示信息",info, QMessageBox.Ok)
 
     def closeEvent(self,QCloseEvent):
         super().closeEvent(QCloseEvent)

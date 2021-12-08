@@ -1,7 +1,5 @@
 from PyQt5.QtWidgets import *
 
-from ui.m2DImageShownWidget import m2DImageShownWidget
-from ui.m3DImageShownWidget import m3DImageShownWidget
 from ui.config import uiConfig
 from controller.ImageShownLayoutController import ImageShownLayoutController
 

@@ -6,7 +6,7 @@ from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 import vtkmodules.all as vtk
-from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom
+from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom,getImageTileInfoFromDicom
 from utils.cycleSyncThread import CycleSyncThread
 
 class m2DImageShownWidget(AbstractImageShownWidget):
@@ -17,7 +17,7 @@ class m2DImageShownWidget(AbstractImageShownWidget):
     def __init__(self):
         AbstractImageShownWidget.__init__(self)
         #初始化GUI配置
-        # self.setFixedSize(500,500)
+        self.setTileText("This is a 2D series list.")
         #初始化数据
         self.seriesPath = ""
         self.filePaths = []
@@ -61,7 +61,7 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renImage)
 
     def showImageExtraInfoVtkView(self):
-        if self.qvtkWidget is None:self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
+        if self.qvtkWidget is None:self.qvtkWidget = CustomQVTKRenderWindowInteractor(self.imageContainer)
         if self.renText is None:self.renText = vtk.vtkRenderer()
         if self.textActor is None:self.textActor = vtk.vtkTextActor()
 
@@ -123,7 +123,7 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.renderVtkWindow()
 
     def renderVtkWindow(self):
-        self.qvtkWidget.setFixedSize(self.size())
+        self.qvtkWidget.setFixedSize(self.imageContainer.size())
         self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(2)
         self.qvtkWidget.GetRenderWindow().Render()
 
@@ -149,6 +149,7 @@ class m2DImageShownWidget(AbstractImageShownWidget):
         self.currentIndex = 0
 
         print("showXZDicom begin")
+        self.setTileText(getImageTileInfoFromDicom(self.curFilePath))
         self.showImageExtraInfoVtkView()
         self.show2DImageVtkView()
         self.update2DImageShownSignal.emit()
