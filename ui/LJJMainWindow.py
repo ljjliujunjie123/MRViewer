@@ -98,12 +98,18 @@ class LJJMainWindow(QMainWindow):
         self.actionopen_study.triggered.connect(self.openFileController.openStudyDirectory)
         self.actionopen_patient.triggered.connect(self.openFileController.openPatientDirectory)
         # self.toolsContainer.showInfoSig.connect(self.showImageShownLayoutInfo)
+        self.imageShownContainer.imageShownLayoutController.updateToolsContainerStateSignal.connect(
+            self.toolsContainer.updateToolsContainerStateHandler
+        )
         self.toolsContainer.updateImageShownLayoutSignal.connect(
             self.imageShownContainer.imageShownLayoutController.updateLayout
         )
         self.toolsContainer.enableImageSlideshowSignal.connect(
             self.imageShownContainer.imageShownLayoutController.imageSlideshowControl
         ) #evermg42
+        self.toolsContainer.imageModeSelectSignal.connect(
+            self.imageShownContainer.imageShownLayoutController.imageModeSelectHandler
+        )
         self.retranslateUi(self)
         QMetaObject.connectSlotsByName(self)
 

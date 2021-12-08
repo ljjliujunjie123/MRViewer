@@ -26,6 +26,7 @@ class SingleImageShownContainer(QFrame):
         self.mImageShownWidget = None
         self.resizeFlag = False
         self.isSelected = False
+        self.curMode = self.m2DMode
         self.imageData = BaseImageData()
         self.selectImageShownContainerSignal = selectImageShownContainerSignal
         self.selectSignal.connect(self.selectSignalHandler)
@@ -109,11 +110,13 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget = m3DImageShownWidget()
         elif mode == self.m3DFakeMode:
             print("m3DFakeMode")
-            self.mImageShownWidget = m3DFakeImageShownWidget()
+            # self.mImageShownWidget = m3DFakeImageShownWidget()
+            self.mImageShownWidget = m2DImageShownWidget()
         elif mode == self.mRTMode:
             print("mRTMode")
-            self.mImageShownWidget = mRealTimeImageShownWidget()
-
+            # self.mImageShownWidget = mRealTimeImageShownWidget()
+            self.mImageShownWidget = m2DImageShownWidget()
+        self.curMode = mode
         self.initImageShownWidget()
         self.mImageShownWidget.initBaseData(self.imageData)
         self.mImageShownWidget.showAllViews()

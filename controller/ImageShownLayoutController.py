@@ -15,7 +15,7 @@ from utils.status import Status
 class ImageShownLayoutController(QObject):
 
     selectImageShownContainerSignal = pyqtSignal(SingleImageShownContainer,bool)
-
+    updateToolsContainerStateSignal = pyqtSignal(bool)
     #此处imageShownContainerLayout类型是ui.CustomDecoratedLayout
     def __init__(
             self,
@@ -29,23 +29,24 @@ class ImageShownLayoutController(QObject):
         self.curlayout = (0, 0, 1, 1)
         self.imageShownWidgetPool = { }
         self.selectedImageShownContainer = None
+        self.imageSlideshow = None
         self.selectImageShownContainerSignal.connect(self.selectImageShownContianerHandler)
         self.imageSlideShowPlayFlag = False
 
     def selectImageShownContianerHandler(self, container, isSelected):
-        if self.selectedImageShownContainer is None:
-            print("select")
-            self.selectedImageShownContainer = container
-            return
-        if self.selectedImageShownContainer is container:
-            print("select same")
-        else:
+        if self.selectedImageShownContainer is not None:
             self.tryQuitImageSlideShow()
             self.selectedImageShownContainer.resetSelectState()
-            self.selectedImageShownContainer = container
+        if self.selectedImageShownContainer is container:
+            print("select same")
+            self.selectedImageShownContainer = None
+        else:
             print("select different")
+            self.selectedImageShownContainer = container
+        self.updateToolsContainerStateSignal.emit(isSelected)
 
     def tryQuitImageSlideShow(self):
+        # if self.imageSlideshow is not None: self.imageSlideshow.close()
         if self.imageSlideShowPlayFlag:
             self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
             self.selectedImageShownContainer.mImageShownWidget.controlSlideShow(self.imageSlideShowPlayFlag)
@@ -221,23 +222,38 @@ class ImageShownLayoutController(QObject):
             self.tryQuitImageSlideShow()
             self.imageSlideshow.close()#直觉如此
 
+    def checkSelectContainerCanSlideShow(self):
+        if self.selectedImageShownContainer is None or\
+            self.selectedImageShownContainer.curMode is not SingleImageShownContainer.m2DMode or\
+            self.selectedImageShownContainer.mImageShownWidget is None: return False
+        else: return True
+
     def imageSlideShowPlayHandler(self):
+        if not self.checkSelectContainerCanSlideShow():return
         if self.selectedImageShownContainer.mImageShownWidget.canSlideShow():
             self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
             self.selectedImageShownContainer.mImageShownWidget.controlSlideShow(self.imageSlideShowPlayFlag)
 
     def imageSlideShowSlowHandler(self):
+        if not self.checkSelectContainerCanSlideShow():return
         print("slow")
         self.selectedImageShownContainer.mImageShownWidget.controlSlideShowSpeed(0.1)
 
     def imageSlideShowFasterHandler(self):
-        print("fasr")
+        if not self.checkSelectContainerCanSlideShow():return
+        print("fast")
         self.selectedImageShownContainer.mImageShownWidget.controlSlideShowSpeed(-0.1)
+
+    #模式切换
+    def imageModeSelectHandler(self, mode):
+        if self.selectedImageShownContainer.curMode ==  mode:
+            return
+        self.selectedImageShownContainer.switchImageContainerMode(mode)
 
     def closeEvent(self, QCloseEvent):
         self.firstImageShownContainer.closeEvent(QCloseEvent)
+        self.secondImageShownContainer.closeEvent(QCloseEvent)
         self.thirdImageShownContainer.closeEvent(QCloseEvent)
         self.fourthImageShownContainer.closeEvent(QCloseEvent)
-        self.secondImageShownContainer.closeEvent(QCloseEvent)
-        if hasattr(self, 'imageSlideshow'):self.imageSlideshow.closeEvent(QCloseEvent)
+        if self.imageSlideshow is not None:self.imageSlideshow.closeEvent(QCloseEvent)
 

@@ -9,6 +9,7 @@ class ToolsContainer(QFrame):
 
     updateImageShownLayoutSignal = pyqtSignal(tuple)
     enableImageSlideshowSignal = pyqtSignal(int)
+    imageModeSelectSignal = pyqtSignal(int)
 
     def __init__(self, ParentWidget):
         QFrame.__init__(self, ParentWidget)
@@ -23,7 +24,7 @@ class ToolsContainer(QFrame):
         #每一个功能用一个Frame包裹起来，用竖向ScrollArea收敛所有功能
         self.toolsScrollArea = QScrollArea(self)
         self.toolsScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.toolsScrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.toolsScrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.toolsScrollArea.setFixedSize(self.size())
 
         self.toolsScrollContainer = QFrame(self.toolsScrollArea)
@@ -51,8 +52,14 @@ class ToolsContainer(QFrame):
             self.toolFactory.createTool(ToolFactory.imageSlideShow, signal = self.enableImageSlideshowSignal)
         self.toolsScrollLayout.addWidget(self.enableImageSlideShowWidget)
 
+        #功能3
+        #图像的模式切换
+        self.imageModeSelectWidget = \
+            self.toolFactory.createTool(ToolFactory.imageModeSelect, signal = self.imageModeSelectSignal)
+        self.toolsScrollLayout.addWidget(self.imageModeSelectWidget)
+
         #占位的功能
-        for i in range(5):
+        for i in range(4):
             self.toolsScrollLayout.addWidget(self.toolFactory.createTool())
 
         # #用来测试各个功能的button
@@ -64,6 +71,14 @@ class ToolsContainer(QFrame):
         # self.pushButton = QPushButton(self)
         # self.pushButton.setGeometry(0, self.selectImageShownRegionTableWidget.height() + self.testButton.height(), 100, 30)
         # self.pushButton.clicked.connect(self.showInfoSig)
+    def updateToolsContainerStateHandler(self, state):
+        for i in range(self.toolsScrollLayout.count()):
+            widget = self.toolsScrollLayout.itemAt(i).widget()
+            widget.setEnabled(state)
+            layout = widget.layout()
+            for i in range(layout.count()):
+                subWidget = layout.itemAt(i).widget()
+                subWidget.setEnabled(state)
 
     def retranslateUi(self):
         _translate = QCoreApplication.translate

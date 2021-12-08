@@ -14,3 +14,10 @@ class CustomDecoratedLayout():
         for i in reversed(range(self.layout.count())):
             widget = self.layout.itemAt(i).widget()
             widget.setParent(None)
+
+    def setSpacing(self, int):
+        self.layout.setSpacing(int)
+
+    def addWidgets(self, widgetList):
+        for widget in widgetList:
+            self.layout.addWidget(widget)

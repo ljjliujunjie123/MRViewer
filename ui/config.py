@@ -26,6 +26,7 @@ class UIConfig():
     toolsSelectRegionRow = 2
     toolsSelectRegionItemSize = QSize(80,80)
 
+    imageModeIconSize = QSize(80,80)
     totalColRation = scrollContinerColRatio + shownContainerColRatio + toolsContainerColRation
 
     studyTag = 1

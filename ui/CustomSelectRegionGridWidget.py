@@ -2,6 +2,7 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from ui.config import uiConfig
+from ui.CustomDecoratedLayout import CustomDecoratedLayout
 
 class CustomSelectRegionGridWidget(QFrame):
 
@@ -28,27 +29,15 @@ class CustomSelectRegionGridWidget(QFrame):
         self.hBoxLayout.addWidget(self.innerFrame)
         self.vBoxLayout.addLayout(self.hBoxLayout)
 
-        self.gridLayout = QGridLayout(self.innerFrame)
-        self.gridLayout.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout = CustomDecoratedLayout(QGridLayout(self.innerFrame))
+        self.gridLayout.initParamsForPlain()
         self.gridLayout.setSpacing(2)
-        self.widget = QWidget(self)
-        self.gridLayout.addWidget(self.widget, 0, 0, 1, 1)
-        self.widget_2 = QWidget(self)
-        self.gridLayout.addWidget(self.widget_2, 0, 1, 1, 1)
-        self.widget_3 = QWidget(self)
-        self.gridLayout.addWidget(self.widget_3, 1, 0, 1, 1)
-        self.widget_4 = QWidget(self)
-        self.gridLayout.addWidget(self.widget_4, 1, 1, 1, 1)
 
-        self.widget.setStyleSheet("background-color:black;")
-        self.widget_2.setStyleSheet("background-color:black;")
-        self.widget_3.setStyleSheet("background-color:black;")
-        self.widget_4.setStyleSheet("background-color:black;")
-
-        self.widget.setMouseTracking(True)
-        self.widget_2.setMouseTracking(True)
-        self.widget_3.setMouseTracking(True)
-        self.widget_4.setMouseTracking(True)
+        for rect in [(0,0),(0,1),(1,0),(1,1)]:
+            widget = QWidget(self)
+            widget.setStyleSheet("background-color:black;")
+            widget.setMouseTracking(True)
+            self.gridLayout.getLayout().addWidget(widget,rect[0],rect[1],1,1)
 
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)
@@ -57,11 +46,11 @@ class CustomSelectRegionGridWidget(QFrame):
         #注意：从0开始计数
         row,col = -1,-1
         for i in range(uiConfig.toolsSelectRegionCol):
-            widget = self.gridLayout.itemAt(i).widget()
+            widget = self.gridLayout.getLayout().itemAt(i).widget()
             if point.x() - self.innerFrame.pos().x() - widget.pos().x() > 0:
                 col += 1
         for i in range(0,uiConfig.toolsSelectRegionRow * uiConfig.toolsSelectRegionCol, uiConfig.toolsSelectRegionCol):
-            widget = self.gridLayout.itemAt(i).widget()
+            widget = self.gridLayout.getLayout().itemAt(i).widget()
             if point.y() - self.innerFrame.pos().y() - widget.pos().y() > 0:
                 row += 1
         self.updateImageShownLayoutSignal.emit((0,0,row,col))
@@ -72,8 +61,8 @@ class CustomSelectRegionGridWidget(QFrame):
         isInInnerFrame = self.isInInnerFrame(point)
         print("cur point ", point)
         print("innerframe ", self.innerFrame.pos())
-        for i in range(self.gridLayout.count()):
-            widget = self.gridLayout.itemAt(i).widget()
+        for i in range(self.gridLayout.getLayout().count()):
+            widget = self.gridLayout.getLayout().itemAt(i).widget()
             print(i," widget ", widget.pos())
             if isInInnerFrame and \
                 point.x() > self.innerFrame.pos().x() + widget.pos().x() and \
@@ -89,3 +78,12 @@ class CustomSelectRegionGridWidget(QFrame):
         if point.x() < limMin.x() or point.y() < limMin.y() or \
             point.x() > limMax.x() or point.y() > limMax.y(): return False
         return True
+
+    def setEnabled(self, bool):
+        for i in range(self.gridLayout.getLayout().count()):
+            widget = self.gridLayout.getLayout().itemAt(i).widget()
+            if bool:
+                widget.setStyleSheet("background-color:black;")
+            else:
+                widget.setStyleSheet("background-color:gray;")
+        super().setEnabled(bool)

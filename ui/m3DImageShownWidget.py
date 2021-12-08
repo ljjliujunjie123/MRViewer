@@ -14,7 +14,7 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         #初始化数据
         self.imageData = None
         #初始化逻辑
-        self.qvtkWidget = QVTKRenderWindowInteractor(self.imageContainer)
+        self.qvtkWidget = QVTKRenderWindowInteractor(self)
 
     def resizeEvent(self, *args, **kwargs):
         self.qvtkWidget.setFixedSize(self.size())
@@ -91,4 +91,8 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageData = imageData
 
     def clearViews(self):
+        self.qvtkWidget.Finalize()
+
+    def closeEvent(self, QCloseEvent):
+        super().closeEvent(QCloseEvent)
         self.qvtkWidget.Finalize()
