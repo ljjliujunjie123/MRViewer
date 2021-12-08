@@ -2,8 +2,7 @@ from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import vtkmodules.all as vtk
-from ui.m2DImageShownWidget import m2DImageShownWidget
-from ui.m3DImageShownWidget import m3DImageShownWidget
+from ui.SingleImageShownContainer import SingleImageShownContainer
 from ui.SlideshowContainer import SlideshowContainer
 from ui.config import uiConfig
 
@@ -13,47 +12,63 @@ import sympy as sp
 import pydicom
 from utils.status import Status
 
-class ImageShownLayoutController():
+class ImageShownLayoutController(QObject):
 
+    selectImageShownContainerSignal = pyqtSignal(SingleImageShownContainer,bool)
+
+    #此处imageShownContainerLayout类型是ui.CustomDecoratedLayout
     def __init__(
             self,
             imageShownContainerWidget,
             imageShownContainerLayout
     ):
+        QObject.__init__(self)
         self.imageShownContainerWidget = imageShownContainerWidget
         self.imageShownContainerLayout = imageShownContainerLayout
 
         self.curlayout = (0, 0, 1, 1)
         self.imageShownWidgetPool = { }
-
+        self.selectedImageShownContainer = None
+        self.selectImageShownContainerSignal.connect(self.selectImageShownContianerHandler)
         self.imageSlideShowPlayFlag = False
 
+    def selectImageShownContianerHandler(self, container, isSelected):
+        if self.selectedImageShownContainer is None:
+            print("select")
+            self.selectedImageShownContainer = container
+            return
+        if self.selectedImageShownContainer is container:
+            print("select same")
+        else:
+            self.selectedImageShownContainer.resetSelectState()
+            self.selectedImageShownContainer = container
+            print("select different")
+
     def initLayoutParams(self, uiConfig):
-        self.imageShownContainerLayout.setContentsMargins(uiConfig.shownContainerMargins)
-        self.imageShownContainerLayout.setSpacing(uiConfig.shownContainerContentSpace)
-        self.imageShownContainerLayout.setObjectName("imageGridShownContainer")
+        self.imageShownContainerLayout.getLayout().setContentsMargins(uiConfig.shownContainerMargins)
+        self.imageShownContainerLayout.getLayout().setSpacing(uiConfig.shownContainerContentSpace)
 
     def initWidget(self):
-        self.RealTimeContainer = m2DImageShownWidget()
-        self.vtk3DContainer = m3DImageShownWidget()
-        self.crossXZContainer = m2DImageShownWidget()
-        self.crossYZContainer = m2DImageShownWidget()
+        self.firstImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal)
+        self.secondImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal)
+        self.thirdImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal)
+        self.fourthImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal)
 
-        self.addWidget(self.RealTimeContainer, 0, 0)
-        self.addWidget(self.vtk3DContainer, 0, 1)
-        self.addWidget(self.crossXZContainer, 1, 0)
-        self.addWidget(self.crossYZContainer, 1, 1)
+        self.addWidget(self.firstImageShownContainer, 0, 0)
+        self.addWidget(self.secondImageShownContainer, 0, 1)
+        self.addWidget(self.thirdImageShownContainer, 1, 0)
+        self.addWidget(self.fourthImageShownContainer, 1, 1)
 
-        self.imageShownWidgetPool[(0, 0)] = self.RealTimeContainer
-        self.imageShownWidgetPool[(0, 1)] = self.vtk3DContainer
-        self.imageShownWidgetPool[(1, 0)] = self.crossXZContainer
-        self.imageShownWidgetPool[(1, 1)] = self.crossYZContainer
+        self.imageShownWidgetPool[(0, 0)] = self.firstImageShownContainer
+        self.imageShownWidgetPool[(0, 1)] = self.secondImageShownContainer
+        self.imageShownWidgetPool[(1, 0)] = self.thirdImageShownContainer
+        self.imageShownWidgetPool[(1, 1)] = self.fourthImageShownContainer
 
-        self.crossXZContainer.update2DImageShownSignal.connect(self.controlCrossView)
-        self.crossYZContainer.update2DImageShownSignal.connect(self.controlCrossView)
+        # self.crossXZContainer.update2DImageShownSignal.connect(self.controlCrossView)
+        # self.crossYZContainer.update2DImageShownSignal.connect(self.controlCrossView)
 
     def addWidget(self, childWidget, row, col, rowSpan = 1, colSpan = 1):
-        self.imageShownContainerLayout.addWidget(childWidget, row, col, rowSpan, colSpan)
+        self.imageShownContainerLayout.getLayout().addWidget(childWidget, row, col, rowSpan, colSpan)
 
     def updateLayout(self, layoutTuple):
         if layoutTuple == self.curlayout: return
@@ -62,11 +77,7 @@ class ImageShownLayoutController():
         topRow, leftCol, bottomRow, rightCol = layoutTuple
 
         #从Layout移除所有子Widget
-        for i in reversed(range(self.imageShownContainerLayout.count())):
-            widget = self.imageShownContainerLayout.itemAt(i).widget()
-            print(widget.geometry())
-            widget.setParent(None)
-        print(self.imageShownContainerLayout.count())
+        self.imageShownContainerLayout.clearLayout()
 
         #重新向Layout中添加子Widget
         rowSpan = uiConfig.toolsSelectRegionRow - bottomRow
@@ -77,17 +88,17 @@ class ImageShownLayoutController():
                 self.addWidget(childWidget, row, col, rowSpan, colSpan)
 
     def controlCrossView(self):
-        crossXZFile = self.crossXZContainer.curFilePath
-        crossYZFile = self.crossYZContainer.curFilePath
+        crossXZFile = self.thirdImageShownContainer.curFilePath
+        crossYZFile = self.fourthImageShownContainer.curFilePath
 
         if len(crossXZFile) < 1 or len(crossYZFile) < 1:return
         res = self.getCrossPos(crossXZFile, crossYZFile)
         if res == Status.bad: return
-        self.crossXZContainer.crossViewColRatio, self.crossXZContainer.crossViewRowRatio,\
-        self.crossYZContainer.crossViewColRatio, self.crossYZContainer.crossViewRowRatio = res
+        self.thirdImageShownContainer.crossViewColRatio, self.thirdImageShownContainer.crossViewRowRatio, \
+        self.fourthImageShownContainer.crossViewColRatio, self.fourthImageShownContainer.crossViewRowRatio = res
 
-        self.crossXZContainer.showCrossView()
-        self.crossYZContainer.showCrossView()
+        self.thirdImageShownContainer.showCrossView()
+        self.fourthImageShownContainer.showCrossView()
 
     def getinfo(self,img_file):
         RefDs = pydicom.read_file(img_file)
@@ -144,26 +155,26 @@ class ImageShownLayoutController():
         y2 = differ2_y/PixelSpacing2[1]
 
         #这样能拿到中心点坐标
-        imageCenterPoint1,imageBoundPoint1 = self.getImageCenterAndBoundPos(self.crossXZContainer)
+        imageCenterPoint1,imageBoundPoint1 = self.getImageCenterAndBoundPos(self.thirdImageShownContainer)
         imageWidth1 = 2 * (imageBoundPoint1[0] - imageCenterPoint1[0])
         imageHeight1 = 2 * (imageBoundPoint1[1] - imageCenterPoint1[1])
-        imageCenterPoint2,imageBoundPoint2 = self.getImageCenterAndBoundPos(self.crossYZContainer)
+        imageCenterPoint2,imageBoundPoint2 = self.getImageCenterAndBoundPos(self.fourthImageShownContainer)
         imageWidth2 = 2 * (imageBoundPoint2[0] - imageCenterPoint2[0])
         imageHeight2 = 2 * (imageBoundPoint2[1] - imageCenterPoint2[1])
 
         #计算Display坐标系的比例
         if sp.sign(x1) == 1:
-            x1 = int((x1 / Cols1)*imageWidth1 + imageCenterPoint1[0] - imageWidth1/2) / self.crossXZContainer.width()
+            x1 = int((x1 / Cols1)*imageWidth1 + imageCenterPoint1[0] - imageWidth1/2) / self.thirdImageShownContainer.width()
         else: x1 = None
         if sp.sign(y1) == 1:
-            y1 = int((y1 / Rows1)*imageHeight1 + imageCenterPoint1[1] - imageHeight1/2) / self.crossXZContainer.height()
+            y1 = int((y1 / Rows1)*imageHeight1 + imageCenterPoint1[1] - imageHeight1/2) / self.thirdImageShownContainer.height()
             y1 = 1 - y1
         else: y1 = None
         if sp.sign(x2) == 1:
-            x2 = int((x2 / Cols2)*imageWidth2 + imageCenterPoint2[0] - imageWidth2/2) / self.crossYZContainer.width()
+            x2 = int((x2 / Cols2)*imageWidth2 + imageCenterPoint2[0] - imageWidth2/2) / self.fourthImageShownContainer.width()
         else: x2 = None
         if sp.sign(y2) == 1:
-            y2 = int((y2 / Rows2)*imageHeight2 + imageCenterPoint2[1] - imageHeight2/2) / self.crossYZContainer.height()
+            y2 = int((y2 / Rows2)*imageHeight2 + imageCenterPoint2[1] - imageHeight2/2) / self.fourthImageShownContainer.height()
             y2 = 1 - y2
         else: y2 = None
 
@@ -204,22 +215,22 @@ class ImageShownLayoutController():
             self.imageSlideshow.close()#直觉如此
 
     def imageSlideShowPlayHandler(self):
-        if self.crossXZContainer.canSlideShow():
-            self.crossXZContainer.controlSlideShow(not self.imageSlideShowPlayFlag)
+        if self.thirdImageShownContainer.canSlideShow():
+            self.thirdImageShownContainer.controlSlideShow(not self.imageSlideShowPlayFlag)
             self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
 
     def imageSlideShowSlowHandler(self):
         print("slow")
-        self.crossXZContainer.controlSlideShowSpeed(0.1)
+        self.thirdImageShownContainer.controlSlideShowSpeed(0.1)
 
     def imageSlideShowFasterHandler(self):
         print("fasr")
-        self.crossXZContainer.controlSlideShowSpeed(-0.1)
+        self.thirdImageShownContainer.controlSlideShowSpeed(-0.1)
 
     def closeEvent(self, QCloseEvent):
-        self.RealTimeContainer.closeEvent(QCloseEvent)
-        self.crossXZContainer.closeEvent(QCloseEvent)
-        self.crossYZContainer.closeEvent(QCloseEvent)
-        self.vtk3DContainer.closeEvent(QCloseEvent)
+        self.firstImageShownContainer.closeEvent(QCloseEvent)
+        self.thirdImageShownContainer.closeEvent(QCloseEvent)
+        self.fourthImageShownContainer.closeEvent(QCloseEvent)
+        self.secondImageShownContainer.closeEvent(QCloseEvent)
         if hasattr(self, 'imageSlideshow'):self.imageSlideshow.closeEvent(QCloseEvent)
 

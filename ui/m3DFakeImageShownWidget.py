@@ -4,7 +4,7 @@ import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from utils.util import getDicomWindowCenterAndLevel,getImageTileInfoFromDicom
 
-class m3DImageShownWidget(QFrame):
+class m3DFakeImageShownWidget(QFrame):
 
     def __init__(self):
         QFrame.__init__(self)

@@ -1,13 +1,13 @@
-from PyQt5.QtCore import *
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QFrame
+import os
 from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
-from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 import vtkmodules.all as vtk
-from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom
+from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom,getImageTileInfoFromDicom
 from utils.cycleSyncThread import CycleSyncThread
 
-class m2DImageShownWidget(QFrame):
+class mRealTimeImageShownWidget(QFrame):
 
     sigWheelChanged = pyqtSignal(object)
     update2DImageShownSignal = pyqtSignal()
@@ -15,9 +15,12 @@ class m2DImageShownWidget(QFrame):
     def __init__(self):
         QFrame.__init__(self)
         #初始化GUI配置
-        # self.setTileText("This is a 2D series list.")
+        self.setTileText("This is a 2D series list.")
         #初始化数据
-        self.imageData = None
+        self.seriesPath = ""
+        self.filePaths = []
+        self.curFilePath = ""
+        self.currentIndex = 0
         self.crossViewColRatio = 0
         self.crossViewRowRatio = 0
         #初始化逻辑
@@ -28,33 +31,21 @@ class m2DImageShownWidget(QFrame):
         self.renText = None
         self.textActor = None
 
-        self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
-        self.reader = vtk.vtkDICOMImageReader()
-        self.imageViewer =  vtk.vtkImageViewer2()
-        self.renImage = vtk.vtkRenderer()
-        self.renText = vtk.vtkRenderer()
-        self.textActor = vtk.vtkTextActor()
-
         self.timerThread = None
 
         self.sigWheelChanged.connect(self.wheelChangeEvent)
 
-    def initBaseData(self, imageData):
-        self.imageData = imageData
-
-    def showAllView(self):
-        self.show2DImageVtkView()
-        self.showImageExtraInfoVtkView()
-        # self.showCrossView()
-        self.renderVtkWindow()
-
     def show2DImageVtkView(self):
+        if self.qvtkWidget is None:self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
+        if self.reader is None: self.reader = vtk.vtkDICOMImageReader()
+        if self.imageViewer is None:self.imageViewer =  vtk.vtkImageViewer2()
+        if self.renImage is None:self.renImage = vtk.vtkRenderer()
         self.reader.SetDataByteOrderToLittleEndian()
-        self.reader.SetFileName(self.imageData.curFilePath)
+        self.reader.SetFileName(self.curFilePath)
         self.reader.Update()
 
         self.imageViewer.SetInputConnection(self.reader.GetOutputPort())
-        level,width = getDicomWindowCenterAndLevel(self.imageData.curFilePath)
+        level,width = getDicomWindowCenterAndLevel(self.curFilePath)
         self.imageViewer.SetColorLevel(level)
         self.imageViewer.SetColorWindow(width)
         self.imageViewer.SetRenderer(self.renImage)
@@ -68,13 +59,17 @@ class m2DImageShownWidget(QFrame):
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renImage)
 
     def showImageExtraInfoVtkView(self):
+        if self.qvtkWidget is None:self.qvtkWidget = CustomQVTKRenderWindowInteractor(self.imageContainer)
+        if self.renText is None:self.renText = vtk.vtkRenderer()
+        if self.textActor is None:self.textActor = vtk.vtkTextActor()
+
         #添加文本注释
         # self.textActor.SetTextScaleModeToProp()
         self.textActor.SetDisplayPosition(
             self.calcImageExtraInfoWidthPos(),
             self.calcImageExtraInfoHeightPos()
         )
-        self.textActor.SetInput(getImageExtraInfoFromDicom(self.imageData.curFilePath))
+        self.textActor.SetInput(getImageExtraInfoFromDicom(self.curFilePath))
         # self.textActor.GetActualPosition2Coordinate().SetCoordinateSystemToNormalizedViewport()
         # self.textActor.GetPosition2Coordinate().SetValue(0.6, 0.1)
         self.textActor.GetTextProperty().SetFontSize(20)
@@ -126,6 +121,7 @@ class m2DImageShownWidget(QFrame):
         self.renderVtkWindow()
 
     def renderVtkWindow(self):
+        self.qvtkWidget.setFixedSize(self.imageContainer.size())
         self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(2)
         self.qvtkWidget.GetRenderWindow().Render()
 
@@ -141,47 +137,70 @@ class m2DImageShownWidget(QFrame):
     def calcImageExtraInfoHeightPos(self):
         return uiConfig.shownTextInfoMarginHeight
 
+    def dropEvent(self, event):
+        super().dropEvent(event)
+        self.seriesPath = event.mimeData().getImageExtraData()["seriesPath"]
+        event.mimeData().setText("")
+        fileNames = os.listdir(self.seriesPath)
+        self.filePaths = [self.seriesPath + '/' + fileName for fileName in fileNames]
+        self.curFilePath = self.filePaths[0]
+        self.currentIndex = 0
+
+        print("showXZDicom begin")
+        self.setTileText(getImageTileInfoFromDicom(self.curFilePath))
+        self.showImageExtraInfoVtkView()
+        self.show2DImageVtkView()
+        self.update2DImageShownSignal.emit()
+        self.renderVtkWindow()
+        print("showXZDicom end")
+
     def resizeEvent(self, QResizeEvent):
         super().resizeEvent(QResizeEvent)
         print("resize: ",self.geometry())
-        self.qvtkWidget.setFixedSize(self.size())
-        # if self.resizeFlag:
-        #     self.updateImageExtraInfo()
+        if self.resizeFlag:
+            self.updateImageExtraInfo()
 
     #滚轮调用sigWheelChanged
     def wheelEvent(self, ev):
-        if len(self.imageData.filePaths) <= 0:
+        if len(self.filePaths) <= 0:
             return
         print("wheelEvent")
         self.sigWheelChanged.emit(ev.angleDelta())
 
     #滚轮改变事件
     def wheelChangeEvent(self, angleDelta):
-        self.setCurrentIndex(self.imageData.currentIndex+(angleDelta.y()//120))
+        self.setCurrentIndex(self.currentIndex+(angleDelta.y()//120))
 
     #切换到第ind张图
     def setCurrentIndex(self, ind):
         """Set the currently displayed frame index."""
         #ind调节到可用范围
         print("set current index")
-        ind %= len(self.imageData.filePaths)
-        if ind < 0: 
-            ind += len(self.imageData.filePaths)
-        self.imageData.currentIndex = ind
-        self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
-        self.showAllView()
+        ind = ind % len(self.filePaths)
+        if ind < 0:
+            ind = ind + len(self.filePaths)
+        self.currentIndex = ind
+        self.curFilePath = self.filePaths[self.currentIndex]
+        self.show2DImageVtkView()
+        self.showImageExtraInfoVtkView()
         self.update2DImageShownSignal.emit()
+        self.renderVtkWindow()
+        #print("setIndex")
 
     def canSlideShow(self):
-        return len(self.imageData.filePaths) > 0
+        if self.qvtkWidget is None:
+            return False
+        if len(self.filePaths) <= 0:
+            return False
+        return True
 
     def setCurrentIndexMore(self, val):
-        self.setCurrentIndex(self.imageData.currentIndex + 1)
+        self.setCurrentIndex(self.currentIndex + 1)
 
     def controlSlideShow(self, flag):
         if flag:
             self.timerThread = CycleSyncThread(0.3)
-            self.timerThread.signal.connect(lambda x:self.setCurrentIndex(self.imageData.currentIndex + 1))
+            self.timerThread.signal.connect(lambda x:self.setCurrentIndex(self.currentIndex + 1))
             self.timerThread.start()
         else:
             self.timerThread.requestInterruption()
@@ -191,16 +210,12 @@ class m2DImageShownWidget(QFrame):
     def controlSlideShowSpeed(self, delta):
         if self.timerThread is not None:
             newSpeed = self.timerThread.interval + delta
-            newSpeed = max(min(newSpeed,uiConfig.shownSlideSpeedMin),uiConfig.shownSlideSpeedMax)
+            newSpeed = max(min(newSpeed,1),0.1)
             self.timerThread.interval = newSpeed
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
-        self.qvtkWidget.Finalize()
         if self.timerThread is not None and not self.timerThread.isFinished():
             self.timerThread.requestInterruption()
             self.timerThread.quit()
             self.timerThread.wait()
-
-    def clearViews(self):
-        self.qvtkWidget.Finalize()

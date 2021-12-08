@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 
 from ui.config import uiConfig
+from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from controller.ImageShownLayoutController import ImageShownLayoutController
 
 class ImageShownContainer(QFrame):
@@ -19,8 +20,8 @@ class ImageShownContainer(QFrame):
         self.imageShownContainerWidget.setFixedSize(self.size())
         self.imageShownContainerWidget.setObjectName("imageShownContainerWidget")
 
-        self.imageShownContainerLayout = QGridLayout(self.imageShownContainerWidget)
-        self.imageShownContainerWidget.setLayout(self.imageShownContainerLayout)
+        self.imageShownContainerLayout = CustomDecoratedLayout(QGridLayout())
+        self.imageShownContainerWidget.setLayout(self.imageShownContainerLayout.getLayout())
 
         #初始化controller
         self.imageShownLayoutController = ImageShownLayoutController(
