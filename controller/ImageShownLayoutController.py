@@ -40,9 +40,15 @@ class ImageShownLayoutController(QObject):
         if self.selectedImageShownContainer is container:
             print("select same")
         else:
+            self.tryQuitImageSlideShow()
             self.selectedImageShownContainer.resetSelectState()
             self.selectedImageShownContainer = container
             print("select different")
+
+    def tryQuitImageSlideShow(self):
+        if self.imageSlideShowPlayFlag:
+            self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
+            self.selectedImageShownContainer.mImageShownWidget.controlSlideShow(self.imageSlideShowPlayFlag)
 
     def initLayoutParams(self, uiConfig):
         self.imageShownContainerLayout.getLayout().setContentsMargins(uiConfig.shownContainerMargins)
@@ -212,20 +218,21 @@ class ImageShownLayoutController(QObject):
             self.imageSlideshow.setWindowModality(Qt.NonModal)
             self.imageSlideshow.show()
         else:
+            self.tryQuitImageSlideShow()
             self.imageSlideshow.close()#直觉如此
 
     def imageSlideShowPlayHandler(self):
-        if self.thirdImageShownContainer.canSlideShow():
-            self.thirdImageShownContainer.controlSlideShow(not self.imageSlideShowPlayFlag)
+        if self.selectedImageShownContainer.mImageShownWidget.canSlideShow():
             self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
+            self.selectedImageShownContainer.mImageShownWidget.controlSlideShow(self.imageSlideShowPlayFlag)
 
     def imageSlideShowSlowHandler(self):
         print("slow")
-        self.thirdImageShownContainer.controlSlideShowSpeed(0.1)
+        self.selectedImageShownContainer.mImageShownWidget.controlSlideShowSpeed(0.1)
 
     def imageSlideShowFasterHandler(self):
         print("fasr")
-        self.thirdImageShownContainer.controlSlideShowSpeed(-0.1)
+        self.selectedImageShownContainer.mImageShownWidget.controlSlideShowSpeed(-0.1)
 
     def closeEvent(self, QCloseEvent):
         self.firstImageShownContainer.closeEvent(QCloseEvent)

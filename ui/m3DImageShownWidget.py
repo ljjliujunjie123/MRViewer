@@ -1,34 +1,29 @@
 import os
 from PyQt5.QtWidgets import QFrame
+from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from utils.util import getDicomWindowCenterAndLevel,getImageTileInfoFromDicom
 
-class m3DImageShownWidget(QFrame):
+class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def __init__(self):
         QFrame.__init__(self)
         #初始化GUI配置
-        self.label.setText("This is a 3D image based on series.")
-        #初始化数据
-        self.seriesPath = ""
-        #初始化逻辑
-        self.update3DImageShownSignal = None
-        self.qvtkWidget = None
 
-    def dropEvent(self, event):
-        super().dropEvent(event)
-        self.seriesPath = event.mimeData().getImageExtraData()["seriesPath"]
-        fileNames = os.listdir(self.seriesPath)
-        if len(fileNames) > 0: self.setTileText(getImageTileInfoFromDicom(self.seriesPath + '/' + fileNames[0]))
-        event.mimeData().setText("")
-        self.show3DImage(self.seriesPath)
+        #初始化数据
+        self.imageData = None
+        #初始化逻辑
+        self.qvtkWidget = QVTKRenderWindowInteractor(self.imageContainer)
+
+    def resizeEvent(self, *args, **kwargs):
+        self.qvtkWidget.setFixedSize(self.size())
+
+    def showAllViews(self):
+        self.show3DImage(self.imageData.seriesPath)
 
     def show3DImage(self, seriesPath):
         print("show 3D Dicom Window Begin")
-        if self.qvtkWidget is None: self.qvtkWidget = QVTKRenderWindowInteractor(self.imageContainer)
-        self.qvtkWidget.setFixedSize(self.imageContainer.size())
-
         ren3D = vtk.vtkRenderer()
         renWin = self.qvtkWidget.GetRenderWindow()
         renWin.AddRenderer(ren3D)
@@ -91,3 +86,9 @@ class m3DImageShownWidget(QFrame):
 
         if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
         print("show 3D Dicom Window End")
+
+    def initBaseData(self, imageData):
+        self.imageData = imageData
+
+    def clearViews(self):
+        self.qvtkWidget.Finalize()

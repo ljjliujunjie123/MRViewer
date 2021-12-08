@@ -104,21 +104,19 @@ class SingleImageShownContainer(QFrame):
         if mode == self.m2DMode:
             print("m2DMode")
             self.mImageShownWidget = m2DImageShownWidget()
-            self.initImageShownWidget()
-            self.mImageShownWidget.initBaseData(self.imageData)
-            self.mImageShownWidget.showAllView()
         elif mode == self.m3DMode:
             print("m3DMode")
             self.mImageShownWidget = m3DImageShownWidget()
-            self.initImageShownWidget()
         elif mode == self.m3DFakeMode:
             print("m3DFakeMode")
             self.mImageShownWidget = m3DFakeImageShownWidget()
-            self.initImageShownWidget()
         elif mode == self.mRTMode:
             print("mRTMode")
             self.mImageShownWidget = mRealTimeImageShownWidget()
-            self.initImageShownWidget()
+
+        self.initImageShownWidget()
+        self.mImageShownWidget.initBaseData(self.imageData)
+        self.mImageShownWidget.showAllViews()
 
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)

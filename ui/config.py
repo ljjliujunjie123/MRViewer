@@ -18,7 +18,8 @@ class UIConfig():
     shownTextInfoMarginHeight = 0
 
     shownSlideShowDialogSize = QSize(300,100)
-    shownSlideSpeedMax = 0.1 #时间间隔
+    shownSlideSpeedDefault = 0.2
+    shownSlideSpeedMax = 0.05 #时间间隔
     shownSlideSpeedMin = 1
 
     toolsSelectRegionCol = 2

@@ -2,12 +2,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QFrame
 from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
+from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 import vtkmodules.all as vtk
 from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom
 from utils.cycleSyncThread import CycleSyncThread
 
-class m2DImageShownWidget(QFrame):
+class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     sigWheelChanged = pyqtSignal(object)
     update2DImageShownSignal = pyqtSignal()
@@ -15,7 +16,7 @@ class m2DImageShownWidget(QFrame):
     def __init__(self):
         QFrame.__init__(self)
         #初始化GUI配置
-        # self.setTileText("This is a 2D series list.")
+
         #初始化数据
         self.imageData = None
         self.crossViewColRatio = 0
@@ -42,7 +43,7 @@ class m2DImageShownWidget(QFrame):
     def initBaseData(self, imageData):
         self.imageData = imageData
 
-    def showAllView(self):
+    def showAllViews(self):
         self.show2DImageVtkView()
         self.showImageExtraInfoVtkView()
         # self.showCrossView()
@@ -169,7 +170,7 @@ class m2DImageShownWidget(QFrame):
             ind += len(self.imageData.filePaths)
         self.imageData.currentIndex = ind
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
-        self.showAllView()
+        self.showAllViews()
         self.update2DImageShownSignal.emit()
 
     def canSlideShow(self):
@@ -180,7 +181,7 @@ class m2DImageShownWidget(QFrame):
 
     def controlSlideShow(self, flag):
         if flag:
-            self.timerThread = CycleSyncThread(0.3)
+            self.timerThread = CycleSyncThread(uiConfig.shownSlideSpeedDefault)
             self.timerThread.signal.connect(lambda x:self.setCurrentIndex(self.imageData.currentIndex + 1))
             self.timerThread.start()
         else:
