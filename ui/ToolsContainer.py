@@ -71,6 +71,7 @@ class ToolsContainer(QFrame):
         # self.pushButton = QPushButton(self)
         # self.pushButton.setGeometry(0, self.selectImageShownRegionTableWidget.height() + self.testButton.height(), 100, 30)
         # self.pushButton.clicked.connect(self.showInfoSig)
+
     def updateToolsContainerStateHandler(self, state):
         for i in range(self.toolsScrollLayout.count()):
             widget = self.toolsScrollLayout.itemAt(i).widget()
@@ -87,3 +88,8 @@ class ToolsContainer(QFrame):
 
     def enableImageSlideshowSignalHandler(self):
         self.enableImageSlideshowSignal.emit(self.enableImageSlideShowWidget.isChecked())
+
+    def resizeEvent(self, *args, **kwargs):
+        print("cur ToolContainer Geometry ", self.geometry())
+        self.toolsScrollArea.setFixedSize(self.size())
+        self.toolsScrollContainer.setFixedSize(self.size())

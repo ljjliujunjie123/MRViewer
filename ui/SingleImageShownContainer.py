@@ -48,15 +48,15 @@ class SingleImageShownContainer(QFrame):
         self.title.setFrameShape(QFrame.StyledPanel)
         self.title.setFrameShadow(QFrame.Plain)
         self.title.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
-        self.title.setStyleSheet("background-color:rgb(100,100,100);")
+        self.title.setStyleSheet("background-color:#fce1df;")
         hBoxLayout = QHBoxLayout()
         hBoxLayout.setContentsMargins(5,5,5,5)
         hBoxLayout.setSpacing(0)
         hBoxLayout.setAlignment(Qt.AlignLeft)
         self.title.setLayout(hBoxLayout)
         self.label = QLabel()
-        self.label.setText("this is a image container")
-        self.label.setStyleSheet("color:white;")
+        self.label.setText("This is a image container")
+        self.label.setStyleSheet("color:black;")
         hBoxLayout.addWidget(self.label)
 
         #底部image
@@ -73,9 +73,9 @@ class SingleImageShownContainer(QFrame):
 
     def selectSignalHandler(self, isSelected):
         if isSelected:
-            self.title.setStyleSheet("background-color:rgb(204,102,100);")
+            self.title.setStyleSheet("background-color:#eb9076;")
         else:
-            self.title.setStyleSheet("background-color:rgb(100,100,100);")
+            self.title.setStyleSheet("background-color:#fce1df;")
 
     def resetSelectState(self):
         self.isSelected = False
@@ -125,6 +125,8 @@ class SingleImageShownContainer(QFrame):
         super().mousePressEvent(QMouseEvent)
         point = QMouseEvent.pos()
 
+        #空状态无法点击
+        if self.mImageShownWidget is None: return
         #判断点击是否在title上
         if  self.title.y() < point.y() < self.imageContainer.y():
             print("click title")

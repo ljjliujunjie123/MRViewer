@@ -23,7 +23,7 @@ class SlideshowContainer(QDialog):
         self.setObjectName("slideshowContainer")
 
         self.resize(uiConfig.shownSlideShowDialogSize)
-        self.setStyleSheet("QDialog{background-color:rgb(100,100,100);}")
+        self.setStyleSheet("QDialog{background-color:#d1d5d9;}")
 
         self.hBoxLayout = QHBoxLayout(self)
         self.setLayout(self.hBoxLayout)

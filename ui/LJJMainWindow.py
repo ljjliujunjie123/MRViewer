@@ -22,35 +22,29 @@ class LJJMainWindow(QMainWindow):
         self.resize(uiConfig.screenWidth, uiConfig.screenHeight)
         self.centralwidget = QWidget(self)
         self.centralwidget.setGeometry(uiConfig.calcCenterWidgetGeometry())
+        self.centralwidget.setStyleSheet("background-color:#edf0f0;")
         self.centralwidget.setObjectName("centralwidget")
-
-        self.mainWindowWidget = QWidget(self.centralwidget)
-        self.mainWindowWidget.setGeometry(self.centralwidget.geometry())
-        self.mainWindowWidget.setObjectName("mainWindowWidget")
-
-        self.mainWindowLayout = QHBoxLayout(self.mainWindowWidget)
-        self.mainWindowLayout.setContentsMargins(0,0,0,0)
-        self.mainWindowLayout.setSpacing(0)
-        self.mainWindowLayout.setObjectName("mainWindowLayout")
+        self.setCentralWidget(self.centralwidget)
 
         print("MainWindow CentralWidget Geometry：")
         print(self.centralwidget.geometry())
 
-        #抽象出左侧的image列表
-        self.imageScrollContainer = ImageScrollContainer(self.mainWindowWidget)
-        #抽象出中间的image展示区域
-        self.imageShownContainer = ImageShownContainer(self.mainWindowWidget)
-        #抽象出右侧的工具栏
-        self.toolsContainer = ToolsContainer(self.mainWindowWidget)
-
         #添加splitter
-        self.splitter =  QSplitter(Qt.Horizontal)
+        self.splitter =  QSplitter(self.centralwidget)
+        self.splitter.setGeometry(self.centralwidget.geometry())
+        # self.splitter.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.splitter.setOrientation(Qt.Horizontal)
+
+        #抽象出左侧的image列表
+        self.imageScrollContainer = ImageScrollContainer(self.splitter)
+        #抽象出中间的image展示区域
+        self.imageShownContainer = ImageShownContainer(self.splitter)
+        #抽象出右侧的工具栏
+        self.toolsContainer = ToolsContainer(self.splitter)
+
         self.splitter.addWidget(self.imageScrollContainer)
         self.splitter.addWidget(self.imageShownContainer)
         self.splitter.addWidget(self.toolsContainer)
-
-        #收敛子组件
-        self.mainWindowLayout.addWidget(self.splitter)
 
         # print(self.geometry())
         # print(self.mainWindowWidget.geometry())
@@ -59,7 +53,6 @@ class LJJMainWindow(QMainWindow):
         # print(self.toolsContainer.geometry())
 
         #菜单栏部分
-        self.setCentralWidget(self.centralwidget)
         self.menuBar = QMenuBar(self)
         self.menuBar.setGeometry(QRect(0, 0, uiConfig.screenWidth, uiConfig.menuHeight))
         self.menuBar.setObjectName("menubar")
