@@ -10,6 +10,7 @@ class ToolFactory():
     imageShownLayout = 0
     imageSlideShow = 1
     imageModeSelect = 2
+    imageExtraInfo = 3
     defaultTool = -1
 
     iconPaths = {
@@ -41,8 +42,9 @@ class ToolFactory():
             hBoxLayout.addWidget(selectImageShownRegionGridWidget)
         elif tag == self.imageSlideShow:
             enableImageSlideshow = QCheckBox('跑马灯效果',frame)
-            enableImageSlideshow.setEnabled(True) #设置是否启用,可自动变灰色
+            enableImageSlideshow.setEnabled(False) #设置是否启用,可自动变灰色
             enableImageSlideshow.setCheckState(False) #设置初始状态
+            enableImageSlideshow.setTristate(False)
             enableImageSlideshow.stateChanged.connect(signal) #打勾就送信
             hBoxLayout.addWidget(enableImageSlideshow)
         elif tag == self.imageModeSelect:
@@ -57,6 +59,14 @@ class ToolFactory():
             imageHBoxLayout.addWidgets([bt2D,bt3D,bt3DFake,btRT])
             imageModeContainer.setLayout(imageHBoxLayout.getLayout())
             hBoxLayout.addWidget(imageModeContainer)
+        elif tag == self.imageExtraInfo:
+            print("imageExtraInfo")
+            enableImageExtraInfo = QCheckBox('展示附加信息',frame)
+            enableImageExtraInfo.setEnabled(False) #设置是否启用,可自动变灰色
+            enableImageExtraInfo.setCheckState(True) #设置初始状态
+            enableImageExtraInfo.setTristate(False)
+            enableImageExtraInfo.stateChanged.connect(signal) #打勾就送信
+            hBoxLayout.addWidget(enableImageExtraInfo)
         else:
             pushButton = QPushButton(frame)
             hBoxLayout.addWidget(pushButton)

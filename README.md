@@ -445,3 +445,8 @@ def showCrossView(self):
   - 暂时只实现了2D和3D的切换
 
 <img src="\pictures source\星愿浏览器截图20211208235216@2x.png" style="zoom:33%;" />
+
+2021-12-9
+
+- 修复工具栏在调整窗口时的异常效果
+- 调整标题栏样式

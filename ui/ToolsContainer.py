@@ -10,6 +10,7 @@ class ToolsContainer(QFrame):
     updateImageShownLayoutSignal = pyqtSignal(tuple)
     enableImageSlideshowSignal = pyqtSignal(int)
     imageModeSelectSignal = pyqtSignal(int)
+    enableImageExtraInfoSignal = pyqtSignal(int)
 
     def __init__(self, ParentWidget):
         QFrame.__init__(self, ParentWidget)
@@ -57,6 +58,12 @@ class ToolsContainer(QFrame):
         self.imageModeSelectWidget = \
             self.toolFactory.createTool(ToolFactory.imageModeSelect, signal = self.imageModeSelectSignal)
         self.toolsScrollLayout.addWidget(self.imageModeSelectWidget)
+
+        #功能4
+        #图像的附加信息开关
+        self.enableImageExtraInfoWidget = \
+            self.toolFactory.createTool(ToolFactory.imageExtraInfo, signal = self.enableImageExtraInfoSignal)
+        self.toolsScrollLayout.addWidget(self.enableImageExtraInfoWidget)
 
         #占位的功能
         for i in range(4):

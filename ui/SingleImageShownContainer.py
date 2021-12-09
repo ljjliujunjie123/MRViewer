@@ -121,6 +121,15 @@ class SingleImageShownContainer(QFrame):
         self.mImageShownWidget.initBaseData(self.imageData)
         self.mImageShownWidget.showAllViews()
 
+    def controlImageExtraInfoState(self, isShow):
+        if isShow:
+            self.mImageShownWidget.showImageExtraInfoVtkView()
+            self.mImageShownWidget.renderVtkWindow()
+            self.mImageShownWidget.showExtraInfoFlag = True
+        else:
+            self.mImageShownWidget.hideImageExtraInfoVtkView()
+            self.mImageShownWidget.showExtraInfoFlag = False
+
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)
         point = QMouseEvent.pos()

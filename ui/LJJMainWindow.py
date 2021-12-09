@@ -104,6 +104,9 @@ class LJJMainWindow(QMainWindow):
         self.toolsContainer.imageModeSelectSignal.connect(
             self.imageShownContainer.imageShownLayoutController.imageModeSelectHandler
         )
+        self.toolsContainer.enableImageExtraInfoSignal.connect(
+            self.imageShownContainer.imageShownLayoutController.imageExtraInfoStateHandler
+        )
         self.retranslateUi(self)
         QMetaObject.connectSlotsByName(self)
 

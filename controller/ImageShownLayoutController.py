@@ -250,6 +250,10 @@ class ImageShownLayoutController(QObject):
             return
         self.selectedImageShownContainer.switchImageContainerMode(mode)
 
+    #imageExtraInfo开关
+    def imageExtraInfoStateHandler(self, isShow):
+        self.selectedImageShownContainer.controlImageExtraInfoState(isShow)
+
     def closeEvent(self, QCloseEvent):
         self.firstImageShownContainer.closeEvent(QCloseEvent)
         self.secondImageShownContainer.closeEvent(QCloseEvent)

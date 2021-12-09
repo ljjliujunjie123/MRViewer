@@ -28,6 +28,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.renImage = None
         self.renText = None
         self.textActor = None
+        self.showExtraInfoFlag = True
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
         self.reader = vtk.vtkDICOMImageReader()
@@ -45,7 +46,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def showAllViews(self):
         self.show2DImageVtkView()
-        self.showImageExtraInfoVtkView()
+        if self.showExtraInfoFlag:
+            self.showImageExtraInfoVtkView()
         # self.showCrossView()
         self.renderVtkWindow()
 
@@ -91,6 +93,11 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
 
+    def hideImageExtraInfoVtkView(self):
+        if self.renText is not None:
+            self.qvtkWidget.GetRenderWindow().RemoveRenderer(self.renText)
+            self.renderVtkWindow(layerCount=1)
+
     def showCrossView(self):
         #方法一
         # self.crossView = CustomCrossBoxWidget()
@@ -126,8 +133,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.crossView.On()
         self.renderVtkWindow()
 
-    def renderVtkWindow(self):
-        self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(2)
+    def renderVtkWindow(self, layerCount = 2):
+        self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(layerCount)
         self.qvtkWidget.GetRenderWindow().Render()
 
         if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
