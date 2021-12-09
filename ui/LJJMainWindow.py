@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import QIcon
 
 from controller.OpenFileController import OpenFileController
 from ui.config import uiConfig
@@ -61,8 +62,8 @@ class LJJMainWindow(QMainWindow):
         self.setMenuBar(self.menuBar)
 
         #标题栏部分
-        # self.titleBar = QStyleOptionTitleBar()
-        # self.titleBar.initFrom()
+        self.setWindowIcon(QIcon("ui_source/win_title_icon.png"))
+        self.setWindowTitle("LJJ-MRViewer")
 
         self.actionopen_study = QAction(self)
         self.actionopen_study.setObjectName("actionopen_study")
@@ -110,7 +111,6 @@ class LJJMainWindow(QMainWindow):
 
     def retranslateUi(self, MainWindow):
         _translate = QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.menu.setTitle(_translate("MainWindow", "文件"))
         self.actionopen_study.setText(_translate("MainWindow", "打开Study"))
         self.actionopen_patient.setText(_translate("MainWindow", "打开Patient"))
