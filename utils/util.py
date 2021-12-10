@@ -16,6 +16,15 @@ normalKeyDict = {
         "SliceThickness": "Slice Thickness: "
     }
 
+orientationDict = {
+    (1,0,0):("R","L"),
+    (0,1,0):("A","P"),
+    (0,0,1):("I","S"),
+    (-1,0,0):("L","R"),
+    (0,-1,0):("P","A"),
+    (0,0,-1):("S","I")
+}
+
 def getDicomWindowCenterAndLevel(fileName):
     dcmFile = pyd.dcmread(fileName)
     return (dcmFile.WindowCenter, dcmFile.WindowWidth)
@@ -27,6 +36,16 @@ def getImageTileInfoFromDicom(fileName):
     res += " - "
     res += (normalKeyDict["SeriesDescription"] +  str(dcmFile["SeriesDescription"].value))
     return res
+
+def getImageOrientationInfoFromDicom(fileName):
+    dcmFile = pyd.dcmread(fileName)
+    ImageOrientation=np.array(dcmFile.ImageOrientationPatient,dtype = float)
+    xVector,yVector = ImageOrientation[:3],ImageOrientation[3:]
+    func = lambda x:round(x)
+    xVector,yVector = tuple(map(func,xVector)),tuple(map(func,yVector))
+    print("orientation vector ", xVector, yVector)
+    xInfo,yInfo = orientationDict[xVector],orientationDict[yVector]
+    return xInfo + yInfo
 
 def getImageExtraInfoFromDicom(fileName):
     dcmFile = pyd.dcmread(fileName)

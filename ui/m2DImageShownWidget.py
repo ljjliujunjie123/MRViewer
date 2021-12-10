@@ -5,7 +5,7 @@ from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 import vtkmodules.all as vtk
-from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom
+from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom,getImageOrientationInfoFromDicom
 from utils.cycleSyncThread import CycleSyncThread
 
 class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
@@ -37,6 +37,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.renImage = vtk.vtkRenderer()
         self.renText = vtk.vtkRenderer()
         self.textActor = vtk.vtkTextActor()
+        #方位actor，依次是left,right,top,bottom
+        self.orientationActors = [vtk.vtkTextActor() for i in range(4)]
 
         self.timerThread = None
 
@@ -53,7 +55,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         else:
             self.show2DImageVtkView()
             self.renderVtkWindow(1)
-        # self.showCrossView()
+            # self.showCrossView()
 
     def show2DImageVtkView(self):
         self.reader.SetDataByteOrderToLittleEndian()
@@ -75,18 +77,36 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renImage)
 
     def showImageExtraInfoVtkView(self):
+        #添加orientation注释
+        orientationInfo = getImageOrientationInfoFromDicom(self.imageData.curFilePath)
+        for i in range(len(orientationInfo)):
+            self.orientationActors[i].SetInput(orientationInfo[i])
+            self.orientationActors[i].GetTextProperty().SetFontSize(20)
+            self.orientationActors[i].GetTextProperty().SetColor(1, 0, 0)
+
+        truWidth,truHeight = self.parent().width(),self.parent().height()
+        self.orientationActors[0].SetDisplayPosition(20,truHeight//2)
+        self.orientationActors[1].SetDisplayPosition(truWidth - 20,truHeight//2)
+        self.orientationActors[2].SetDisplayPosition(truWidth//2,truHeight - 40)
+        self.orientationActors[3].SetDisplayPosition(truWidth//2,20)
+
+        self.orientationActors[0].GetTextProperty().SetJustificationToLeft()
+        self.orientationActors[1].GetTextProperty().SetJustificationToRight()
+        self.orientationActors[2].GetTextProperty().SetJustificationToLeft()
+        self.orientationActors[3].GetTextProperty().SetJustificationToLeft()
+
         #添加文本注释
         # self.textActor.SetTextScaleModeToProp()
         self.textActor.SetDisplayPosition(
-            self.calcImageExtraInfoWidthPos(),
-            self.calcImageExtraInfoHeightPos()
+                self.calcImageExtraInfoWidthPos(),
+                self.calcImageExtraInfoHeightPos()
         )
         self.textActor.SetInput(getImageExtraInfoFromDicom(self.imageData.curFilePath))
         # self.textActor.GetActualPosition2Coordinate().SetCoordinateSystemToNormalizedViewport()
         # self.textActor.GetPosition2Coordinate().SetValue(0.6, 0.1)
         self.textActor.GetTextProperty().SetFontSize(20)
         # self.textActor.GetTextProperty().SetFontFamilyToArial()
-        # self.textActor.GetTextProperty().SetJustificationToCentered()
+        self.textActor.GetTextProperty().SetJustificationToLeft()
         self.textActor.GetTextProperty().BoldOn()
         # self.textActor.GetTextProperty().ItalicOn()
         self.textActor.GetTextProperty().ShadowOn()
@@ -95,8 +115,13 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.renText.SetInteractive(0)
         self.renText.SetLayer(1)
         self.renText.AddViewProp(self.textActor)
+        for actor in self.orientationActors:
+            self.renText.AddViewProp(actor)
 
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
+        size = [0.0,0.0]
+        self.textActor.GetSize(self.renText,size)
+        print("textActor size ", size)
 
     def hideImageExtraInfoVtkView(self):
         if self.renText is not None:
@@ -177,7 +202,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         #ind调节到可用范围
         print("set current index")
         ind %= len(self.imageData.filePaths)
-        if ind < 0: 
+        if ind < 0:
             ind += len(self.imageData.filePaths)
         self.imageData.currentIndex = ind
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
