@@ -64,7 +64,7 @@ class LJJMainWindow(QMainWindow):
 
         #标题栏部分
         self.setWindowIcon(QIcon("ui_source/win_title_icon.png"))
-        self.setWindowTitle("LJJ-MRViewer")
+        self.setWindowTitle("iRTMR V1")
 
         # #添加centralWidget的layout
         self.mainWinLayout = CustomDecoratedLayout(QVBoxLayout())

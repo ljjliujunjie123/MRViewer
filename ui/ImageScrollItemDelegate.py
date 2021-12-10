@@ -15,6 +15,8 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         if itemTextData is None or itemIconData is None or itemExtraData is None:
             super().paint(QPainter, QStyleOptionViewItem, QModelIndex)
             return
+
+        #绘制背景
         rect = QStyleOptionViewItem.rect
         # palette = QStyleOptionViewItem.palette
         print("rect ", rect)
@@ -22,11 +24,13 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         QPainter.setBrush(QColor(80, 80, 80))
         QPainter.drawRect(rect)
 
+        #绘制缩略图
         iconRect = self.calcIconTargetRect(rect)
         QPainter.drawPixmap(iconRect, itemIconData.pixmap(
             uiConfig.iconSize, QIcon.Normal, QIcon.On
         ))
 
+        #绘制series Name
         QPainter.setPen(QColor(230, 230, 230))
         font = QFont()
         font.setFamily("Microsoft YaHei")
@@ -34,6 +38,7 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         QPainter.setFont(font)
         QPainter.drawText(self.calcTextTargetRect(rect), Qt.AlignCenter, itemTextData)
 
+        #绘制series Count
         annoRect = self.calcAnnotationTargetRect(iconRect)
         QPainter.setBrush(QColor(0, 0, 0))
         QPainter.drawRect(annoRect)

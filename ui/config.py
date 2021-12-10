@@ -10,9 +10,10 @@ class UIConfig():
 
     menuHeight = 22
 
-    scrollContinerColRatio = 1
     shownContainerColRatio = 4
     toolsContainerColRation = 1
+
+    scrollContainerHintWidth = 400
 
     shownContainerMargins = QMargins(0,0,0,0)
     shownContainerContentSpace = 4
@@ -29,11 +30,12 @@ class UIConfig():
     toolsSelectRegionItemSize = QSize(80,80)
 
     imageModeIconSize = QSize(80,80)
-    totalColRation = scrollContinerColRatio + shownContainerColRatio + toolsContainerColRation
+    totalColRation = shownContainerColRatio + toolsContainerColRation
 
     studyTag = 1
     patientTag = 2
 
+    itemHintSize = QSize(280,300)
     itemSpace = 2
     iconSize = QSize(280,280)
     textHeight = 40
@@ -63,24 +65,24 @@ class UIConfig():
 
     def calcScrollContainerGeometry(self):
         return QRect(0, 0,
-            (self.screenWidth // self.totalColRation) * self.scrollContinerColRatio,
-            self.calcCenterWidgetHeight()
-        )
+                     self.scrollContainerHintWidth,
+                     self.calcCenterWidgetHeight()
+                     )
 
     def calcShownContainerGeometry(self):
         return QRect(
-            (self.screenWidth // self.totalColRation) * self.scrollContinerColRatio,
+            self.scrollContainerHintWidth,
             0,
-            (self.screenWidth // self.totalColRation) * self.shownContainerColRatio,
+            ((self.screenWidth - self.scrollContainerHintWidth) // self.totalColRation) * self.shownContainerColRatio,
             self.calcCenterWidgetHeight()
         )
 
     def calcToolsContainerGeometry(self):
         return QRect(
-            (self.screenWidth // self.totalColRation) * self.scrollContinerColRatio +
-            (self.screenWidth // self.totalColRation) * self.shownContainerColRatio,
+                self.scrollContainerHintWidth +
+                ((self.screenWidth - self.scrollContainerHintWidth) // self.totalColRation) * self.shownContainerColRatio,
             0,
-            (self.screenWidth // self.totalColRation) * self.toolsContainerColRation,
+                ((self.screenWidth - self.scrollContainerHintWidth) // self.totalColRation) * self.toolsContainerColRation,
             self.calcCenterWidgetHeight()
         )
 

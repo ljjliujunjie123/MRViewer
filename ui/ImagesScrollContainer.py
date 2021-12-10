@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from ui.config import uiConfig
 from ui.ImageScrollListWidget import ImageScrollListWidget
 from ui.ImageScrollTreeWidget import ImageScrollTreeWidget
+from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from utils.status import Status
 
 class ImageScrollContainer(QFrame):
@@ -17,10 +18,10 @@ class ImageScrollContainer(QFrame):
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Plain)
         self.setObjectName("imageScrollContainer")
-
-        self.imageVerticalScrollLayout = QVBoxLayout()
-        self.imageVerticalScrollLayout.setContentsMargins(0,0,0,0)
-        self.setLayout(self.imageVerticalScrollLayout)
+        self.imageVerticalScrollWidget = None
+        self.imageVerticalScrollLayout = CustomDecoratedLayout(QVBoxLayout())
+        self.imageVerticalScrollLayout.initParamsForPlain()
+        self.setLayout(self.imageVerticalScrollLayout.getLayout())
 
     def updateListHeight(self, itemCount):
         listHeight = (uiConfig.iconSize.height() + uiConfig.itemSpace * 2) * itemCount
@@ -35,12 +36,10 @@ class ImageScrollContainer(QFrame):
             self.imageVerticalScrollWidget = ImageScrollListWidget()
         if tag is uiConfig.patientTag:
             self.imageVerticalScrollWidget = ImageScrollTreeWidget()
-        for i in range(self.imageVerticalScrollLayout.count()):
-            widget = self.imageVerticalScrollLayout.itemAt(i).widget()
-            widget.setParent(None)
+        self.imageVerticalScrollLayout.clearLayout()
         self.imageVerticalScrollWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
         self.imageVerticalScrollWidget.setFixedHeight(self.height())
-        self.imageVerticalScrollLayout.addWidget(self.imageVerticalScrollWidget)
+        self.imageVerticalScrollLayout.getLayout().addWidget(self.imageVerticalScrollWidget)
         self.imageVerticalScrollWidget.show()
 
     def clearImageList(self):
@@ -49,3 +48,7 @@ class ImageScrollContainer(QFrame):
 
     def showImageList(self, dict, tag):
         self.imageVerticalScrollWidget.showImageList(dict)
+
+    def resizeEvent(self, *args, **kwargs):
+        if self.imageVerticalScrollWidget is not None:
+            self.imageVerticalScrollWidget.setFixedHeight(self.height())

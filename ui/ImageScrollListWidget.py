@@ -20,11 +20,10 @@ class ImageScrollListWidget(QListWidget):
         self.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setFixedHeight(uiConfig.listHeight)
-        self.setIconSize(uiConfig.iconSize)
         self.setDragEnabled(True)
         self.setUniformItemSizes(True)
         self.setSpacing(uiConfig.itemSpace)
-
+        self.setResizeMode(QListWidget.Adjust)
         self.setItemDelegate(ImageScrollItemDelegate(self))
 
     def showImageList(self, dict):
@@ -41,6 +40,7 @@ class ImageScrollListWidget(QListWidget):
         imageItem = QListWidgetItem()
         imageItem.setIcon(imageIcon)
         imageItem.setText(text)
+        imageItem.setSizeHint(uiConfig.itemHintSize)
         seriesPath = getSeriesPathFromFileName(fileName)
         seriesImageCount = getSeriesImageCountFromSeriesPath(seriesPath)
         itemExtraData = {
