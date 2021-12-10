@@ -6,6 +6,8 @@ class UIConfig():
     screenWidth = 1000
     screenHeight = 800
 
+    centralWidgetMinSize = QSize(800,600)
+
     menuHeight = 22
 
     scrollContinerColRatio = 1

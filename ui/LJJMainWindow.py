@@ -7,6 +7,7 @@ from ui.config import uiConfig
 from ui.ImagesScrollContainer import ImageScrollContainer
 from ui.ToolsContainer import ToolsContainer
 from ui.ImageShownContainer import ImageShownContainer
+from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from utils.status import Status
 
 class LJJMainWindow(QMainWindow):
@@ -23,6 +24,7 @@ class LJJMainWindow(QMainWindow):
         self.resize(uiConfig.screenWidth, uiConfig.screenHeight)
         self.centralwidget = QWidget(self)
         self.centralwidget.setGeometry(uiConfig.calcCenterWidgetGeometry())
+        self.centralwidget.setMinimumSize(uiConfig.centralWidgetMinSize)
         self.centralwidget.setStyleSheet("background-color:#edf0f0;")
         self.centralwidget.setObjectName("centralwidget")
         self.setCentralWidget(self.centralwidget)
@@ -33,7 +35,6 @@ class LJJMainWindow(QMainWindow):
         #添加splitter
         self.splitter =  QSplitter(self.centralwidget)
         self.splitter.setGeometry(self.centralwidget.geometry())
-        # self.splitter.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.splitter.setOrientation(Qt.Horizontal)
 
         #抽象出左侧的image列表
@@ -64,6 +65,13 @@ class LJJMainWindow(QMainWindow):
         #标题栏部分
         self.setWindowIcon(QIcon("ui_source/win_title_icon.png"))
         self.setWindowTitle("LJJ-MRViewer")
+
+        # #添加centralWidget的layout
+        self.mainWinLayout = CustomDecoratedLayout(QVBoxLayout())
+        self.mainWinLayout.initParamsForPlain()
+        self.splitter.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.mainWinLayout.getLayout().addWidget(self.splitter)
+        self.centralwidget.setLayout(self.mainWinLayout.getLayout())
 
         self.actionopen_study = QAction(self)
         self.actionopen_study.setObjectName("actionopen_study")
@@ -133,6 +141,11 @@ class LJJMainWindow(QMainWindow):
 
         self.imageScrollContainer.clearImageList()
         self.imageScrollContainer.showImageList(dict, tag)
+
+    def resizeEvent(self, *args, **kwargs):
+        print("mainWindow geometry", self.geometry())
+        print("centralWidget geometry", self.centralwidget.geometry())
+        self.centralwidget.resize(self.width(),self.height() - self.menuBar.height())
 
     def closeEvent(self,QCloseEvent):
         super().closeEvent(QCloseEvent)
