@@ -31,6 +31,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.showExtraInfoFlag = True
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
+        self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()
         self.reader = vtk.vtkDICOMImageReader()
         self.imageViewer =  vtk.vtkImageViewer2()
         self.renImage = vtk.vtkRenderer()
@@ -48,8 +49,11 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.show2DImageVtkView()
         if self.showExtraInfoFlag:
             self.showImageExtraInfoVtkView()
+            self.renderVtkWindow()
+        else:
+            self.show2DImageVtkView()
+            self.renderVtkWindow(1)
         # self.showCrossView()
-        self.renderVtkWindow()
 
     def show2DImageVtkView(self):
         self.reader.SetDataByteOrderToLittleEndian()
@@ -62,8 +66,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageViewer.SetColorWindow(width)
         self.imageViewer.SetRenderer(self.renImage)
         self.imageViewer.SetRenderWindow(self.qvtkWidget.GetRenderWindow())
+        self.imageViewer.SetupInteractor(self.iren)
         self.imageViewer.UpdateDisplayExtent()
-        self.imageViewer.SetupInteractor(self.qvtkWidget.GetRenderWindow().GetInteractor())
 
         self.renImage.SetLayer(0)
         self.renImage.ResetCamera()
@@ -88,6 +92,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.textActor.GetTextProperty().ShadowOn()
         self.textActor.GetTextProperty().SetColor(1, 1, 1)
 
+        self.renText.SetInteractive(0)
         self.renText.SetLayer(1)
         self.renText.AddViewProp(self.textActor)
 
@@ -135,8 +140,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def renderVtkWindow(self, layerCount = 2):
         self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(layerCount)
-        self.qvtkWidget.GetRenderWindow().Render()
-
+        self.iren.Initialize()
         if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
 
     def updateImageExtraInfo(self):
