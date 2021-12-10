@@ -28,7 +28,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.renImage = None
         self.renText = None
         self.textActor = None
-        self.showExtraInfoFlag = True
+        self.showExtraInfoFlag = None
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
         self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()

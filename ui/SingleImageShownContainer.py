@@ -24,6 +24,7 @@ class SingleImageShownContainer(QFrame):
     def __init__(self, selectImageShownContainerSignal):
         QFrame.__init__(self)
         self.mImageShownWidget = None
+        self.showExtraInfoFlag = True
         self.resizeFlag = False
         self.isSelected = False
         self.curMode = self.m2DMode
@@ -105,6 +106,7 @@ class SingleImageShownContainer(QFrame):
         if mode == self.m2DMode:
             print("m2DMode")
             self.mImageShownWidget = m2DImageShownWidget()
+            self.mImageShownWidget.showExtraInfoFlag = self.showExtraInfoFlag
         elif mode == self.m3DMode:
             print("m3DMode")
             self.mImageShownWidget = m3DImageShownWidget()
@@ -122,13 +124,13 @@ class SingleImageShownContainer(QFrame):
         self.mImageShownWidget.showAllViews()
 
     def controlImageExtraInfoState(self, isShow):
+        self.showExtraInfoFlag = isShow
+        if self.curMode is not self.m2DMode or self.mImageShownWidget is None: return
         if isShow:
             self.mImageShownWidget.showImageExtraInfoVtkView()
             self.mImageShownWidget.renderVtkWindow()
-            self.mImageShownWidget.showExtraInfoFlag = True
         else:
             self.mImageShownWidget.hideImageExtraInfoVtkView()
-            self.mImageShownWidget.showExtraInfoFlag = False
 
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)
