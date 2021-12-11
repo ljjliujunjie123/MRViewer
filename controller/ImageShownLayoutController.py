@@ -11,11 +11,16 @@ import numpy as np
 import sympy as sp
 import pydicom
 from utils.status import Status
+from utils.util import checkSameSeries,checkSameStudy
 
 class ImageShownLayoutController(QObject):
 
     selectImageShownContainerSignal = pyqtSignal(SingleImageShownContainer,bool)
     updateToolsContainerStateSignal = pyqtSignal(bool)
+
+    #第一个参数指示发出信号的是哪一个container，第二个参数是该container当前的image filePath
+    updateCrossViewSignal = pyqtSignal(SingleImageShownContainer)
+
     #此处imageShownContainerLayout类型是ui.CustomDecoratedLayout
     def __init__(
             self,
@@ -31,6 +36,7 @@ class ImageShownLayoutController(QObject):
         self.selectedImageShownContainer = None
         self.imageSlideshow = None
         self.selectImageShownContainerSignal.connect(self.selectImageShownContianerHandler)
+        self.updateCrossViewSignal.connect(self.updateCrossViewSignalHandler)
         self.imageSlideShowPlayFlag = False
 
     def selectImageShownContianerHandler(self, container, isSelected):
@@ -56,10 +62,10 @@ class ImageShownLayoutController(QObject):
         self.imageShownContainerLayout.getLayout().setSpacing(uiConfig.shownContainerContentSpace)
 
     def initWidget(self):
-        self.firstImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal)
-        self.secondImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal)
-        self.thirdImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal)
-        self.fourthImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal)
+        self.firstImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
+        self.secondImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
+        self.thirdImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
+        self.fourthImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
 
         self.addWidget(self.firstImageShownContainer, 0, 0)
         self.addWidget(self.secondImageShownContainer, 0, 1)
@@ -94,6 +100,23 @@ class ImageShownLayoutController(QObject):
                 childWidget = self.imageShownWidgetPool[(row, col)]
                 self.addWidget(childWidget, row, col, rowSpan, colSpan)
 
+    #crossView 逻辑控制
+    def updateCrossViewSignalHandler(self, emitContainer):
+        # self.imageShownContainerLayout.mapWidgetsFunc(lambda x:print(filePath),filePath)
+        self.imageShownContainerLayout.mapWidgetsFunc(self.updateCrossViewSignalSCHandler, emitContainer)
+
+    def updateCrossViewSignalSCHandler(self, handleContainer, emitContainerTuple):
+        emitContainer, = emitContainerTuple
+        if handleContainer is emitContainer\
+            or handleContainer.curMode != SingleImageShownContainer.m2DMode\
+            or len(handleContainer.imageData.curFilePath) < 1:return
+        # isSameStudy = checkSameStudy(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
+        # isSameSeries = checkSameSeries(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
+        # if (not isSameStudy) or isSameSeries:return
+        # posRes = self.tryGetCrossPos(handleContainer, emitContainer)
+        # if posRes == Status.bad:return
+        # print("posRes: ", posRes)
+
     def controlCrossView(self):
         crossXZFile = self.thirdImageShownContainer.curFilePath
         crossYZFile = self.fourthImageShownContainer.curFilePath
@@ -113,7 +136,7 @@ class ImageShownLayoutController(QObject):
         ImagePosition =np.array(RefDs.ImagePositionPatient)
         ImageOrientation=np.array(RefDs.ImageOrientationPatient,dtype = int)
         PixelSpacing =RefDs.PixelSpacing
-        SliceThickness=RefDs.SliceThickness
+        # SliceThickness=RefDs.SliceThickness
         ImageOrientationX=ImageOrientation[0:3]
         ImageOrientationY=ImageOrientation[3:6]
 
@@ -124,25 +147,29 @@ class ImageShownLayoutController(QObject):
         normalvector=np.cross(ImageOrientationX,ImageOrientationY)
         return img_array,normalvector,ImagePosition,PixelSpacing,ImageOrientationX,ImageOrientationY,Rows,Cols
 
-    def getCrossPos(self,f1,f2):
+    def tryGetCrossPos(self, handleContainer, emitContainer):
+        f1,f2 = handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath
         #get info
         img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
         ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= self.getinfo(f1)
         img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
         ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.getinfo(f2)
 
+        ImageOrientationX1 = np.array([0.707,0,0.707])
+        normalvector1 = np.array([-0.707,0,0.707])
+        ImageOrientationX2 = np.array([0.707,0.707,0])
+        normalvector2 = np.array([-0.707,0.707,0])
         #建立方程组
         sp.init_printing(use_unicode=True)
         x, y, z = sp.symbols('x, y, z')
         eq=[normalvector1[0] * (x - ImagePosition1[0]) + normalvector1[1] * (y - ImagePosition1[1]) + normalvector1[2] * (z - ImagePosition1[2]),\
             normalvector2[0] * (x - ImagePosition2[0]) + normalvector2[1] * (y - ImagePosition2[1]) + normalvector2[2] * (z - ImagePosition2[2])]
 
-         #解方程
+        #解方程
         s = list(sp.linsolve(eq, [x, y, z]))
         if len(s) < 1: return Status.bad
 
         #求2d交线
-        x, y, z = sp.symbols('x, y, z')
         x1_3d = s[0][0]
         y1_3d = s[0][1]
         z1_3d = s[0][2]
@@ -161,6 +188,9 @@ class ImageShownLayoutController(QObject):
         differ2_y=np.dot(differ2,ImageOrientationY2)
         y2 = differ2_y/PixelSpacing2[1]
 
+        x_tmp,y_tmp,z_tmp =0,0,0
+        print(x1.evalf(subs={x:x_tmp,y:y_tmp,z:z_tmp}))
+        return (x1,y1,x2,y2)
         #这样能拿到中心点坐标
         imageCenterPoint1,imageBoundPoint1 = self.getImageCenterAndBoundPos(self.thirdImageShownContainer)
         imageWidth1 = 2 * (imageBoundPoint1[0] - imageCenterPoint1[0])

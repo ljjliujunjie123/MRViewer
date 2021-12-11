@@ -85,3 +85,13 @@ def getSeriesPathFromFileName(fileName):
 
 def getSeriesImageCountFromSeriesPath(seriesPath):
     return len(os.listdir(seriesPath))
+
+def checkSameStudy(f1,f2):
+    df1 = pyd.dcmread(f1)
+    df2 = pyd.dcmread(f2)
+    return (df1["PatientName"] == df2["PatientName"]) and (df1["StudyDescription"] == df2["StudyDescription"])
+
+def checkSameSeries(f1,f2):
+    df1 = pyd.dcmread(f1)
+    df2 = pyd.dcmread(f2)
+    return df1["SeriesDescription"] == df2["SeriesDescription"]

@@ -21,3 +21,7 @@ class CustomDecoratedLayout():
     def addWidgets(self, widgetList):
         for widget in widgetList:
             self.layout.addWidget(widget)
+
+    def mapWidgetsFunc(self, func, *args):
+        for i in range(self.layout.count()):
+            func(self.layout.itemAt(i).widget(),args)

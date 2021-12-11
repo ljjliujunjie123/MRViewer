@@ -23,7 +23,7 @@ class SingleImageShownContainer(QFrame):
     selectImageShownContainerSignal = None
     selectSignal = pyqtSignal(bool)
 
-    def __init__(self, selectImageShownContainerSignal):
+    def __init__(self, selectImageShownContainerSignal, updateCrossViewSignal):
         QFrame.__init__(self)
         self.mImageShownWidget = None
         self.showExtraInfoFlag = True
@@ -33,6 +33,7 @@ class SingleImageShownContainer(QFrame):
         self.curMode = self.m2DMode
         self.imageData = BaseImageData()
         self.selectImageShownContainerSignal = selectImageShownContainerSignal
+        self.updateCrossViewSignal = updateCrossViewSignal
         self.selectSignal.connect(self.selectSignalHandler)
         #初始化配置
         self.setAcceptDrops(True)
@@ -156,7 +157,8 @@ class SingleImageShownContainer(QFrame):
             print("click title")
             self.isSelected = not self.isSelected
             self.selectSignal.emit(self.isSelected)
-            self.selectImageShownContainerSignal.emit(self,self.isSelected)
+            self.selectImageShownContainerSignal.emit(self, self.isSelected)
+            self.updateCrossViewSignal.emit(self)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasText():
