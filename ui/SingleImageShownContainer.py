@@ -3,7 +3,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QRegion
 
 import os
+from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
+from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 from ui.m2DImageShownWidget import m2DImageShownWidget
 from ui.m3DFakeImageShownWidget import m3DFakeImageShownWidget
 from ui.m3DImageShownWidget import m3DImageShownWidget
@@ -25,6 +27,7 @@ class SingleImageShownContainer(QFrame):
         QFrame.__init__(self)
         self.mImageShownWidget = None
         self.showExtraInfoFlag = True
+        self.showCrossFlag = False
         self.resizeFlag = False
         self.isSelected = False
         self.curMode = self.m2DMode
@@ -68,6 +71,9 @@ class SingleImageShownContainer(QFrame):
         self.vImageBoxLayout.getLayout().setAlignment(Qt.AlignHCenter)
         self.imageContainer.setLayout(self.vImageBoxLayout.getLayout())
 
+        #crossView
+        self.crossBoxWidget = CustomCrossBoxWidget(self)
+        # self.crossBoxWidget.show()
         #整体布局垂直
         vBoxLayout.addWidget(self.title)
         vBoxLayout.addWidget(self.imageContainer)
@@ -132,6 +138,13 @@ class SingleImageShownContainer(QFrame):
         else:
             self.mImageShownWidget.hideImageExtraInfoVtkView()
 
+    def updateCrossBoxWidgetGeometry(self):
+        pos = self.mapToGlobal(QPoint(0,0))
+        x,y = pos.x(),pos.y()
+        width,height = self.width(),self.height()
+        self.crossBoxWidget.setGeometry(x,y,width,height)
+        self.crossBoxWidget.show()
+
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)
         point = QMouseEvent.pos()
@@ -171,7 +184,9 @@ class SingleImageShownContainer(QFrame):
             event.ignore()
 
     def resizeEvent(self, QResizeEvent):
-        print('parentWidgetSize:', self.width(), self.height())
+        print('singleImageShownContainer:', self.geometry())
+        if self.showCrossFlag:
+            self.updateCrossBoxWidgetGeometry()
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)

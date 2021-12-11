@@ -201,6 +201,11 @@ class ImageShownLayoutController(QObject):
 
         return (imageCenterPoint,imageBoundPoint)
 
+    def controlMoveEvent(self):
+        if self.selectedImageShownContainer is not None:
+            self.selectedImageShownContainer.showCrossFlag = True
+            self.selectedImageShownContainer.updateCrossBoxWidgetGeometry()
+
     #走马灯播放控制器(得搬到container里)evermg42
     def imageSlideshowControl(self,isShown):
         if(isShown):

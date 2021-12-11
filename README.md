@@ -450,3 +450,38 @@ def showCrossView(self):
 
 - 修复工具栏在调整窗口时的异常效果
 - 调整标题栏样式
+
+2021-12-11
+
+- 重新实现了基本的crossView叠层效果
+
+  - 难点在于如何让上层的crossView背景透明，但绘制的内容不透明
+  - 实现方案：放弃了2021-11-30号的vtkBorderWidget方案，因为border不支持旋转，可调节性太差
+
+  ```python
+  from PyQt5.QtWidgets import *
+  from PyQt5.QtGui import *
+  from PyQt5.QtCore import Qt
+  
+  class CustomCrossBoxWidget(QWidget):
+  
+      def __init__(self,parent=None):
+          QWidget.__init__(self,parent)
+          #设置窗体无边框、模式为Tool模式（这种模式的窗口是独立窗口，不依赖主窗口）、显示层级始终在最高
+          self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool |Qt.WindowStaysOnTopHint)
+          #设置窗体背景全透明
+          self.setAttribute(Qt.WA_TranslucentBackground,True)
+          self.qp = QPainter()
+  
+      def paintEvent(self, ev):
+          #自定义绘制内容
+          self.qp.begin(self)
+          self.qp.setPen(QPen(Qt.red,10,Qt.SolidLine))
+          self.qp.drawRect(0,0,self.width(),self.height())
+          self.qp.end()
+  ```
+
+- 效果：图中红色矩形框即为叠层view
+
+<video src="D:\school_files\vedio\录制_2021_12_11_16_02_54_386.mp4" width="800px" height="600px" controls="controls"></video>
+

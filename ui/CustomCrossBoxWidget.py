@@ -4,9 +4,10 @@ from PyQt5.QtCore import Qt
 
 class CustomCrossBoxWidget(QWidget):
 
-    def __init__(self):
-        QWidget.__init__(self)
-        self.setWindowOpacity(0.2)
+    def __init__(self,parent=None):
+        QWidget.__init__(self,parent)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool |Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_TranslucentBackground,True)
         self.qp = QPainter()
 
     def paintEvent(self, ev):

@@ -147,6 +147,10 @@ class LJJMainWindow(QMainWindow):
         print("centralWidget geometry", self.centralwidget.geometry())
         self.centralwidget.resize(self.width(),self.height() - self.menuBar.height())
 
+    def moveEvent(self, *args, **kwargs):
+        print("moving MainWindow")
+        self.imageShownContainer.imageShownLayoutController.controlMoveEvent()
+
     def closeEvent(self,QCloseEvent):
         super().closeEvent(QCloseEvent)
         self.imageScrollContainer.closeEvent(QCloseEvent)
