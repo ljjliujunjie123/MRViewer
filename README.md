@@ -49,7 +49,7 @@ Open your Pycharm or other IDE
 - open this project
 - change the python interpreter. You should replace the path in picture with your own env python path. You can find it by serach in your file explorer. 
 
-![](\pictures source\星愿浏览器截图20211124093000@2x.png)
+![](.\pictures source\星愿浏览器截图20211124093000@2x.png)
 
 - run this project
 
@@ -65,7 +65,7 @@ to do
 - pyqt5提供GUI逻辑层，pyqt5-tools自带designer工具，提供UI层，vtk基于C++核心库，提供3D渲染效果
 - 复现教程demo https://blog.csdn.net/weixin_34471817/article/details/89714949
 
-<img src="\pictures source\星愿浏览器截图20211101183136@2x.png" style="zoom:33%;" />
+<img src=".\pictures source\星愿浏览器截图20211101183136@2x.png" style="zoom:33%;" />
 
 2021-11-3
 
@@ -73,7 +73,7 @@ to do
 
 - 在该分支上使用pyinstaller将程序打包成exe免安装程序
 
-  <img src="\pictures source\星愿浏览器截图20211105174842@2x.png" style="zoom: 50%;" />
+  <img src=".\pictures source\星愿浏览器截图20211105174842@2x.png" style="zoom: 50%;" />
 
 2021-11-4
 
@@ -81,7 +81,7 @@ to do
 
 - 如何实现平面把一个3D物体切开，呈现断面的效果，比较难做
 
-  <img src="\pictures source\星愿浏览器截图20211105175723@2x.png" style="zoom:33%;" />
+  <img src=".\pictures source\星愿浏览器截图20211105175723@2x.png" style="zoom:33%;" />
 
 2021-11-5
 
@@ -89,7 +89,7 @@ to do
 
 - 这个功能较为简单，可以抽象成一个独立的widget
 
-  <img src="D:\respository\MRViewer\pictures source\星愿浏览器截图20211105175927@2x.png" style="zoom:33%;" />
+  <img src=".\pictures source\星愿浏览器截图20211105175927@2x.png" style="zoom:33%;" />
 
 2021-11-13
 
@@ -188,13 +188,13 @@ to do
 
 加载一个Study
 
-<img src="\pictures source\星愿浏览器截图20211121202247@2x.png" style="zoom:33%;" />
+<img src=".\pictures source\星愿浏览器截图20211121202247@2x.png" style="zoom:33%;" />
 
 加载一个Patient
 
-<img src="\pictures source\星愿浏览器截图20211121202319@2x.png" style="zoom:33%;" />
+<img src=".\pictures source\星愿浏览器截图20211121202319@2x.png" style="zoom:33%;" />
 
-<img src="\pictures source\星愿浏览器截图20211121202337@2x.png" style="zoom:33%;" />
+<img src=".\pictures source\星愿浏览器截图20211121202337@2x.png" style="zoom:33%;" />
 
 2021-11-22
 
@@ -234,13 +234,13 @@ to do
 
       - **cv2只用到了一个resize功能，且大小高达100M，必须砍掉**
 
-        <img src="\pictures source\星愿浏览器截图20211123160231@2x.png" style="zoom:33%;" />
+        <img src=".\pictures source\星愿浏览器截图20211123160231@2x.png" style="zoom:33%;" />
 
     - pyinstaller提供了两种打包模式，一是开箱即用，即产物只有一个exe，所有内容全部封装进去，二是提供一个文件夹，里面包含一个exe文件和一堆依赖文件。两种对比
 
       |          | 开箱即用                                                     | 文件夹封装                                                   |
       | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-      | 样式     | <img src="\pictures source\星愿浏览器截图20211123155535@2x.png" style="zoom:33%;" /> | <img src="\pictures source\星愿浏览器截图20211123155621@2x.png" style="zoom:33%;" /> |
+      | 样式     | <img src=".\pictures source\星愿浏览器截图20211123155535@2x.png" style="zoom:33%;" /> | <img src=".\pictures source\星愿浏览器截图20211123155621@2x.png" style="zoom:33%;" /> |
       | 大小     | 116M                                                         | 331M                                                         |
       | 启动速度 | 30s-60s之间                                                  | 10s以内                                                      |
       | 便携程度 | 非常好                                                       | 较差                                                         |
@@ -257,7 +257,7 @@ to do
   - 暂时的实现：手动加一个小量 10 pix作为补充
   - 未来的可能实现：在第一次渲染窗口后，重绘一次
 
-<img src="\pictures source\星愿浏览器截图20211125212723@2x.png" style="zoom:33%;" />
+<img src=".\pictures source\星愿浏览器截图20211125212723@2x.png" style="zoom:33%;" />
 
 2021-11-26
 
@@ -288,7 +288,7 @@ to do
   - 封装更完善更易用的附加信息类
   - 优化文本的Position控制
 
-<img src="\pictures source\星愿浏览器截图20211127204902@2x.png" style="zoom:33%;" />
+<img src=".\pictures source\星愿浏览器截图20211127204902@2x.png" style="zoom:33%;" />
 
 2021-11-29
 
@@ -296,7 +296,7 @@ to do
 - 遇到的问题：
   - 原计划重构文件渲染区中的m2DImageShownWidget结构，反复调试后始终被一个Bug卡住。即当QVTKRenderWindowInteractor被m2DImageShownWidget固定持有时，会发现在调整渲染区布局时，一个widget的内容会被渲染到其余的widget中，猜测是vtk进行渲染时做了什么优化引起的。暂无修复思路
 
-<img src="\pictures source\星愿浏览器截图20211129151353@2x.png" style="zoom:33%;" />
+<img src=".\pictures source\星愿浏览器截图20211129151353@2x.png" style="zoom:33%;" />
 
 - **[陶然]** 实现了文件渲染区的滚动切换slice功能
   - 基本思路是重写相关widget的wheelEvent方法
@@ -414,7 +414,7 @@ def showCrossView(self):
 - 实现了横纵两个方向的CrossView
   - 交线求取的代码搞懂了原理，并重新实现了一遍
 
-<img src="\pictures source\星愿浏览器截图20211201093205@2x.png" style="zoom:33%;" />
+<img src=".\pictures source\星愿浏览器截图20211201093205@2x.png" style="zoom:33%;" />
 
 2021-12-7
 
@@ -444,7 +444,7 @@ def showCrossView(self):
 - 实现了模式切换
   - 暂时只实现了2D和3D的切换
 
-<img src="\pictures source\星愿浏览器截图20211208235216@2x.png" style="zoom:33%;" />
+<img src=".\pictures source\星愿浏览器截图20211208235216@2x.png" style="zoom:33%;" />
 
 2021-12-9
 
@@ -529,3 +529,20 @@ $$
 
 > 注意：这里需要对vtkImageViewer的位置进行二次映射
 
+2021-12-12
+
+- 基本实现了静态CrossView算法
+  - 实现过程基本和预期一样，算法本身没有问题
+  - 目前的算法可以支持任意角度的交线
+- 遗留问题：
+  - 问题一：CrossView本身是顶级窗口，所以在应用窗口切换时，需要手动管理其出现和消失
+  - 问题二：CrossView的渲染和控制涉及四个类，按照层级从高向低依次是
+    - ImageShownLayoutController
+    - SingleImageShownContainer
+    - m2DImageShownWidget
+    - CustomCrossBoxWidget
+    - 目前主要的计算都在ImageShownLayoutController里，SingleImageShownContainer只有逻辑控制，m2D只有少量计算，CustomCrossBoxWidget只负责绘制。所有可能的触发信号，最后都走到最高层，然后触发整个渲染流程，耗时非常严重（**当开启跑马灯效果，调到最高速后，程序因渲染卡顿崩溃**）
+    - 预计的优化策略是将计算过程均摊到四个层次中，如resize、move事件不再触发全部渲染流程
+  - 问题三：CrossView的美化问题。包括颜色、矩形样式
+
+![](D:\respository\MRViewer\pictures source\星愿浏览器截图20211212205916@2x.png)

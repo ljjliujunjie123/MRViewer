@@ -18,7 +18,7 @@ class ImageShownLayoutController(QObject):
     selectImageShownContainerSignal = pyqtSignal(SingleImageShownContainer,bool)
     updateToolsContainerStateSignal = pyqtSignal(bool)
 
-    #第一个参数指示发出信号的是哪一个container，第二个参数是该container当前的image filePath
+    #第一个参数指示发出信号的是哪一个container
     updateCrossViewSignal = pyqtSignal(SingleImageShownContainer)
 
     #此处imageShownContainerLayout类型是ui.CustomDecoratedLayout
@@ -42,12 +42,10 @@ class ImageShownLayoutController(QObject):
     def selectImageShownContianerHandler(self, container, isSelected):
         if self.selectedImageShownContainer is not None:
             self.tryQuitImageSlideShow()
-            self.selectedImageShownContainer.resetSelectState()
-        if self.selectedImageShownContainer is container:
-            print("select same")
-            self.selectedImageShownContainer = None
+            if self.selectedImageShownContainer is not container:
+                self.selectedImageShownContainer.resetSelectState()
+                self.selectedImageShownContainer = container
         else:
-            print("select different")
             self.selectedImageShownContainer = container
         self.updateToolsContainerStateSignal.emit(isSelected)
 
@@ -109,15 +107,25 @@ class ImageShownLayoutController(QObject):
         if handleContainer is emitContainer\
             or handleContainer.curMode != SingleImageShownContainer.m2DMode\
             or len(handleContainer.imageData.curFilePath) < 1:return
+        if emitContainer.curMode != SingleImageShownContainer.m2DMode:
+            handleContainer.mImageShownWidget.tryHideCrossBoxWidget()
+            return
         isSameStudy = checkSameStudy(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
         isSameSeries = checkSameSeries(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
-        if (not isSameStudy) or isSameSeries:return
+        if (not isSameStudy) or isSameSeries:
+            handleContainer.mImageShownWidget.tryHideCrossBoxWidget()
+            return
 
         crossViewPointRatios = self.calcCrossViewDisPos(handleContainer,emitContainer)
 
+        if crossViewPointRatios == Status.bad:
+            #交线为空
+            handleContainer.mImageShownWidget.tryHideCrossBoxWidget()
+            return
         #由自定义CrossView绘制交点之间的连线
         #这里的point是比例值
-        handleContainer.updateCrossBoxWidgetContent(crossViewPointRatios[0],crossViewPointRatios[1])
+        handleContainer.mImageShownWidget.updateCrossBoxWidgetGeometry()
+        handleContainer.mImageShownWidget.updateCrossBoxWidgetContent(crossViewPointRatios[0],crossViewPointRatios[1])
 
     def calcCrossViewDisPos(self,handleContainer,emitContainer):
         #建立世界坐标系
@@ -126,6 +134,10 @@ class ImageShownLayoutController(QObject):
         ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= self.getBasePosInfoFromDcm(f1)
         img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
         ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.getBasePosInfoFromDcm(f2)
+
+        if (normalvector1 == normalvector2).all():
+            #平面平行
+            return Status.bad
 
         # ImageOrientationX1 = np.array([0.707,0,0.707])
         # normalvector1 = np.array([-0.707,0,0.707])
@@ -140,7 +152,6 @@ class ImageShownLayoutController(QObject):
 
         #求世界坐标系下的交线方程
         lineExpr = list(sp.linsolve(eq, [x, y, z]))
-        if len(lineExpr) < 1: return
 
         #获得交线上两个定点
         fixPoint1,fixPoint2 = self.getWorldPointOnCrossLine(lineExpr,0,0,0),self.getWorldPointOnCrossLine(lineExpr,1,1,1)
@@ -165,11 +176,12 @@ class ImageShownLayoutController(QObject):
             pointx,pointy = int(point[0]),int(point[1])
             if pointx < 0 or pointx > Rows1 or pointy < 0 or pointy > Cols1:continue
             res.append(QPoint(pointx,pointy))
-
+        if len(res) < 2:return  Status.bad
         #计算交点的屏幕坐标
-        imageDisPos,imageDisRows,imageDisCols = self.getImageDisplayInfo(handleContainer.mImageShownWidget)
-        kImgToDisX,kImgToDisY = imageDisRows/Rows1,imageDisCols/Cols1
-        resDis = [QPoint(int(point.x() * kImgToDisX),int(point.y()*kImgToDisY)) + imageDisPos for point in res]
+        imageDisPos,imageDisWidth,imageDisHeight = self.getImageDisplayInfo(handleContainer.mImageShownWidget)
+        kImgToDisW,kImgToDisH = imageDisHeight/Rows1,imageDisWidth/Cols1
+        print("Rows1,Cols1 ",Rows1,Cols1)
+        resDis = [QPoint(int(point.x() * kImgToDisW),int(point.y()*kImgToDisH)) + imageDisPos for point in res]
 
         #将绝对坐标转为相对ImageContainer的比例值
         size = handleContainer.mImageShownWidget.size()
@@ -210,27 +222,37 @@ class ImageShownLayoutController(QObject):
         return (x,y)
 
     def getImageDisplayInfo(self, m2DWidget):
-        focal = m2DWidget.renImage.GetActiveCamera().GetFocalPoint()
-        m2DWidget.renImage.SetWorldPoint(focal[0],focal[1],focal[2],0)
-        m2DWidget.renImage.WorldToDisplay()
-        imageCenterPoint = m2DWidget.renImage.GetDisplayPoint()
+        """ 目前该函数只支持缩放中心点在视图正中央的情况，如果image被拖动到其他位置，计算错误"""
+        # focal = m2DWidget.renImage.GetActiveCamera().GetFocalPoint()
+        # m2DWidget.renImage.SetWorldPoint(focal[0],focal[1],focal[2],0)
+        # m2DWidget.renImage.WorldToDisplay()
+        # imageCenterPoint = m2DWidget.renImage.GetDisplayPoint()
 
         bounds = m2DWidget.imageViewer.GetImageActor().GetBounds()
+        #图像右下角
         colBound,rowBound = bounds[1],bounds[3]
-        m2DWidget.renImage.SetWorldPoint(colBound,rowBound,focal[2],0)
+        z = m2DWidget.renImage.GetZ(int(colBound),int(rowBound))
+        m2DWidget.renImage.SetWorldPoint(colBound,rowBound,z,0)
         m2DWidget.renImage.WorldToDisplay()
         imageBoundPoint = m2DWidget.renImage.GetDisplayPoint()
+        #图像左上角
+        colBound2,rowBound2 = bounds[0],bounds[2]
+        z = m2DWidget.renImage.GetZ(int(colBound2),int(rowBound2))
+        m2DWidget.renImage.SetWorldPoint(colBound2,rowBound2,z,0)
+        m2DWidget.renImage.WorldToDisplay()
+        imageBoundPoint2 = m2DWidget.renImage.GetDisplayPoint()
 
-        imageCenterPoint = np.array(imageCenterPoint[:2])
+        print("bounds: ",imageBoundPoint,imageBoundPoint2)
         imageBoundPoint = np.array(imageBoundPoint[:2])
-        rows,cols = tuple((imageBoundPoint - imageCenterPoint)*2)
-        pos = QPoint(imageBoundPoint[0] - rows,imageBoundPoint[1] - cols)
-        return pos,rows,cols
+        imageBoundPoint2 = np.array(imageBoundPoint2[:2])
+        width,height = tuple(imageBoundPoint - imageBoundPoint2)
+        pos = QPoint(imageBoundPoint2[0],imageBoundPoint2[1])
+        print("左上角坐标：", pos,width,height)
+        return pos,width,height
 
     def controlMoveEvent(self):
         if self.selectedImageShownContainer is not None:
-            self.selectedImageShownContainer.showCrossFlag = True
-            self.selectedImageShownContainer.updateCrossBoxWidgetGeometry()
+            self.selectedImageShownContainer.tryUpdateCrossBoxWidgetGeometry()
 
     #走马灯播放控制器(得搬到container里)evermg42
     def imageSlideshowControl(self,isShown):

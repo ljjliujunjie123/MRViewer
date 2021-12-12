@@ -12,6 +12,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     sigWheelChanged = pyqtSignal(object)
     update2DImageShownSignal = pyqtSignal()
+    updateCrossViewSubSignal = pyqtSignal()
 
     def __init__(self):
         QFrame.__init__(self)
@@ -19,8 +20,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         #初始化数据
         self.imageData = None
-        self.crossViewColRatio = 0
-        self.crossViewRowRatio = 0
         #初始化逻辑
         self.reader = None
         self.imageViewer = None
@@ -29,6 +28,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.renText = None
         self.textActor = None
         self.showExtraInfoFlag = None
+        self.showCrossFlag = None
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
         self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()
@@ -39,6 +39,11 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.textActor = vtk.vtkTextActor()
         #方位actor，依次是left,right,top,bottom
         self.orientationActors = [vtk.vtkTextActor() for i in range(4)]
+
+        #crossView
+        self.crossBoxWidget = CustomCrossBoxWidget(self)
+
+        # self.crossBoxWidget.show()
 
         self.timerThread = None
 
@@ -56,6 +61,9 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             self.show2DImageVtkView()
             self.renderVtkWindow(1)
             # self.showCrossView()
+
+    def getSingleContainerParent(self):
+        return self.parent().parent().parent()
 
     def show2DImageVtkView(self):
         self.reader.SetDataByteOrderToLittleEndian()
@@ -128,40 +136,25 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             self.qvtkWidget.GetRenderWindow().RemoveRenderer(self.renText)
             self.renderVtkWindow(layerCount=1)
 
-    def showCrossView(self):
-        #方法一
-        # self.crossView = CustomCrossBoxWidget()
-        # self.crossView.setParent(self)
-        # self.crossView.raise_()
-        # self.crossView.show()
-        #方法二
-        # if self.crossView is None: self.crossView = vtk.vtkBoxWidget()
-        # self.crossView.SetInteractor(self.qvtkWidget.GetRenderWindow().GetInteractor())
-        # # self.crossView.CreateDefaultRepresentation()
-        # self.renCrossView = vtk.vtkRenderer()
-        # self.renCrossView.SetLayer(1)
-        # self.crossView.SetCurrentRenderer(self.renCrossView)
-        # self.qvtkWidget.GetRenderWindow().AddRenderer(self.renCrossView)
-        # self.crossView.On()
-        # self.renderVtkWindow()
-        #方法三
-        self.crossView = vtk.vtkBorderWidget()
-        self.crossView.SetInteractor(self.qvtkWidget.GetRenderWindow().GetInteractor())
-        self.crossView.CreateDefaultRepresentation()
-        if self.crossViewColRatio is not None:
-            self.crossView.GetRepresentation().SetPosition(self.crossViewColRatio,0.05)
-            self.crossView.GetRepresentation().SetPosition2(0.01,0.9)
-        elif self.crossViewRowRatio is not None:
-            self.crossView.GetRepresentation().SetPosition(0.05,self.crossViewRowRatio)
-            self.crossView.GetRepresentation().SetPosition2(0.9,0.01)
-        self.crossView.GetRepresentation().GetBorderProperty().SetColor(1,0,0)
-        self.crossView.GetRepresentation().GetBorderProperty().SetLineWidth(3)
-        self.crossView.GetRepresentation().SetMinimumSize(100, 100)
-        self.crossView.GetRepresentation().SetMaximumSize(200, 200)
-        self.crossView.ResizableOn()
-        self.crossView.SelectableOff()
-        self.crossView.On()
-        self.renderVtkWindow()
+    def tryHideCrossBoxWidget(self):
+        if self.showCrossFlag:
+            self.crossBoxWidget.hide()
+
+    def updateCrossBoxWidgetGeometry(self):
+        pos = self.mapToGlobal(QPoint(0,0))
+        x,y = pos.x(),pos.y()
+        width,height = self.width(),self.height()
+        self.crossBoxWidget.setGeometry(x,y,width,height)
+        self.crossBoxWidget.update()
+
+    def updateCrossBoxWidgetContent(self, pos1, pos2):
+        _pos1 = QPoint(pos1[0]*self.width(),pos1[1]*self.height())
+        _pos2 = QPoint(pos2[0]*self.width(),pos2[1]*self.height())
+        self.crossBoxWidget.setPos(_pos1,_pos2)
+        self.crossBoxWidget.isShowContent = True
+        self.showCrossFlag = True
+        self.crossBoxWidget.update()
+        self.crossBoxWidget.show()
 
     def renderVtkWindow(self, layerCount = 2):
         self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(layerCount)
@@ -208,6 +201,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
         self.showAllViews()
         self.update2DImageShownSignal.emit()
+        self.updateCrossViewSubSignal.emit()
 
     def canSlideShow(self):
         return len(self.imageData.filePaths) > 0

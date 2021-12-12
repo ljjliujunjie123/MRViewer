@@ -19,7 +19,7 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         #绘制背景
         rect = QStyleOptionViewItem.rect
         # palette = QStyleOptionViewItem.palette
-        print("rect ", rect)
+        # print("rect ", rect)
         QPainter.setRenderHint(QPainter.Antialiasing, True)
         QPainter.setBrush(QColor(80, 80, 80))
         QPainter.drawRect(rect)
@@ -50,7 +50,7 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         textRect = QRect(
             itemRect.x(), itemRect.y(), itemRect.width(), uiConfig.textHeight
         )
-        print("textRect ", textRect)
+        # print("textRect ", textRect)
         return textRect
 
     def calcIconTargetRect(self, itemRect):
@@ -63,7 +63,7 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         iconRect = QRect(
             iconLeftX, iconLeftY, clipIconSize.width(), clipIconSize.height()
         )
-        print("IconRect ", iconRect)
+        # print("IconRect ", iconRect)
         return iconRect
 
     def calcAnnotationTargetRect(self, iconRect):
@@ -72,5 +72,5 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         annoRect = QRect(
             annoLeftX, annoLeftY, uiConfig.annotationSize.width(), uiConfig.annotationSize.height()
         )
-        print("annoRect ", annoRect)
+        # print("annoRect ", annoRect)
         return annoRect

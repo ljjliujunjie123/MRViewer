@@ -21,6 +21,7 @@ class SingleImageShownContainer(QFrame):
     mRTMode = 3
 
     selectImageShownContainerSignal = None
+    updateCrossViewSignal = None
     selectSignal = pyqtSignal(bool)
 
     def __init__(self, selectImageShownContainerSignal, updateCrossViewSignal):
@@ -72,9 +73,6 @@ class SingleImageShownContainer(QFrame):
         self.vImageBoxLayout.getLayout().setAlignment(Qt.AlignHCenter)
         self.imageContainer.setLayout(self.vImageBoxLayout.getLayout())
 
-        #crossView
-        self.crossBoxWidget = CustomCrossBoxWidget(self.imageContainer)
-        # self.crossBoxWidget.show()
         #整体布局垂直
         vBoxLayout.addWidget(self.title)
         vBoxLayout.addWidget(self.imageContainer)
@@ -114,6 +112,8 @@ class SingleImageShownContainer(QFrame):
             print("m2DMode")
             self.mImageShownWidget = m2DImageShownWidget()
             self.mImageShownWidget.showExtraInfoFlag = self.showExtraInfoFlag
+            self.mImageShownWidget.showCrossFlag = self.showCrossFlag
+            self.mImageShownWidget.updateCrossViewSubSignal.connect(self.tryUpdateCrossViewSignalEmit)
         elif mode == self.m3DMode:
             print("m3DMode")
             self.mImageShownWidget = m3DImageShownWidget()
@@ -129,6 +129,7 @@ class SingleImageShownContainer(QFrame):
         self.initImageShownWidget()
         self.mImageShownWidget.initBaseData(self.imageData)
         self.mImageShownWidget.showAllViews()
+        self.tryUpdateCrossViewSignalEmit()
 
     def controlImageExtraInfoState(self, isShow):
         self.showExtraInfoFlag = isShow
@@ -139,34 +140,29 @@ class SingleImageShownContainer(QFrame):
         else:
             self.mImageShownWidget.hideImageExtraInfoVtkView()
 
-    def updateCrossBoxWidgetGeometry(self):
-        pos = self.mapToGlobal(QPoint(0,0))
-        x,y = pos.x(),pos.y()
-        width,height = self.width(),self.height()
-        self.crossBoxWidget.setGeometry(x,y,width,height)
-        self.crossBoxWidget.show()
+    def tryUpdateCrossBoxWidgetGeometry(self):
+        if self.showCrossFlag:
+            self.mImageShownWidget.updateCrossBoxWidgetGeometry()
+            self.mImageShownWidget.updateCrossBoxWidgetContent()
 
-    def updateCrossBoxWidgetContent(self, pos1, pos2):
-        _pos1 = QPoint(pos1[0]*self.width(),pos1[1]*self.height())
-        _pos2 = QPoint(pos2[0]*self.width(),pos2[1]*self.height())
-        self.crossBoxWidget.setPos(_pos1,_pos2)
-        self.crossBoxWidget.isShowContent = True
-        self.showCrossFlag = True
-        self.updateCrossBoxWidgetGeometry()
+    def tryUpdateCrossViewSignalEmit(self):
+        if self.isSelected:
+            self.updateCrossViewSignal.emit(self)
+            self.mImageShownWidget.tryHideCrossBoxWidget()
 
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)
         point = QMouseEvent.pos()
 
-        #空状态无法点击
-        if self.mImageShownWidget is None: return
+        #空状态无法点击 or 已经被选中则无法点击
+        if self.mImageShownWidget is None or self.isSelected: return
         #判断点击是否在title上
         if  self.title.y() < point.y() < self.imageContainer.y():
             print("click title")
             self.isSelected = not self.isSelected
             self.selectSignal.emit(self.isSelected)
             self.selectImageShownContainerSignal.emit(self, self.isSelected)
-            self.updateCrossViewSignal.emit(self)
+            self.tryUpdateCrossViewSignalEmit()
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasText():
@@ -189,14 +185,19 @@ class SingleImageShownContainer(QFrame):
             event.setDropAction(Qt.CopyAction)
             event.accept()
             self.getDataFromDropEvent(event.mimeData().getImageExtraData())
+            self.isSelected = True
+            self.selectSignal.emit(self.isSelected)
+            self.selectImageShownContainerSignal.emit(self, self.isSelected)
             self.switchImageContainerMode(self.m2DMode)
+            self.tryUpdateCrossViewSignalEmit()
         else:
             event.ignore()
 
     def resizeEvent(self, QResizeEvent):
         print('singleImageShownContainer:', self.geometry())
-        if self.showCrossFlag:
-            self.updateCrossBoxWidgetGeometry()
+        if self.showCrossFlag and (self.mImageShownWidget is not None):
+            #这里暂时有问题
+            self.tryUpdateCrossViewSignalEmit()
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
