@@ -9,9 +9,17 @@ class CustomCrossBoxWidget(QWidget):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool |Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground,True)
         self.qp = QPainter()
+        self.isShowContent = False
+        self.pos1 = None
+        self.pos2 = None
+
+    def setPos(self,pos1,pos2):
+        self.pos1,self.pos2=pos1,pos2
 
     def paintEvent(self, ev):
         self.qp.begin(self)
         self.qp.setPen(QPen(Qt.red,10,Qt.SolidLine))
         self.qp.drawRect(0,0,self.width(),self.height())
+        if self.isShowContent:
+            self.qp.drawLine(self.pos1,self.pos2)
         self.qp.end()

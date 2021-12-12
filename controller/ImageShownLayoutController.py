@@ -102,7 +102,6 @@ class ImageShownLayoutController(QObject):
 
     #crossView 逻辑控制
     def updateCrossViewSignalHandler(self, emitContainer):
-        # self.imageShownContainerLayout.mapWidgetsFunc(lambda x:print(filePath),filePath)
         self.imageShownContainerLayout.mapWidgetsFunc(self.updateCrossViewSignalSCHandler, emitContainer)
 
     def updateCrossViewSignalSCHandler(self, handleContainer, emitContainerTuple):
@@ -110,28 +109,76 @@ class ImageShownLayoutController(QObject):
         if handleContainer is emitContainer\
             or handleContainer.curMode != SingleImageShownContainer.m2DMode\
             or len(handleContainer.imageData.curFilePath) < 1:return
-        # isSameStudy = checkSameStudy(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
-        # isSameSeries = checkSameSeries(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
-        # if (not isSameStudy) or isSameSeries:return
-        # posRes = self.tryGetCrossPos(handleContainer, emitContainer)
-        # if posRes == Status.bad:return
-        # print("posRes: ", posRes)
+        isSameStudy = checkSameStudy(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
+        isSameSeries = checkSameSeries(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
+        if (not isSameStudy) or isSameSeries:return
 
-    def controlCrossView(self):
-        crossXZFile = self.thirdImageShownContainer.curFilePath
-        crossYZFile = self.fourthImageShownContainer.curFilePath
+        crossViewPointRatios = self.calcCrossViewDisPos(handleContainer,emitContainer)
 
-        if len(crossXZFile) < 1 or len(crossYZFile) < 1:return
-        res = self.getCrossPos(crossXZFile, crossYZFile)
-        if res == Status.bad: return
-        self.thirdImageShownContainer.crossViewColRatio, self.thirdImageShownContainer.crossViewRowRatio, \
-        self.fourthImageShownContainer.crossViewColRatio, self.fourthImageShownContainer.crossViewRowRatio = res
+        #由自定义CrossView绘制交点之间的连线
+        #这里的point是比例值
+        handleContainer.updateCrossBoxWidgetContent(crossViewPointRatios[0],crossViewPointRatios[1])
 
-        self.thirdImageShownContainer.showCrossView()
-        self.fourthImageShownContainer.showCrossView()
+    def calcCrossViewDisPos(self,handleContainer,emitContainer):
+        #建立世界坐标系
+        f1,f2 = handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath
+        img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
+        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= self.getBasePosInfoFromDcm(f1)
+        img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
+        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.getBasePosInfoFromDcm(f2)
 
-    def getinfo(self,img_file):
-        RefDs = pydicom.read_file(img_file)
+        # ImageOrientationX1 = np.array([0.707,0,0.707])
+        # normalvector1 = np.array([-0.707,0,0.707])
+        # ImageOrientationX2 = np.array([0.707,0.707,0])
+        # normalvector2 = np.array([-0.707,0.707,0])
+
+        #建立交线方程组
+        sp.init_printing(use_unicode=True)
+        x, y, z = sp.symbols('x, y, z')
+        eq=[normalvector1[0] * (x - ImagePosition1[0]) + normalvector1[1] * (y - ImagePosition1[1]) + normalvector1[2] * (z - ImagePosition1[2]),\
+            normalvector2[0] * (x - ImagePosition2[0]) + normalvector2[1] * (y - ImagePosition2[1]) + normalvector2[2] * (z - ImagePosition2[2])]
+
+        #求世界坐标系下的交线方程
+        lineExpr = list(sp.linsolve(eq, [x, y, z]))
+        if len(lineExpr) < 1: return
+
+        #获得交线上两个定点
+        fixPoint1,fixPoint2 = self.getWorldPointOnCrossLine(lineExpr,0,0,0),self.getWorldPointOnCrossLine(lineExpr,1,1,1)
+
+        #获得两个定点在handleContainer图像坐标系下的坐标
+        fixPoint1_x,fixPoint1_y = self.getCrossPointOnImagePlane(
+            fixPoint1, ImagePosition1, ImageOrientationX1, ImageOrientationY1, PixelSpacing1[0], PixelSpacing1[1]
+        )
+        fixPoint2_x,fixPoint2_y = self.getCrossPointOnImagePlane(
+            fixPoint2, ImagePosition1, ImageOrientationX1, ImageOrientationY1, PixelSpacing1[0], PixelSpacing1[1]
+        )
+
+        #在图像坐标系下建立交线方程，并求其与图像边界的交点
+        x, y = sp.symbols('x, y')
+        crossLine = (y - fixPoint1_y) * (fixPoint2_x - fixPoint1_x) - (x - fixPoint1_x) * (fixPoint2_y - fixPoint1_y)
+        res = []
+        for line in [x-Rows1,y-Cols1,x,y]:
+            eq = [crossLine, line]
+            point = list(sp.linsolve(eq, [x,y]))
+            if len(point) < 1:continue
+            point = point[0]
+            pointx,pointy = int(point[0]),int(point[1])
+            if pointx < 0 or pointx > Rows1 or pointy < 0 or pointy > Cols1:continue
+            res.append(QPoint(pointx,pointy))
+
+        #计算交点的屏幕坐标
+        imageDisPos,imageDisRows,imageDisCols = self.getImageDisplayInfo(handleContainer.mImageShownWidget)
+        kImgToDisX,kImgToDisY = imageDisRows/Rows1,imageDisCols/Cols1
+        resDis = [QPoint(int(point.x() * kImgToDisX),int(point.y()*kImgToDisY)) + imageDisPos for point in res]
+
+        #将绝对坐标转为相对ImageContainer的比例值
+        size = handleContainer.mImageShownWidget.size()
+        resDis = [(point.x() / size.width(),point.y() / size.height()) for point in resDis]
+
+        return resDis
+
+    def getBasePosInfoFromDcm(self, filePath):
+        RefDs = pydicom.read_file(filePath)
         img_array = RefDs.pixel_array# indexes are z,y,x
         ImagePosition =np.array(RefDs.ImagePositionPatient)
         ImageOrientation=np.array(RefDs.ImageOrientationPatient,dtype = int)
@@ -139,85 +186,30 @@ class ImageShownLayoutController(QObject):
         # SliceThickness=RefDs.SliceThickness
         ImageOrientationX=ImageOrientation[0:3]
         ImageOrientationY=ImageOrientation[3:6]
-
         Rows = RefDs.Rows
         Cols = RefDs.Columns
-
-        #z轴(X与Y的叉积)
+        #图像平面法向量(X与Y的叉积)
         normalvector=np.cross(ImageOrientationX,ImageOrientationY)
         return img_array,normalvector,ImagePosition,PixelSpacing,ImageOrientationX,ImageOrientationY,Rows,Cols
 
-    def tryGetCrossPos(self, handleContainer, emitContainer):
-        f1,f2 = handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath
-        #get info
-        img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
-        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= self.getinfo(f1)
-        img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
-        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.getinfo(f2)
-
-        ImageOrientationX1 = np.array([0.707,0,0.707])
-        normalvector1 = np.array([-0.707,0,0.707])
-        ImageOrientationX2 = np.array([0.707,0.707,0])
-        normalvector2 = np.array([-0.707,0.707,0])
-        #建立方程组
-        sp.init_printing(use_unicode=True)
+    def getWorldPointOnCrossLine(self,lineExpr,*args):
+        x_tmp,y_tmp,z_tmp, = args
         x, y, z = sp.symbols('x, y, z')
-        eq=[normalvector1[0] * (x - ImagePosition1[0]) + normalvector1[1] * (y - ImagePosition1[1]) + normalvector1[2] * (z - ImagePosition1[2]),\
-            normalvector2[0] * (x - ImagePosition2[0]) + normalvector2[1] * (y - ImagePosition2[1]) + normalvector2[2] * (z - ImagePosition2[2])]
+        x_expr,y_expr,z_expr = lineExpr[0][0],lineExpr[0][1],lineExpr[0][2]
+        point = (
+            x_expr.evalf(subs={x:x_tmp,y:y_tmp,z:z_tmp}),
+            y_expr.evalf(subs={x:x_tmp,y:y_tmp,z:z_tmp}),
+            z_expr.evalf(subs={x:x_tmp,y:y_tmp,z:z_tmp})
+        )
+        return point
 
-        #解方程
-        s = list(sp.linsolve(eq, [x, y, z]))
-        if len(s) < 1: return Status.bad
+    def getCrossPointOnImagePlane(self, fixPoint, originPos, axisX, axisY, pixelSpaceX, pixelSpaceY):
+        vectorOtoP = np.array(fixPoint) - originPos
+        x = np.dot(vectorOtoP,axisX) / pixelSpaceX
+        y = np.dot(vectorOtoP,axisY) / pixelSpaceY
+        return (x,y)
 
-        #求2d交线
-        x1_3d = s[0][0]
-        y1_3d = s[0][1]
-        z1_3d = s[0][2]
-
-        pos=[x1_3d,y1_3d,z1_3d]
-
-        differ1=pos-ImagePosition1
-        differ1_x=np.dot(differ1,ImageOrientationX1)
-        x1 = differ1_x/PixelSpacing1[0]
-        differ1_y=np.dot(differ1,ImageOrientationY1)
-        y1 = differ1_y/PixelSpacing1[1]
-
-        differ2=pos-ImagePosition2
-        differ2_x=np.dot(differ2,ImageOrientationX2)
-        x2 = differ2_x/PixelSpacing2[0]
-        differ2_y=np.dot(differ2,ImageOrientationY2)
-        y2 = differ2_y/PixelSpacing2[1]
-
-        x_tmp,y_tmp,z_tmp =0,0,0
-        print(x1.evalf(subs={x:x_tmp,y:y_tmp,z:z_tmp}))
-        return (x1,y1,x2,y2)
-        #这样能拿到中心点坐标
-        imageCenterPoint1,imageBoundPoint1 = self.getImageCenterAndBoundPos(self.thirdImageShownContainer)
-        imageWidth1 = 2 * (imageBoundPoint1[0] - imageCenterPoint1[0])
-        imageHeight1 = 2 * (imageBoundPoint1[1] - imageCenterPoint1[1])
-        imageCenterPoint2,imageBoundPoint2 = self.getImageCenterAndBoundPos(self.fourthImageShownContainer)
-        imageWidth2 = 2 * (imageBoundPoint2[0] - imageCenterPoint2[0])
-        imageHeight2 = 2 * (imageBoundPoint2[1] - imageCenterPoint2[1])
-
-        #计算Display坐标系的比例
-        if sp.sign(x1) == 1:
-            x1 = int((x1 / Cols1)*imageWidth1 + imageCenterPoint1[0] - imageWidth1/2) / self.thirdImageShownContainer.width()
-        else: x1 = None
-        if sp.sign(y1) == 1:
-            y1 = int((y1 / Rows1)*imageHeight1 + imageCenterPoint1[1] - imageHeight1/2) / self.thirdImageShownContainer.height()
-            y1 = 1 - y1
-        else: y1 = None
-        if sp.sign(x2) == 1:
-            x2 = int((x2 / Cols2)*imageWidth2 + imageCenterPoint2[0] - imageWidth2/2) / self.fourthImageShownContainer.width()
-        else: x2 = None
-        if sp.sign(y2) == 1:
-            y2 = int((y2 / Rows2)*imageHeight2 + imageCenterPoint2[1] - imageHeight2/2) / self.fourthImageShownContainer.height()
-            y2 = 1 - y2
-        else: y2 = None
-
-        return (x1,y1,x2,y2)
-
-    def getImageCenterAndBoundPos(self, m2DWidget):
+    def getImageDisplayInfo(self, m2DWidget):
         focal = m2DWidget.renImage.GetActiveCamera().GetFocalPoint()
         m2DWidget.renImage.SetWorldPoint(focal[0],focal[1],focal[2],0)
         m2DWidget.renImage.WorldToDisplay()
@@ -229,7 +221,11 @@ class ImageShownLayoutController(QObject):
         m2DWidget.renImage.WorldToDisplay()
         imageBoundPoint = m2DWidget.renImage.GetDisplayPoint()
 
-        return (imageCenterPoint,imageBoundPoint)
+        imageCenterPoint = np.array(imageCenterPoint[:2])
+        imageBoundPoint = np.array(imageBoundPoint[:2])
+        rows,cols = tuple((imageBoundPoint - imageCenterPoint)*2)
+        pos = QPoint(imageBoundPoint[0] - rows,imageBoundPoint[1] - cols)
+        return pos,rows,cols
 
     def controlMoveEvent(self):
         if self.selectedImageShownContainer is not None:

@@ -73,7 +73,7 @@ class SingleImageShownContainer(QFrame):
         self.imageContainer.setLayout(self.vImageBoxLayout.getLayout())
 
         #crossView
-        self.crossBoxWidget = CustomCrossBoxWidget(self)
+        self.crossBoxWidget = CustomCrossBoxWidget(self.imageContainer)
         # self.crossBoxWidget.show()
         #整体布局垂直
         vBoxLayout.addWidget(self.title)
@@ -145,6 +145,14 @@ class SingleImageShownContainer(QFrame):
         width,height = self.width(),self.height()
         self.crossBoxWidget.setGeometry(x,y,width,height)
         self.crossBoxWidget.show()
+
+    def updateCrossBoxWidgetContent(self, pos1, pos2):
+        _pos1 = QPoint(pos1[0]*self.width(),pos1[1]*self.height())
+        _pos2 = QPoint(pos2[0]*self.width(),pos2[1]*self.height())
+        self.crossBoxWidget.setPos(_pos1,_pos2)
+        self.crossBoxWidget.isShowContent = True
+        self.showCrossFlag = True
+        self.updateCrossBoxWidgetGeometry()
 
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)
