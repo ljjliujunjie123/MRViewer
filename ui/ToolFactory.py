@@ -63,7 +63,7 @@ class ToolFactory():
             print("imageExtraInfo")
             enableImageExtraInfo = QCheckBox('展示附加信息',frame)
             enableImageExtraInfo.setEnabled(False) #设置是否启用,可自动变灰色
-            enableImageExtraInfo.setCheckState(True) #设置初始状态
+            enableImageExtraInfo.setCheckState(Qt.Unchecked) #设置初始状态
             enableImageExtraInfo.setTristate(False)
             enableImageExtraInfo.stateChanged.connect(signal) #打勾就送信
             hBoxLayout.addWidget(enableImageExtraInfo)

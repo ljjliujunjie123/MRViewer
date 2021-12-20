@@ -63,7 +63,7 @@ class LJJMainWindow(QMainWindow):
         self.setMenuBar(self.menuBar)
 
         #标题栏部分
-        self.setWindowIcon(QIcon("ui_source/win_title_icon.png"))
+        self.setWindowIcon(QIcon("ui_source/win_title_icon_color.png"))
         self.setWindowTitle("iRTMR V1")
 
         # #添加centralWidget的layout
