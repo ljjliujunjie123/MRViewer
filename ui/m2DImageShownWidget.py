@@ -161,10 +161,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.iren.Initialize()
         if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
 
-    def updateImageExtraInfo(self):
-        self.showImageExtraInfoVtkView()
-        self.renText.Render()
-
     def calcImageExtraInfoWidthPos(self):
         return uiConfig.shownTextInfoMarginWidth
 
@@ -175,8 +171,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         super().resizeEvent(QResizeEvent)
         print("resize: ",self.geometry())
         self.qvtkWidget.setFixedSize(self.size())
-        # if self.resizeFlag:
-        #     self.updateImageExtraInfo()
 
     #滚轮调用sigWheelChanged
     def wheelEvent(self, ev):

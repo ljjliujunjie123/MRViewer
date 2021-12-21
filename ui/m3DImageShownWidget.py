@@ -28,17 +28,18 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         renWin = self.qvtkWidget.GetRenderWindow()
         renWin.AddRenderer(ren3D)
 
-        # v16 = vtk.vtkVolume16Reader()
-        # v16.SetDataDimensions(64, 64)
-        # v16.SetImageRange(1, 93)
-        # v16.SetDataByteOrderToLittleEndian()
-        # v16.SetFilePrefix("D:/dicom_image/headsq/quarter")
-        # v16.SetDataSpacing(3.2, 3.2, 1.5)
         v16 = vtk.vtkDICOMImageReader()
         v16.SetDirectoryName(seriesPath)
+        v16.Update()
+
+        shrink = vtk.vtkImageShrink3D()
+        shrink.SetShrinkFactors(1,1,4)
+        shrink.AveragingOn()
+        shrink.SetInputConnection(v16.GetOutputPort())
+        shrink.Update()
 
         volumeMapper = vtk.vtkGPUVolumeRayCastMapper()
-        volumeMapper.SetInputConnection(v16.GetOutputPort())
+        volumeMapper.SetInputConnection(shrink.GetOutputPort())
         volumeMapper.SetBlendModeToComposite()
 
         volumeColor = vtk.vtkColorTransferFunction()

@@ -152,7 +152,9 @@ class ImageShownLayoutController(QObject):
 
         #求世界坐标系下的交线方程
         lineExpr = list(sp.linsolve(eq, [x, y, z]))
-
+        if len(lineExpr) < 1:
+            #平面虽然不平行，但非常接近平行，单精度浮点下无法建立交线方程
+            return Status.bad
         #获得交线上两个定点
         fixPoint1,fixPoint2 = self.getWorldPointOnCrossLine(lineExpr,0,0,0),self.getWorldPointOnCrossLine(lineExpr,1,1,1)
 
@@ -192,8 +194,8 @@ class ImageShownLayoutController(QObject):
     def getBasePosInfoFromDcm(self, filePath):
         RefDs = pydicom.read_file(filePath)
         img_array = RefDs.pixel_array# indexes are z,y,x
-        ImagePosition =np.array(RefDs.ImagePositionPatient)
-        ImageOrientation=np.array(RefDs.ImageOrientationPatient,dtype = int)
+        ImagePosition =np.array(RefDs.ImagePositionPatient,dtype=float)
+        ImageOrientation=np.array(RefDs.ImageOrientationPatient,dtype = float)
         PixelSpacing =RefDs.PixelSpacing
         # SliceThickness=RefDs.SliceThickness
         ImageOrientationX=ImageOrientation[0:3]
