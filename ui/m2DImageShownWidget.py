@@ -42,12 +42,14 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         #crossView
         self.crossBoxWidget = CustomCrossBoxWidget(self)
-
+        self.installEventFilter(self.crossBoxWidget)#防止CrossBox遮挡其他应用窗口
         # self.crossBoxWidget.show()
 
         self.timerThread = None
 
         self.sigWheelChanged.connect(self.wheelChangeEvent)
+
+
 
     def initBaseData(self, imageData):
         self.imageData = imageData
@@ -139,6 +141,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def tryHideCrossBoxWidget(self):
         if self.showCrossFlag:
             self.crossBoxWidget.hide()
+            self.crossBoxWidget.isShowContent = False
 
     def updateCrossBoxWidgetGeometry(self):
         pos = self.mapToGlobal(QPoint(0,0))

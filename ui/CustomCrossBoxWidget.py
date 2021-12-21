@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt,QEvent
 
 class CustomCrossBoxWidget(QWidget):
 
@@ -24,3 +24,14 @@ class CustomCrossBoxWidget(QWidget):
         if self.isShowContent:
             self.qp.drawLine(self.pos1,self.pos2)
         self.qp.end()
+
+    #防止CrossBox遮挡其他应用窗口
+    def eventFilter(self, a0: 'QObject', a1: 'QEvent') -> bool:
+        if a1.type() == QEvent.Type.WindowDeactivate and self.isShowContent:
+            self.hide()
+            #print("hide the red line")
+        elif a1.type() == QEvent.Type.WindowActivate and self.isShowContent:
+            self.show()
+        #print("eventFilter ")
+        #print(a1.type())
+        return super().eventFilter(a0, a1)
