@@ -27,8 +27,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.renImage = None
         self.renText = None
         self.textActor = None
-        self.showExtraInfoFlag = None
-        self.showCrossFlag = None
+        self.imageShownData = None
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
         self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()
@@ -49,14 +48,12 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         self.sigWheelChanged.connect(self.wheelChangeEvent)
 
-
-
     def initBaseData(self, imageData):
         self.imageData = imageData
 
     def showAllViews(self):
         self.show2DImageVtkView()
-        if self.showExtraInfoFlag:
+        if self.imageShownData.showExtraInfoFlag:
             self.showImageExtraInfoVtkView()
             self.renderVtkWindow()
         else:
@@ -139,9 +136,14 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             self.renderVtkWindow(layerCount=1)
 
     def tryHideCrossBoxWidget(self):
-        if self.showCrossFlag:
+        if self.imageShownData.showCrossFlag:
             self.crossBoxWidget.hide()
+            self.imageShownData.showCrossFlag = False
             self.crossBoxWidget.isShowContent = False
+
+    def updateCrossBoxWidget(self):
+        self.updateCrossBoxWidgetGeometry()
+        self.updateCrossBoxWidgetContent()
 
     def updateCrossBoxWidgetGeometry(self):
         pos = self.mapToGlobal(QPoint(0,0))
@@ -150,12 +152,13 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.crossBoxWidget.setGeometry(x,y,width,height)
         self.crossBoxWidget.update()
 
-    def updateCrossBoxWidgetContent(self, pos1, pos2):
-        _pos1 = QPoint(pos1[0]*self.width(),pos1[1]*self.height())
-        _pos2 = QPoint(pos2[0]*self.width(),pos2[1]*self.height())
+    def updateCrossBoxWidgetContent(self):
+        x1,y1 = self.imageShownData.crossViewRatios[0]
+        x2,y2 = self.imageShownData.crossViewRatios[1]
+        _pos1 = QPoint(x1*self.width(),y1*self.height())
+        _pos2 = QPoint(x2*self.width(),y2*self.height())
         self.crossBoxWidget.setPos(_pos1,_pos2)
         self.crossBoxWidget.isShowContent = True
-        self.showCrossFlag = True
         self.crossBoxWidget.update()
         self.crossBoxWidget.show()
 
@@ -232,3 +235,12 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def clearViews(self):
         self.qvtkWidget.Finalize()
+
+    def showEvent(self, *args, **kwargs):
+        if self.imageShownData.showCrossFlag:
+            self.updateCrossBoxWidget()
+
+    def hideEvent(self, *args, **kwargs):
+        if self.imageShownData.showCrossFlag:
+            self.crossBoxWidget.hide()
+            self.crossBoxWidget.isShowContent = True

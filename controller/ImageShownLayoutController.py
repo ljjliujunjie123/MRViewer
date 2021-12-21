@@ -124,8 +124,9 @@ class ImageShownLayoutController(QObject):
             return
         #由自定义CrossView绘制交点之间的连线
         #这里的point是比例值
-        handleContainer.mImageShownWidget.updateCrossBoxWidgetGeometry()
-        handleContainer.mImageShownWidget.updateCrossBoxWidgetContent(crossViewPointRatios[0],crossViewPointRatios[1])
+        handleContainer.m2DImageShownData.showCrossFlag = True
+        handleContainer.m2DImageShownData.crossViewRatios = crossViewPointRatios
+        handleContainer.tryUpdateCrossBoxWidget()
 
     def calcCrossViewDisPos(self,handleContainer,emitContainer):
         #建立世界坐标系
@@ -253,8 +254,10 @@ class ImageShownLayoutController(QObject):
         return pos,width,height
 
     def controlMoveEvent(self):
-        if self.selectedImageShownContainer is not None:
-            self.selectedImageShownContainer.tryUpdateCrossBoxWidgetGeometry()
+        self.imageShownContainerLayout.mapWidgetsFunc(
+                lambda handleContainer,*args:handleContainer.tryUpdateCrossBoxWidget(),
+                None
+        )
 
     #走马灯播放控制器(得搬到container里)evermg42
     def imageSlideshowControl(self,isShown):

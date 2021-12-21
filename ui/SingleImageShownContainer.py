@@ -12,6 +12,7 @@ from ui.m3DImageShownWidget import m3DImageShownWidget
 from ui.mRealTimeImageShownWidget import mRealTimeImageShownWidget
 from utils.BaseImageData import BaseImageData
 from utils.util import getImageTileInfoFromDicom
+from utils.m2DImageShownData import m2DImageShownData
 
 class SingleImageShownContainer(QFrame):
 
@@ -19,16 +20,16 @@ class SingleImageShownContainer(QFrame):
     m3DMode = 1
     m3DFakeMode = 2
     mRTMode = 3
-
+    #这个signal负责SC之外的处理
     selectImageShownContainerSignal = None
     updateCrossViewSignal = None
+    #这个signal负责SC本身的处理
     selectSignal = pyqtSignal(bool)
 
     def __init__(self, selectImageShownContainerSignal, updateCrossViewSignal):
         QFrame.__init__(self)
         self.mImageShownWidget = None
-        self.showExtraInfoFlag = True
-        self.showCrossFlag = False
+        self.m2DImageShownData = m2DImageShownData()
         self.resizeFlag = False
         self.isSelected = False
         self.curMode = self.m2DMode
@@ -111,8 +112,7 @@ class SingleImageShownContainer(QFrame):
         if mode == self.m2DMode:
             print("m2DMode")
             self.mImageShownWidget = m2DImageShownWidget()
-            self.mImageShownWidget.showExtraInfoFlag = self.showExtraInfoFlag
-            self.mImageShownWidget.showCrossFlag = self.showCrossFlag
+            self.mImageShownWidget.imageShownData = self.m2DImageShownData
             self.mImageShownWidget.updateCrossViewSubSignal.connect(self.tryUpdateCrossViewSignalEmit)
         elif mode == self.m3DMode:
             print("m3DMode")
@@ -132,7 +132,7 @@ class SingleImageShownContainer(QFrame):
         self.tryUpdateCrossViewSignalEmit()
 
     def controlImageExtraInfoState(self, isShow):
-        self.showExtraInfoFlag = isShow
+        self.m2DImageShownData.showExtraInfoFlag = isShow
         if self.curMode is not self.m2DMode or self.mImageShownWidget is None: return
         if isShow:
             self.mImageShownWidget.showImageExtraInfoVtkView()
@@ -140,10 +140,9 @@ class SingleImageShownContainer(QFrame):
         else:
             self.mImageShownWidget.hideImageExtraInfoVtkView()
 
-    def tryUpdateCrossBoxWidgetGeometry(self):
-        if self.showCrossFlag:
-            self.mImageShownWidget.updateCrossBoxWidgetGeometry()
-            self.mImageShownWidget.updateCrossBoxWidgetContent()
+    def tryUpdateCrossBoxWidget(self):
+        if self.m2DImageShownData.showCrossFlag and (self.mImageShownWidget is not None):
+            self.mImageShownWidget.updateCrossBoxWidget()
 
     def tryUpdateCrossViewSignalEmit(self):
         if self.isSelected:
@@ -189,15 +188,12 @@ class SingleImageShownContainer(QFrame):
             self.selectSignal.emit(self.isSelected)
             self.selectImageShownContainerSignal.emit(self, self.isSelected)
             self.switchImageContainerMode(self.m2DMode)
-            self.tryUpdateCrossViewSignalEmit()
         else:
             event.ignore()
 
     def resizeEvent(self, QResizeEvent):
         print('singleImageShownContainer:', self.geometry())
-        if self.showCrossFlag and (self.mImageShownWidget is not None):
-            #这里暂时有问题
-            self.tryUpdateCrossViewSignalEmit()
+        self.tryUpdateCrossBoxWidget()
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
