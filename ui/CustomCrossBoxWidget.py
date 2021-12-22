@@ -17,13 +17,14 @@ class CustomCrossBoxWidget(QWidget):
         self.pos1,self.pos2=pos1,pos2
 
     def paintEvent(self, ev):
-        print("crossView paint ",self.pos1,self.pos2)
-        self.qp.begin(self)
-        self.qp.setPen(QPen(Qt.red,10,Qt.SolidLine))
-        # self.qp.drawRect(0,0,self.width(),self.height())
-        if self.isShowContent:
-            self.qp.drawLine(self.pos1,self.pos2)
-        self.qp.end()
+        pass
+        # print("crossView paint ",self.pos1,self.pos2)
+        # self.qp.begin(self)
+        # self.qp.setPen(QPen(Qt.red,10,Qt.SolidLine))
+        # # self.qp.drawRect(0,0,self.width(),self.height())
+        # if self.isShowContent:
+        #     self.qp.drawLine(self.pos1,self.pos2)
+        # self.qp.end()
 
     #防止CrossBox遮挡其他应用窗口
     def eventFilter(self, a0: 'QObject', a1: 'QEvent') -> bool:

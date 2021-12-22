@@ -128,7 +128,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
         size = [0.0,0.0]
         self.textActor.GetSize(self.renText,size)
-        print("textActor size ", size)
+        # print("textActor size ", size)
 
     def hideImageExtraInfoVtkView(self):
         if self.renText is not None:
@@ -193,14 +193,14 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def setCurrentIndex(self, ind):
         """Set the currently displayed frame index."""
         #ind调节到可用范围
-        print("set current index")
+        # print("set current index")
         ind %= len(self.imageData.filePaths)
         if ind < 0:
             ind += len(self.imageData.filePaths)
         self.imageData.currentIndex = ind
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
         self.showAllViews()
-        self.update2DImageShownSignal.emit()
+        # self.update2DImageShownSignal.emit()
         self.updateCrossViewSubSignal.emit()
 
     def canSlideShow(self):
@@ -215,9 +215,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             self.timerThread.signal.connect(lambda x:self.setCurrentIndex(self.imageData.currentIndex + 1))
             self.timerThread.start()
         else:
+            print("申请退出线程")
             self.timerThread.requestInterruption()
             self.timerThread.quit()
-            self.timerThread.wait()
+            # self.timerThread.wait()
 
     def controlSlideShowSpeed(self, delta):
         if self.timerThread is not None:

@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSignal,QThread
+from PyQt5.QtCore import pyqtSignal,QThread,QTimer
 import time
 
 class CycleSyncThread(QThread):
@@ -12,3 +12,4 @@ class CycleSyncThread(QThread):
         while( not self.isInterruptionRequested()):
             self.signal.emit(1)
             time.sleep(self.interval)
+        print("线程退出成功")

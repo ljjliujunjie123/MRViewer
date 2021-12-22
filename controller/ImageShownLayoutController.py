@@ -183,7 +183,7 @@ class ImageShownLayoutController(QObject):
         #计算交点的屏幕坐标
         imageDisPos,imageDisWidth,imageDisHeight = self.getImageDisplayInfo(handleContainer.mImageShownWidget)
         kImgToDisW,kImgToDisH = imageDisHeight/Rows1,imageDisWidth/Cols1
-        print("Rows1,Cols1 ",Rows1,Cols1)
+        # print("Rows1,Cols1 ",Rows1,Cols1)
         resDis = [QPoint(int(point.x() * kImgToDisW),int(point.y()*kImgToDisH)) + imageDisPos for point in res]
 
         #将绝对坐标转为相对ImageContainer的比例值
@@ -245,12 +245,12 @@ class ImageShownLayoutController(QObject):
         m2DWidget.renImage.WorldToDisplay()
         imageBoundPoint2 = m2DWidget.renImage.GetDisplayPoint()
 
-        print("bounds: ",imageBoundPoint,imageBoundPoint2)
+        # print("bounds: ",imageBoundPoint,imageBoundPoint2)
         imageBoundPoint = np.array(imageBoundPoint[:2])
         imageBoundPoint2 = np.array(imageBoundPoint2[:2])
         width,height = tuple(imageBoundPoint - imageBoundPoint2)
         pos = QPoint(imageBoundPoint2[0],imageBoundPoint2[1])
-        print("左上角坐标：", pos,width,height)
+        # print("左上角坐标：", pos,width,height)
         return pos,width,height
 
     def controlMoveEvent(self):
@@ -287,9 +287,11 @@ class ImageShownLayoutController(QObject):
         else: return True
 
     def imageSlideShowPlayHandler(self):
+        print("播放button")
         if not self.checkSelectContainerCanSlideShow():return
         if self.selectedImageShownContainer.mImageShownWidget.canSlideShow():
             self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
+            print("申请控制slideShow")
             self.selectedImageShownContainer.mImageShownWidget.controlSlideShow(self.imageSlideShowPlayFlag)
 
     def imageSlideShowSlowHandler(self):

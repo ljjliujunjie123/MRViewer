@@ -43,7 +43,7 @@ def getImageOrientationInfoFromDicom(fileName):
     xVector,yVector = ImageOrientation[:3],ImageOrientation[3:]
     func = lambda x:round(x)
     xVector,yVector = tuple(map(func,xVector)),tuple(map(func,yVector))
-    print("orientation vector ", xVector, yVector)
+    # print("orientation vector ", xVector, yVector)
     xInfo,yInfo = orientationDict[xVector],orientationDict[yVector]
     return xInfo + yInfo
 
