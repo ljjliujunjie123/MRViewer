@@ -1,0 +1,1 @@
+1. 通过修改了ui\SingleImageShownContainer.py、ui\ToolFactory.py、ui\ToolsContainer.py、controller\ImageShownLayoutController.py 完成了按钮、图片双向调控

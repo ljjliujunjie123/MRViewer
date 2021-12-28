@@ -5,13 +5,19 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QIcon
 from ui.config import uiConfig
 from ui.SingleImageShownContainer import SingleImageShownContainer
+from enum import Enum
+
+
+
+class ToolNum(Enum):
+    shownLayout = 0
+    slideShow = 1
+    modeSelect = 2
+    extraInfo = 3
+    default = -1
 
 class ToolFactory():
-    imageShownLayout = 0
-    imageSlideShow = 1
-    imageModeSelect = 2
-    imageExtraInfo = 3
-    defaultTool = -1
+    
 
     iconPaths = {
         SingleImageShownContainer.m2DMode:"ui_source/2d_mode.png",
@@ -23,7 +29,7 @@ class ToolFactory():
         print("tool Factory")
         self.parent = parent
 
-    def createTool(self, tag = defaultTool, **kwargs):
+    def createTool(self, tag = ToolNum.default, **kwargs):
         frame = QFrame(self.parent)
         frame.setFrameShape(QFrame.StyledPanel)
         frame.setFrameShadow(QFrame.Plain)
@@ -34,20 +40,20 @@ class ToolFactory():
         hBoxLayout.setAlignment(Qt.AlignCenter)
         frame.setLayout(hBoxLayout)
         if len(kwargs) > 0: signal = kwargs["signal"]
-        if tag == self.imageShownLayout:
+        if tag == ToolNum.shownLayout:
             selectImageShownRegionGridWidget = CustomSelectRegionGridWidget(signal)
             selectImageShownRegionGridWidget.setParent(frame)
             selectImageShownRegionGridWidget.setMouseTracking(True)
             selectImageShownRegionGridWidget.setEnabled(False)
             hBoxLayout.addWidget(selectImageShownRegionGridWidget)
-        elif tag == self.imageSlideShow:
+        elif tag == ToolNum.slideShow:
             enableImageSlideshow = QCheckBox('跑马灯效果',frame)
             enableImageSlideshow.setEnabled(False) #设置是否启用,可自动变灰色
             enableImageSlideshow.setCheckState(False) #设置初始状态
             enableImageSlideshow.setTristate(False)
             enableImageSlideshow.stateChanged.connect(signal) #打勾就送信
             hBoxLayout.addWidget(enableImageSlideshow)
-        elif tag == self.imageModeSelect:
+        elif tag == ToolNum.modeSelect:
             print("imageModeSelect")
             imageModeContainer = QFrame()
             imageHBoxLayout =  CustomDecoratedLayout(QHBoxLayout())
@@ -59,7 +65,7 @@ class ToolFactory():
             imageHBoxLayout.addWidgets([bt2D,bt3D,bt3DFake,btRT])
             imageModeContainer.setLayout(imageHBoxLayout.getLayout())
             hBoxLayout.addWidget(imageModeContainer)
-        elif tag == self.imageExtraInfo:
+        elif tag == ToolNum.extraInfo:
             print("imageExtraInfo")
             enableImageExtraInfo = QCheckBox('展示附加信息',frame)
             enableImageExtraInfo.setEnabled(False) #设置是否启用,可自动变灰色
