@@ -12,7 +12,7 @@ from ui.m3DImageShownWidget import m3DImageShownWidget
 from ui.mRealTimeImageShownWidget import mRealTimeImageShownWidget
 from utils.BaseImageData import BaseImageData
 from utils.util import getImageTileInfoFromDicom
-from utils.m2DImageShownData import m2DImageShownData
+from utils.m2DimageShownData import m2DImageShownData
 
 class SingleImageShownContainer(QFrame):
 

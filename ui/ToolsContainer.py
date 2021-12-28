@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from ui.config import uiConfig
-from ui.ToolFactory import ToolFactory
+from ui.ToolFactory import ToolFactory, ToolNum
 class ToolsContainer(QFrame):
 
     showInfoSig = pyqtSignal()
@@ -44,25 +44,25 @@ class ToolsContainer(QFrame):
         #功能1
         #一个可选择的表格，来调整文件渲染区的布局
         self.selectImageShownRegionWidget = \
-            self.toolFactory.createTool(ToolFactory.imageShownLayout, signal = self.updateImageShownLayoutSignal)
+            self.toolFactory.createTool(ToolNum.shownLayout, signal = self.updateImageShownLayoutSignal)
         self.toolsScrollLayout.addWidget(self.selectImageShownRegionWidget)
 
         # 功能2 by evermg42
         # 图像的自动轮播开启
         self.enableImageSlideShowWidget = \
-            self.toolFactory.createTool(ToolFactory.imageSlideShow, signal = self.enableImageSlideshowSignal)
+            self.toolFactory.createTool(ToolNum.slideShow, signal = self.enableImageSlideshowSignal)
         self.toolsScrollLayout.addWidget(self.enableImageSlideShowWidget)
 
         #功能3
         #图像的模式切换
         self.imageModeSelectWidget = \
-            self.toolFactory.createTool(ToolFactory.imageModeSelect, signal = self.imageModeSelectSignal)
+            self.toolFactory.createTool(ToolNum.modeSelect, signal = self.imageModeSelectSignal)
         self.toolsScrollLayout.addWidget(self.imageModeSelectWidget)
 
         #功能4
         #图像的附加信息开关
         self.enableImageExtraInfoWidget = \
-            self.toolFactory.createTool(ToolFactory.imageExtraInfo, signal = self.enableImageExtraInfoSignal)
+            self.toolFactory.createTool(ToolNum.extraInfo, signal = self.enableImageExtraInfoSignal)
         self.toolsScrollLayout.addWidget(self.enableImageExtraInfoWidget)
 
         #占位的功能
@@ -79,15 +79,44 @@ class ToolsContainer(QFrame):
         # self.pushButton.setGeometry(0, self.selectImageShownRegionTableWidget.height() + self.testButton.height(), 100, 30)
         # self.pushButton.clicked.connect(self.showInfoSig)
 
-    def updateToolsContainerStateHandler(self, state):
-        for i in range(self.toolsScrollLayout.count()):
-            widget = self.toolsScrollLayout.itemAt(i).widget()
-            widget.setEnabled(state)
-            layout = widget.layout()
-            for i in range(layout.count()):
-                subWidget = layout.itemAt(i).widget()
-                subWidget.setEnabled(state)
+    def updateToolsContainerStateHandler(self, case, curMode,showExtraInfoFlag):
+        if case == 0:# 情形0：初始化
+            print("case==0 初始化")
+            for i in range(self.toolsScrollLayout.count()):
+                widget = self.toolsScrollLayout.itemAt(i).widget()
+                widget.setEnabled(True)
+                layout = widget.layout()
+                for j in range(layout.count()):
+                    subWidget = layout.itemAt(j).widget()
+                    print(i)
+                    subWidget.setEnabled(True)
+                    if i == 3:
+                        subWidget.setCheckState(Qt.Checked)
 
+        if case == 1:# 情形1：选定另一张图片
+            print("case==1 选定另一张图片")
+            widget = self.toolsScrollLayout.itemAt(1).widget().layout().itemAt(0).widget()
+
+            widget.setEnabled = (curMode == 0)
+            if curMode == 0 and widget.checkState()==Qt.Checked:
+                widget.setCheckState(Qt.Checked)
+            else:
+                widget.setCheckState(Qt.Unchecked)
+
+            widget3 = self.toolsScrollLayout.itemAt(3).widget().layout().itemAt(0).widget()
+            widget3.setEnabled = (curMode == 0)
+            widget3.setCheckState(showExtraInfoFlag and Qt.Checked or Qt.Unchecked)
+
+        if case == 2:# 情形2：切换2D/3D模式
+            print("case==2 切换2D/3D模式")
+            widget = self.toolsScrollLayout.itemAt(1).widget().layout().itemAt(0).widget()
+            widget.setCheckState(Qt.Unchecked)
+            widget.setEnabled(curMode == 0)
+            widget3 = self.toolsScrollLayout.itemAt(3).widget().layout().itemAt(0).widget()
+            widget3.setCheckState(curMode == 0 and Qt.Checked or Qt.Unchecked)
+            widget3.setEnabled(curMode == 0)
+
+                
     def retranslateUi(self):
         _translate = QCoreApplication.translate
         # self.pushButton.setText(_translate("MainWindow", "展示信息"))
