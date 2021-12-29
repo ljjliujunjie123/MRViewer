@@ -553,3 +553,7 @@ $$
   - Qthread优化：无效
   - 减少Qpainter绘制的数量：无效
 - 毫无思路
+
+2021-12-29
+
+- **[陶然]** 通过修改了ui\SingleImageShownContainer.py、ui\ToolFactory.py、ui\ToolsContainer.py、controller\ImageShownLayoutController.py 完成了按钮、图片双向调控
