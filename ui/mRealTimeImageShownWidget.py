@@ -132,10 +132,10 @@ class mRealTimeImageShownWidget(QFrame):
         self.renText.Render()
 
     def calcImageExtraInfoWidthPos(self):
-        return uiConfig.shownTextInfoMarginWidth
+        return uiConfig.shownTextInfoX
 
     def calcImageExtraInfoHeightPos(self):
-        return uiConfig.shownTextInfoMarginHeight
+        return uiConfig.shownTextInfoY
 
     def dropEvent(self, event):
         super().dropEvent(event)

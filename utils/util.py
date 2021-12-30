@@ -50,12 +50,12 @@ def getImageOrientationInfoFromDicom(fileName):
 def getImageExtraInfoFromDicom(fileName):
     dcmFile = pyd.dcmread(fileName)
 
-    res = ""
+    res = []
     valueDict = {}
     for key,value in normalKeyDict.items():
         valueDict[value] = str(dcmFile[key].value)
     for key,value in valueDict.items():
-        res += (key + value + "\n")
+        res.append(key + value + "\n")
     return res
 
 def extract_grayscale_image(mri_file):

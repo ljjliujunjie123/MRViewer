@@ -21,12 +21,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         #初始化数据
         self.imageData = None
         #初始化逻辑
-        self.reader = None
-        self.imageViewer = None
-        self.qvtkWidget = None
-        self.renImage = None
-        self.renText = None
-        self.textActor = None
         self.imageShownData = None
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
@@ -35,7 +29,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageViewer =  vtk.vtkImageViewer2()
         self.renImage = vtk.vtkRenderer()
         self.renText = vtk.vtkRenderer()
-        self.textActor = vtk.vtkTextActor()
+        #!
+        self.textActor = [vtk.vtkTextActor() for i in range(4)]
         #方位actor，依次是left,right,top,bottom
         self.orientationActors = [vtk.vtkTextActor() for i in range(4)]
 
@@ -104,30 +99,62 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         #添加文本注释
         # self.textActor.SetTextScaleModeToProp()
-        self.textActor.SetDisplayPosition(
-                self.calcImageExtraInfoWidthPos(),
-                self.calcImageExtraInfoHeightPos()
+
+        textList = getImageExtraInfoFromDicom(self.imageData.curFilePath)
+        self.textActor[0].SetDisplayPosition(
+                self.calcExtraInfoWidth(), truHeight - self.calcExtraInfoHeight()
         )
-        self.textActor.SetInput(getImageExtraInfoFromDicom(self.imageData.curFilePath))
-        # self.textActor.GetActualPosition2Coordinate().SetCoordinateSystemToNormalizedViewport()
-        # self.textActor.GetPosition2Coordinate().SetValue(0.6, 0.1)
-        self.textActor.GetTextProperty().SetFontSize(20)
-        # self.textActor.GetTextProperty().SetFontFamilyToArial()
-        self.textActor.GetTextProperty().SetJustificationToLeft()
-        self.textActor.GetTextProperty().BoldOn()
-        # self.textActor.GetTextProperty().ItalicOn()
-        self.textActor.GetTextProperty().ShadowOn()
-        self.textActor.GetTextProperty().SetColor(1, 1, 1)
+        self.textActor[0].SetInput(textList[0]+textList[1]+textList[2])
+        self.textActor[0].GetTextProperty().SetFontSize(20)
+        self.textActor[0].GetTextProperty().SetJustificationToLeft()
+        self.textActor[0].GetTextProperty().SetVerticalJustificationToTop()
+        self.textActor[0].GetTextProperty().BoldOn()
+        self.textActor[0].GetTextProperty().ShadowOn()
+        self.textActor[0].GetTextProperty().SetColor(1, 1, 1)
+
+        self.textActor[1].SetDisplayPosition(
+                truWidth - self.calcExtraInfoWidth(), truHeight - self.calcExtraInfoHeight()
+        )
+        self.textActor[1].SetInput(textList[3])
+        self.textActor[1].GetTextProperty().SetFontSize(20)
+        self.textActor[1].GetTextProperty().SetJustificationToRight()
+        self.textActor[1].GetTextProperty().SetVerticalJustificationToTop()
+        self.textActor[1].GetTextProperty().BoldOn()
+        self.textActor[1].GetTextProperty().ShadowOn()
+        self.textActor[1].GetTextProperty().SetColor(1, 1, 1)
+
+        self.textActor[2].SetDisplayPosition(
+                self.calcExtraInfoWidth(), self.calcExtraInfoHeight()
+        )
+        self.textActor[2].SetInput(textList[4]+textList[5])
+        self.textActor[2].GetTextProperty().SetFontSize(20)
+        self.textActor[2].GetTextProperty().SetJustificationToLeft()
+        self.textActor[2].GetTextProperty().BoldOn()
+        self.textActor[2].GetTextProperty().ShadowOn()
+        self.textActor[2].GetTextProperty().SetColor(1, 1, 1)
+
+        self.textActor[3].SetDisplayPosition(
+                truWidth - self.calcExtraInfoWidth(), self.calcExtraInfoHeight()
+        )
+        self.textActor[3].SetInput(textList[6])
+        self.textActor[3].GetTextProperty().SetFontSize(20)
+        self.textActor[3].GetTextProperty().SetJustificationToRight()
+        self.textActor[3].GetTextProperty().BoldOn()
+        self.textActor[3].GetTextProperty().ShadowOn()
+        self.textActor[3].GetTextProperty().SetColor(1, 1, 1)
 
         self.renText.SetInteractive(0)
         self.renText.SetLayer(1)
-        self.renText.AddViewProp(self.textActor)
+        self.renText.AddViewProp(self.textActor[0])
+        self.renText.AddViewProp(self.textActor[1])
+        self.renText.AddViewProp(self.textActor[2])
+        self.renText.AddViewProp(self.textActor[3])
         for actor in self.orientationActors:
             self.renText.AddViewProp(actor)
 
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
-        size = [0.0,0.0]
-        self.textActor.GetSize(self.renText,size)
+        # size = [0.0,0.0]
+        # self.textActor[0].GetSize(self.renText,size)
         # print("textActor size ", size)
 
     def hideImageExtraInfoVtkView(self):
@@ -167,11 +194,11 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.iren.Initialize()
         if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
 
-    def calcImageExtraInfoWidthPos(self):
-        return uiConfig.shownTextInfoMarginWidth
+    def calcExtraInfoWidth(self):
+        return uiConfig.shownTextInfoX
 
-    def calcImageExtraInfoHeightPos(self):
-        return uiConfig.shownTextInfoMarginHeight
+    def calcExtraInfoHeight(self):
+        return uiConfig.shownTextInfoY
 
     def resizeEvent(self, QResizeEvent):
         super().resizeEvent(QResizeEvent)
@@ -199,8 +226,19 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             ind += len(self.imageData.filePaths)
         self.imageData.currentIndex = ind
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
-        self.showAllViews()
-        # self.update2DImageShownSignal.emit()
+        
+        self.reader.SetFileName(self.imageData.curFilePath)
+        self.reader.Update()
+
+        if self.imageShownData.showExtraInfoFlag:
+            self.showImageExtraInfoVtkView()
+            self.renderVtkWindow()
+        else:
+            self.show2DImageVtkView()
+            self.renderVtkWindow(1)
+
+
+        self.update2DImageShownSignal.emit()
         self.updateCrossViewSubSignal.emit()
 
     def canSlideShow(self):
