@@ -16,14 +16,11 @@ normalKeyDict = {
         "SliceThickness": "Slice Thickness: "
     }
 
-orientationDict = {
-    (1,0,0):("R","L"),
-    (0,1,0):("A","P"),
-    (0,0,1):("I","S"),
-    (-1,0,0):("L","R"),
-    (0,-1,0):("P","A"),
-    (0,0,-1):("S","I")
-}
+orientationList = [
+    ("R","L"),
+    ("A","P"),
+    ("I","S")
+]
 
 def getDicomWindowCenterAndLevel(fileName):
     dcmFile = pyd.dcmread(fileName)
@@ -38,16 +35,29 @@ def getImageTileInfoFromDicom(fileName):
     return res
 
 def getImageOrientationInfoFromDicom(fileName):
+    """
+        通过计算方向矢量与三个轴的内积，如何非0，则增加一个标识
+    """
     dcmFile = pyd.dcmread(fileName)
     ImageOrientation=np.array(dcmFile.ImageOrientationPatient,dtype = float)
     xVector,yVector = ImageOrientation[:3],ImageOrientation[3:]
-    func = lambda x:round(x)
+    func = lambda x:round(x,1)
     xVector,yVector = tuple(map(func,xVector)),tuple(map(func,yVector))
-    # print("orientation vector ", xVector, yVector)
-    xInfo = orientationDict[xVector] if xVector in orientationDict else ("R","l")
-    yInfo = orientationDict[yVector] if yVector in orientationDict else ("A","P")
-    # xInfo,yInfo = orientationDict[xVector],orientationDict[yVector]
-    return xInfo + yInfo
+    print("orientation vector ", xVector, yVector)
+    xInfo = calcImageOrientation(xVector)
+    yInfo = calcImageOrientation(yVector)
+
+    print(xInfo,yInfo)
+    return tuple(xInfo) + tuple(yInfo)
+
+def calcImageOrientation(vector):
+    info = ["",""]
+    for index in reversed(np.array(vector).argsort()):
+        if abs(vector[index])<0.3:continue
+        value = orientationList[index]
+        info[0] += value[0] if vector[index] > 0 else value[1]
+        info[1] += value[1] if vector[index] > 0 else value[0]
+    return info
 
 def getImageExtraInfoFromDicom(fileName):
     dcmFile = pyd.dcmread(fileName)
