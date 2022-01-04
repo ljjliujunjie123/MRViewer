@@ -18,7 +18,7 @@ class UIConfig():
     shownContainerMargins = QMargins(0,0,0,0)
     shownContainerContentSpace = 4
     shownTextInfoX = 20
-    shownTextInfoY = 0
+    shownTextInfoY = 10
 
     shownSlideShowDialogSize = QSize(300,100)
     shownSlideSpeedDefault = 0.2
