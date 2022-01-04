@@ -25,8 +25,12 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
         self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()
+        self.qvtkWidget.GetRenderWindow().SetInteractor(self.iren)
+        self.vtkStyle = vtk.vtkInteractorStyleImage()
+        self.iren.SetInteractorStyle(self.vtkStyle)
         self.reader = vtk.vtkDICOMImageReader()
         self.imageViewer =  vtk.vtkImageViewer2()
+        self.imageViewer.SetupInteractor(self.iren)
         self.renImage = vtk.vtkRenderer()
         self.renText = vtk.vtkRenderer()
         #!
@@ -70,7 +74,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageViewer.SetColorWindow(width)
         self.imageViewer.SetRenderer(self.renImage)
         self.imageViewer.SetRenderWindow(self.qvtkWidget.GetRenderWindow())
-        self.imageViewer.SetupInteractor(self.iren)
         self.imageViewer.UpdateDisplayExtent()
 
         self.renImage.SetLayer(0)
@@ -191,7 +194,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def renderVtkWindow(self, layerCount = 2):
         self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(layerCount)
-        self.iren.Initialize()
+        self.qvtkWidget.Initialize()
+        self.qvtkWidget.Start()
         if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
 
     def calcExtraInfoWidth(self):
@@ -234,7 +238,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             self.showImageExtraInfoVtkView()
             self.renderVtkWindow()
         else:
-            self.show2DImageVtkView()
             self.renderVtkWindow(1)
 
 
