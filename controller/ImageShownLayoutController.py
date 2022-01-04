@@ -306,7 +306,7 @@ class ImageShownLayoutController(QObject):
     def imageSlideShowFasterHandler(self):
         if not self.checkSelectContainerCanSlideShow():return
         print("fast")
-        self.selectedImageShownContainer.mImageShownWidget.controlSlideShowSpeed(-0.1)
+        # self.selectedImageShownContainer.mImageShownWidget.controlSlideShowSpeed(-0.1)
 
     #模式切换
     def imageModeSelectHandler(self, mode):
