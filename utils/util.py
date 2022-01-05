@@ -3,16 +3,32 @@ import pydicom as pyd
 import os
 from PIL import ImageOps, ImageEnhance
 from PIL.ImageQt import *
+from enum import Enum
 
-normalKeyDict = {
+
+class Location(Enum):
+    """顺序为左上、右上、左下、右下"""
+    UL = 0 # up right
+    UR = 1
+    DL = 2 #down left
+    DR = 3
+
+normalKeyDict = {0:{
         "PatientName": "",
         "StudyDescription": "Study: ",
         "SeriesDescription": "Series: ",
-        "InstanceNumber": "Index: ",
+    },
+    1:{
+        "InstanceNumber": "Index: "
+    },
+    2:{
         "RepetitionTime": "TR: ",
         "EchoTime": "TE: ",
+    },
+    3:{
         "SliceThickness": "Slice Thickness: "
     }
+}
 
 orientationList = [
     ("R","L"),
@@ -27,9 +43,9 @@ def getDicomWindowCenterAndLevel(fileName):
 def getImageTileInfoFromDicom(fileName):
     dcmFile = pyd.dcmread(fileName)
     res = ""
-    res += (normalKeyDict["PatientName"] +  str(dcmFile["PatientName"].value))
+    res += (normalKeyDict[0]["PatientName"] +  str(dcmFile["PatientName"].value))
     res += " - "
-    res += (normalKeyDict["SeriesDescription"] +  str(dcmFile["SeriesDescription"].value))
+    res += (normalKeyDict[0]["SeriesDescription"] +  str(dcmFile["SeriesDescription"].value))
     return res
 
 def getImageOrientationInfoFromDicom(fileName):
@@ -58,14 +74,15 @@ def calcImageOrientation(vector):
     return info
 
 def getImageExtraInfoFromDicom(fileName):
+    """从Dicom文件中读取信息，输出位置按照Location类的次序"""
     dcmFile = pyd.dcmread(fileName)
-
-    res = []
-    valueDict = {}
-    for key,value in normalKeyDict.items():
-        valueDict[value] = str(dcmFile[key].value)
-    for key,value in valueDict.items():
-        res.append(key + value + "\n")
+    res = {}
+    for key,dic in normalKeyDict.items():
+        tp = ""
+        for key2,value2 in dic.items():
+            tp = tp + value2 + str(dcmFile[key2].value) + "\r\n"
+        res[key] = tp
+    print(res)
     return res
 
 def extract_grayscale_image(mri_file):
