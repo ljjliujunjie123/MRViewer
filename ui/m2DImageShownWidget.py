@@ -103,22 +103,16 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         #添加文本注释
         # self.textActor.SetTextScaleModeToProp()
-
         textList = getImageExtraInfoFromDicom(self.imageData.curFilePath)
-
-        self.textActor[0].SetInput(textList[0]+textList[1]+textList[2])
-        self.textActor[1].SetInput(textList[3])
-        self.textActor[2].SetInput(textList[4]+textList[5])
-        self.textActor[3].SetInput(textList[6])
-
+        for i in range(0,4):self.textActor[3].SetInput(textList[i])
         
+        #调整文本位置
         self.textActor[0].GetTextProperty().SetJustificationToLeft()
         self.textActor[0].GetTextProperty().SetVerticalJustificationToTop()
         self.textActor[1].GetTextProperty().SetJustificationToRight()
         self.textActor[1].GetTextProperty().SetVerticalJustificationToTop()
         self.textActor[2].GetTextProperty().SetJustificationToLeft()
         self.textActor[3].GetTextProperty().SetJustificationToRight()
-
         self.textActor[0].SetDisplayPosition(
                 self.calcExtraInfoWidth(), truHeight - self.calcExtraInfoHeight())
         self.textActor[1].SetDisplayPosition(
@@ -128,13 +122,13 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.textActor[3].SetDisplayPosition(
                 truWidth - self.calcExtraInfoWidth(), self.calcExtraInfoHeight())
         
+        #调整文本字体颜色
         for i in range(0,4):
             self.textActor[i].GetTextProperty().SetFontSize(20)
             self.textActor[i].GetTextProperty().SetColor(1, 1, 1)
             self.textActor[i].GetTextProperty().BoldOn()
             self.textActor[i].GetTextProperty().ShadowOn()
         
-
         self.renText.SetInteractive(0)
         self.renText.SetLayer(1)
 
@@ -214,7 +208,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def setCurrentIndex(self, ind):
         """Set the currently displayed frame index."""
         #ind调节到可用范围
-        # print("set current index")
         ind %= len(self.imageData.filePaths)
         if ind < 0:
             ind += len(self.imageData.filePaths)
