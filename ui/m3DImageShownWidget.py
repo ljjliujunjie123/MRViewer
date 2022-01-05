@@ -1,4 +1,6 @@
 import os
+import numpy as np
+import pydicom
 from PyQt5.QtWidgets import QFrame
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 import vtkmodules.all as vtk
@@ -15,6 +17,7 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageData = None
         #初始化逻辑
         self.qvtkWidget = QVTKRenderWindowInteractor(self)
+        self.axes_widget = vtk.vtkOrientationMarkerWidget()
 
     def resizeEvent(self, *args, **kwargs):
         self.qvtkWidget.setFixedSize(self.size())
@@ -35,16 +38,20 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.iren.SetInteractorStyle(self.style)
         # 添加世界坐标系
         axesActor = vtk.vtkAnnotatedCubeActor()
+        ren3D.AddActor(axesActor)
+        # 注意这里设置的值是屏幕坐标系下的方位值，并不是解剖学上的方位
         axesActor.SetXPlusFaceText("L")
         axesActor.SetXMinusFaceText("R")
         axesActor.SetYMinusFaceText("I")
         axesActor.SetYPlusFaceText("S")
         axesActor.SetZMinusFaceText("P")
         axesActor.SetZPlusFaceText("A")
+        axesActor.SetXFaceTextRotation(-90)
+        axesActor.SetYFaceTextRotation(180)
+        axesActor.SetZFaceTextRotation(90)
         axesActor.GetTextEdgesProperty().SetColor(1,0,0)
         axesActor.GetTextEdgesProperty().SetLineWidth(2)
         axesActor.GetCubeProperty().SetColor(0,0,1)
-        self.axes_widget = vtk.vtkOrientationMarkerWidget()
         self.axes_widget.SetOrientationMarker(axesActor)
         self.axes_widget.SetInteractor(self.iren)
         self.axes_widget.EnabledOn()
@@ -95,12 +102,12 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         volume.SetProperty(volumeProperty)
 
         ren3D.AddViewProp(volume)
-
-        camera = ren3D.GetActiveCamera()
-        c = volume.GetCenter()
-        camera.SetFocalPoint(c[0], c[1], c[2])
-        camera.SetPosition(c[0] + 400, c[1], c[2])
-        camera.SetViewUp(0, 0, -1)
+        ren3D.ResetCamera()
+        # camera = ren3D.GetActiveCamera()
+        # c = volume.GetCenter()
+        # camera.SetFocalPoint(c[0], c[1], c[2])
+        # camera.SetPosition(c[0] + 400, c[1], c[2])
+        # camera.SetViewUp(0, 0, -1)
         # Interact with the data.
         self.qvtkWidget.Initialize()
         renWin.Render()
