@@ -4,8 +4,6 @@ import os
 from PIL import ImageOps, ImageEnhance
 from PIL.ImageQt import *
 
-import cv2
-
 normalKeyDict = {
         "PatientName": "",
         "StudyDescription": "Study: ",
@@ -79,7 +77,6 @@ def extract_grayscale_image(mri_file):
 
 def dicom_to_qt(dcm_file, factor_contrast, factor_bright, auto_mode, inversion_mode, custom_size = (200,200)):
     image = np.array(extract_grayscale_image(dcm_file))
-    image = cv2.resize(image, (200,200), cv2.INTER_AREA)
     image = Image.fromarray(image)
     if auto_mode == 1:
         image = ImageOps.equalize(image, mask=None)
