@@ -142,7 +142,7 @@ class mRealTimeImageShownWidget(QFrame):
         self.seriesPath = event.mimeData().getImageExtraData()["seriesPath"]
         event.mimeData().setText("")
         fileNames = os.listdir(self.seriesPath)
-        self.filePaths = [self.seriesPath + '/' + fileName for fileName in fileNames]
+        self.filePaths = [self.seriesPath + r'\\' + fileName for fileName in fileNames]
         self.curFilePath = self.filePaths[0]
         self.currentIndex = 0
 

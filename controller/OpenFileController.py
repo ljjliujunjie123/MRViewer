@@ -25,11 +25,11 @@ class OpenFileController():
         seriesPaths = os.listdir(filePath)
         dict = {}
         for _seriesPath in seriesPaths:
-            seriesPath = filePath + '/' + _seriesPath
+            seriesPath = filePath + r'\\' + _seriesPath
             if self.checkDirValidity(seriesPath) is Status.bad:continue
             fileNames = os.listdir(seriesPath)
             if len(fileNames) > 0:
-                dict[_seriesPath] = seriesPath + '/' + fileNames[0]
+                dict[_seriesPath] = seriesPath + '\\' + fileNames[0]
 
         self.updateImageListSignal.emit(dict, uiConfig.studyTag)
 
@@ -42,18 +42,18 @@ class OpenFileController():
 
         studyPaths = os.listdir(filePath)
         for _studyPath in studyPaths:
-            studyPath = filePath + '/' + _studyPath
+            studyPath = filePath + '\\' + _studyPath
             if self.checkDirValidity(studyPath) is Status.bad:continue
             #创建一个studyDict
             studyDict = {}
             seriesPaths = os.listdir(studyPath)
             for _seriesPath in seriesPaths:
-                seriesPath = studyPath + '/' + _seriesPath
+                seriesPath = studyPath + '\\' + _seriesPath
                 if self.checkDirValidity(seriesPath) is Status.bad:continue
                 fileNames = os.listdir(seriesPath)
                 if len(fileNames) > 0:
                     #从series列表中取一个fileName作为value，key是seriesPath
-                    studyDict[_seriesPath] = seriesPath + '/' + fileNames[0]
+                    studyDict[_seriesPath] = seriesPath + '\\' + fileNames[0]
             #把studyDict加入resDict，key为_studyPath
             resDict[_studyPath] = studyDict
 

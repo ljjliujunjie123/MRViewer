@@ -12,7 +12,7 @@ from ui.m3DImageShownWidget import m3DImageShownWidget
 from ui.mRealTimeImageShownWidget import mRealTimeImageShownWidget
 from utils.BaseImageData import BaseImageData
 from utils.util import getImageTileInfoFromDicom
-from utils.m2DImageShownData import m2DImageShownData
+from utils.mImage2DShownData import mImage2DShownData
 
 class SingleImageShownContainer(QFrame):
 
@@ -29,7 +29,7 @@ class SingleImageShownContainer(QFrame):
     def __init__(self, selectImageShownContainerSignal, updateCrossViewSignal):
         QFrame.__init__(self)
         self.mImageShownWidget = None
-        self.m2DImageShownData = m2DImageShownData()
+        self.mImage2DShownData = mImage2DShownData()
         self.resizeFlag = False
         self.isSelected = False
         self.curMode = self.m2DMode
@@ -112,7 +112,7 @@ class SingleImageShownContainer(QFrame):
         if mode == self.m2DMode:
             print("m2DMode")
             self.mImageShownWidget = m2DImageShownWidget()
-            self.mImageShownWidget.imageShownData = self.m2DImageShownData
+            self.mImageShownWidget.imageShownData = self.mImage2DShownData
             self.mImageShownWidget.updateCrossViewSubSignal.connect(self.tryUpdateCrossViewSignalEmit)
         elif mode == self.m3DMode:
             print("m3DMode")
@@ -132,7 +132,7 @@ class SingleImageShownContainer(QFrame):
         self.tryUpdateCrossViewSignalEmit()
 
     def controlImageExtraInfoState(self, isShow):
-        self.m2DImageShownData.showExtraInfoFlag = isShow
+        self.mImage2DShownData.showExtraInfoFlag = isShow
         if self.curMode is not self.m2DMode or self.mImageShownWidget is None: return
         if isShow:
             self.mImageShownWidget.showImageExtraInfoVtkView()
@@ -141,7 +141,7 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget.hideImageExtraInfoVtkView()
 
     def tryUpdateCrossBoxWidget(self):
-        if self.m2DImageShownData.showCrossFlag and (self.mImageShownWidget is not None):
+        if self.mImage2DShownData.showCrossFlag and (self.mImageShownWidget is not None):
             self.mImageShownWidget.updateCrossBoxWidget()
 
     def tryUpdateCrossViewSignalEmit(self):

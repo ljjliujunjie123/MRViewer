@@ -1,4 +1,4 @@
-class m2DImageShownData():
+class mImage2DShownData():
 
     def __init__(self):
         self.showExtraInfoFlag = True

@@ -20,7 +20,7 @@ class m3DFakeImageShownWidget(QFrame):
         super().dropEvent(event)
         self.seriesPath = event.mimeData().getImageExtraData()["seriesPath"]
         fileNames = os.listdir(self.seriesPath)
-        if len(fileNames) > 0: self.setTileText(getImageTileInfoFromDicom(self.seriesPath + '/' + fileNames[0]))
+        if len(fileNames) > 0: self.setTileText(getImageTileInfoFromDicom(self.seriesPath + r'\\' + fileNames[0]))
         event.mimeData().setText("")
         self.show3DImage(self.seriesPath)
 

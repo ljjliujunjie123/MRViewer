@@ -49,9 +49,9 @@ class ImageShownLayoutController(QObject):
             self.selectedImageShownContainer = container
 
         if isInit:
-            self.updateToolsContainerStateSignal.emit(0,container.curMode,container.m2DImageShownData.showExtraInfoFlag)
+            self.updateToolsContainerStateSignal.emit(0,container.curMode,container.mImage2DShownData.showExtraInfoFlag)
         else:
-            self.updateToolsContainerStateSignal.emit(1,container.curMode,container.m2DImageShownData.showExtraInfoFlag)
+            self.updateToolsContainerStateSignal.emit(1,container.curMode,container.mImage2DShownData.showExtraInfoFlag)
 
     def tryQuitImageSlideShow(self):
         # if self.imageSlideshow is not None: self.imageSlideshow.close()
@@ -128,8 +128,8 @@ class ImageShownLayoutController(QObject):
             return
         #由自定义CrossView绘制交点之间的连线
         #这里的point是比例值
-        handleContainer.m2DImageShownData.showCrossFlag = True
-        handleContainer.m2DImageShownData.crossViewRatios = crossViewPointRatios
+        handleContainer.mImage2DShownData.showCrossFlag = True
+        handleContainer.mImage2DShownData.crossViewRatios = crossViewPointRatios
         handleContainer.tryUpdateCrossBoxWidget()
 
     def calcCrossViewDisPos(self,handleContainer,emitContainer):
@@ -313,7 +313,7 @@ class ImageShownLayoutController(QObject):
         if self.selectedImageShownContainer.curMode ==  mode: return
         self.tryQuitImageSlideShow() # 退出跑马灯
         if self.selectedImageShownContainer.switchImageContainerMode(mode) == Status.bad: return # 渲染不出就不渲染了
-        self.updateToolsContainerStateSignal.emit(2,self.selectedImageShownContainer.curMode,self.selectedImageShownContainer.m2DImageShownData.showExtraInfoFlag)
+        self.updateToolsContainerStateSignal.emit(2,self.selectedImageShownContainer.curMode,self.selectedImageShownContainer.mImage2DShownData.showExtraInfoFlag)
 
     #imageExtraInfo开关
     def imageExtraInfoStateHandler(self, isShow):
