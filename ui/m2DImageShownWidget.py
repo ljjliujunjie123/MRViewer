@@ -33,7 +33,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageViewer.SetupInteractor(self.iren)
         self.renImage = vtk.vtkRenderer()
         self.renText = vtk.vtkRenderer()
-        #!
+
+        #extra文本信息，依次是左上、右上、左下、右下
         self.textActor = [vtk.vtkTextActor() for i in range(4)]
         #方位actor，依次是left,right,top,bottom
         self.orientationActors = [vtk.vtkTextActor() for i in range(4)]
@@ -104,54 +105,42 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         # self.textActor.SetTextScaleModeToProp()
 
         textList = getImageExtraInfoFromDicom(self.imageData.curFilePath)
-        self.textActor[0].SetDisplayPosition(
-                self.calcExtraInfoWidth(), truHeight - self.calcExtraInfoHeight()
-        )
+
         self.textActor[0].SetInput(textList[0]+textList[1]+textList[2])
-        self.textActor[0].GetTextProperty().SetFontSize(20)
+        self.textActor[1].SetInput(textList[3])
+        self.textActor[2].SetInput(textList[4]+textList[5])
+        self.textActor[3].SetInput(textList[6])
+
+        
         self.textActor[0].GetTextProperty().SetJustificationToLeft()
         self.textActor[0].GetTextProperty().SetVerticalJustificationToTop()
-        self.textActor[0].GetTextProperty().BoldOn()
-        self.textActor[0].GetTextProperty().ShadowOn()
-        self.textActor[0].GetTextProperty().SetColor(1, 1, 1)
-
-        self.textActor[1].SetDisplayPosition(
-                truWidth - self.calcExtraInfoWidth(), truHeight - self.calcExtraInfoHeight()
-        )
-        self.textActor[1].SetInput(textList[3])
-        self.textActor[1].GetTextProperty().SetFontSize(20)
         self.textActor[1].GetTextProperty().SetJustificationToRight()
         self.textActor[1].GetTextProperty().SetVerticalJustificationToTop()
-        self.textActor[1].GetTextProperty().BoldOn()
-        self.textActor[1].GetTextProperty().ShadowOn()
-        self.textActor[1].GetTextProperty().SetColor(1, 1, 1)
-
-        self.textActor[2].SetDisplayPosition(
-                self.calcExtraInfoWidth(), self.calcExtraInfoHeight()
-        )
-        self.textActor[2].SetInput(textList[4]+textList[5])
-        self.textActor[2].GetTextProperty().SetFontSize(20)
         self.textActor[2].GetTextProperty().SetJustificationToLeft()
-        self.textActor[2].GetTextProperty().BoldOn()
-        self.textActor[2].GetTextProperty().ShadowOn()
-        self.textActor[2].GetTextProperty().SetColor(1, 1, 1)
-
-        self.textActor[3].SetDisplayPosition(
-                truWidth - self.calcExtraInfoWidth(), self.calcExtraInfoHeight()
-        )
-        self.textActor[3].SetInput(textList[6])
-        self.textActor[3].GetTextProperty().SetFontSize(20)
         self.textActor[3].GetTextProperty().SetJustificationToRight()
-        self.textActor[3].GetTextProperty().BoldOn()
-        self.textActor[3].GetTextProperty().ShadowOn()
-        self.textActor[3].GetTextProperty().SetColor(1, 1, 1)
+
+        self.textActor[0].SetDisplayPosition(
+                self.calcExtraInfoWidth(), truHeight - self.calcExtraInfoHeight())
+        self.textActor[1].SetDisplayPosition(
+                truWidth - self.calcExtraInfoWidth(), truHeight - self.calcExtraInfoHeight())
+        self.textActor[2].SetDisplayPosition(
+                self.calcExtraInfoWidth(), self.calcExtraInfoHeight())
+        self.textActor[3].SetDisplayPosition(
+                truWidth - self.calcExtraInfoWidth(), self.calcExtraInfoHeight())
+        
+        for i in range(0,4):
+            self.textActor[i].GetTextProperty().SetFontSize(20)
+            self.textActor[i].GetTextProperty().SetColor(1, 1, 1)
+            self.textActor[i].GetTextProperty().BoldOn()
+            self.textActor[i].GetTextProperty().ShadowOn()
+        
 
         self.renText.SetInteractive(0)
         self.renText.SetLayer(1)
-        self.renText.AddViewProp(self.textActor[0])
-        self.renText.AddViewProp(self.textActor[1])
-        self.renText.AddViewProp(self.textActor[2])
-        self.renText.AddViewProp(self.textActor[3])
+
+        for i in range(0,4):
+            self.renText.AddViewProp(self.textActor[i])
+    
         for actor in self.orientationActors:
             self.renText.AddViewProp(actor)
 
@@ -208,6 +197,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         super().resizeEvent(QResizeEvent)
         print("resize: ",self.geometry())
         self.qvtkWidget.setFixedSize(self.size())
+        self.showImageExtraInfoVtkView()
 
     #滚轮调用sigWheelChanged
     def wheelEvent(self, ev):

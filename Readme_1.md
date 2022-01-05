@@ -6,3 +6,4 @@
 
 2022-1-5
 1. 3D Orientation Marker
+2. 修改了ui\m2DImageShownWidget.py，修正extra text 无法resize的问题，简化了部分代码
