@@ -3,3 +3,6 @@
 2021-12-30
 1. 修改了ui\m2DImageShownWidget.py、ui\mRealTimeImageShownWidget.py、utils\util.py中的getImageExtraInfoFromDicom
 2. ui\config.py中将变量名改短：shownTextInfoMarginWidth, shownTextInfoMarginHeight  -> shownTextInfoX, shownTextInfoY
+
+2022-1-5
+1. 3D Orientation Marker

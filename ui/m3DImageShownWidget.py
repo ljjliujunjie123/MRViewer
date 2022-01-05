@@ -28,6 +28,27 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         renWin = self.qvtkWidget.GetRenderWindow()
         renWin.AddRenderer(ren3D)
 
+        # 设置交互方式
+        self.iren = renWin.GetInteractor()  # 获取交互器
+        self.style = vtk.vtkInteractorStyleTrackballCamera()  # 交互器样式的一种，该样式下，用户是通过控制相机对物体作旋转、放大、缩小等操作
+        self.style.SetDefaultRenderer(ren3D)
+        self.iren.SetInteractorStyle(self.style)
+        # 添加世界坐标系
+        axesActor = vtk.vtkAnnotatedCubeActor()
+        axesActor.SetXPlusFaceText("L")
+        axesActor.SetXMinusFaceText("R")
+        axesActor.SetYMinusFaceText("I")
+        axesActor.SetYPlusFaceText("S")
+        axesActor.SetZMinusFaceText("P")
+        axesActor.SetZPlusFaceText("A")
+        axesActor.GetTextEdgesProperty().SetColor(1,0,0)
+        axesActor.GetTextEdgesProperty().SetLineWidth(2)
+        axesActor.GetCubeProperty().SetColor(0,0,1)
+        self.axes_widget = vtk.vtkOrientationMarkerWidget()
+        self.axes_widget.SetOrientationMarker(axesActor)
+        self.axes_widget.SetInteractor(self.iren)
+        self.axes_widget.EnabledOn()
+        self.axes_widget.InteractiveOn()  # 坐标系是否可移动
         v16 = vtk.vtkDICOMImageReader()
         v16.SetDirectoryName(seriesPath)
         v16.Update()
