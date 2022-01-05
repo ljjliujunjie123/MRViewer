@@ -13,19 +13,20 @@ class Location(Enum):
     DL = 2 #down left
     DR = 3
 
-normalKeyDict = {0:{
+normalKeyDict = {
+    Location.UL:{
         "PatientName": "",
         "StudyDescription": "Study: ",
         "SeriesDescription": "Series: ",
     },
-    1:{
+    Location.UR:{
         "InstanceNumber": "Index: "
     },
-    2:{
+    Location.DL:{
         "RepetitionTime": "TR: ",
         "EchoTime": "TE: ",
     },
-    3:{
+    Location.DR:{
         "SliceThickness": "Slice Thickness: "
     }
 }
@@ -43,14 +44,14 @@ def getDicomWindowCenterAndLevel(fileName):
 def getImageTileInfoFromDicom(fileName):
     dcmFile = pyd.dcmread(fileName)
     res = ""
-    res += (normalKeyDict[0]["PatientName"] +  str(dcmFile["PatientName"].value))
+    res += (normalKeyDict[Location.UL]["PatientName"] +  str(dcmFile["PatientName"].value))
     res += " - "
-    res += (normalKeyDict[0]["SeriesDescription"] +  str(dcmFile["SeriesDescription"].value))
+    res += (normalKeyDict[Location.UL]["SeriesDescription"] +  str(dcmFile["SeriesDescription"].value))
     return res
 
 def getImageOrientationInfoFromDicom(fileName):
     """
-        通过计算方向矢量与三个轴的内积，如何非0，则增加一个标识
+        判断方向向量与标准轴的cos值，如果大于阈值，则增加一个标识
     """
     dcmFile = pyd.dcmread(fileName)
     ImageOrientation=np.array(dcmFile.ImageOrientationPatient,dtype = float)
@@ -77,11 +78,11 @@ def getImageExtraInfoFromDicom(fileName):
     """从Dicom文件中读取信息，输出位置按照Location类的次序"""
     dcmFile = pyd.dcmread(fileName)
     res = {}
-    for key,dic in normalKeyDict.items():
+    for location,tagDict in normalKeyDict.items():
         tp = ""
-        for key2,value2 in dic.items():
-            tp = tp + value2 + str(dcmFile[key2].value) + "\r\n"
-        res[key] = tp
+        for tag,text in tagDict.items():
+            tp = tp + text + str(dcmFile[tag].value) + "\n"
+        res[location] = tp
     print(res)
     return res
 

@@ -5,7 +5,7 @@ from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 import vtkmodules.all as vtk
-from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom,getImageOrientationInfoFromDicom
+from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom,getImageOrientationInfoFromDicom,Location
 from utils.cycleSyncThread import CycleSyncThread
 
 class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
@@ -35,7 +35,12 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.renText = vtk.vtkRenderer()
 
         #extra文本信息，依次是左上、右上、左下、右下
-        self.textActor = [vtk.vtkTextActor() for i in range(4)]
+        self.textActors = {
+            Location.UL:vtk.vtkTextActor(),
+            Location.UR:vtk.vtkTextActor(),
+            Location.DL:vtk.vtkTextActor(),
+            Location.DR:vtk.vtkTextActor()
+        }
         #方位actor，依次是left,right,top,bottom
         self.orientationActors = [vtk.vtkTextActor() for i in range(4)]
 
@@ -103,40 +108,40 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         #添加文本注释
         # self.textActor.SetTextScaleModeToProp()
-        textList = getImageExtraInfoFromDicom(self.imageData.curFilePath)
-        for i in range(0,4):self.textActor[3].SetInput(textList[i])
-        
+        textDict = getImageExtraInfoFromDicom(self.imageData.curFilePath)
+        for location,textActor in self.textActors.items():
+            textActor.SetInput(textDict[location])
+
         #调整文本位置
-        self.textActor[0].GetTextProperty().SetJustificationToLeft()
-        self.textActor[0].GetTextProperty().SetVerticalJustificationToTop()
-        self.textActor[1].GetTextProperty().SetJustificationToRight()
-        self.textActor[1].GetTextProperty().SetVerticalJustificationToTop()
-        self.textActor[2].GetTextProperty().SetJustificationToLeft()
-        self.textActor[3].GetTextProperty().SetJustificationToRight()
-        self.textActor[0].SetDisplayPosition(
+        self.textActors[Location.UL].GetTextProperty().SetJustificationToLeft()
+        self.textActors[Location.UL].GetTextProperty().SetVerticalJustificationToTop()
+        self.textActors[Location.UR].GetTextProperty().SetJustificationToRight()
+        self.textActors[Location.UR].GetTextProperty().SetVerticalJustificationToTop()
+        self.textActors[Location.DL].GetTextProperty().SetJustificationToLeft()
+        self.textActors[Location.DR].GetTextProperty().SetJustificationToRight()
+        self.textActors[Location.UL].SetDisplayPosition(
                 self.calcExtraInfoWidth(), truHeight - self.calcExtraInfoHeight())
-        self.textActor[1].SetDisplayPosition(
+        self.textActors[Location.UR].SetDisplayPosition(
                 truWidth - self.calcExtraInfoWidth(), truHeight - self.calcExtraInfoHeight())
-        self.textActor[2].SetDisplayPosition(
+        self.textActors[Location.DL].SetDisplayPosition(
                 self.calcExtraInfoWidth(), self.calcExtraInfoHeight())
-        self.textActor[3].SetDisplayPosition(
+        self.textActors[Location.DR].SetDisplayPosition(
                 truWidth - self.calcExtraInfoWidth(), self.calcExtraInfoHeight())
         
-        #调整文本字体颜色
-        for i in range(0,4):
-            self.textActor[i].GetTextProperty().SetFontSize(20)
-            self.textActor[i].GetTextProperty().SetColor(1, 1, 1)
-            self.textActor[i].GetTextProperty().BoldOn()
-            self.textActor[i].GetTextProperty().ShadowOn()
-        
+        #调整文本字体颜色，并添加到render中
+        for textActor in self.textActors.values():
+            textActor.GetTextProperty().SetFontSize(20)
+            textActor.GetTextProperty().SetColor(1, 1, 1)
+            textActor.GetTextProperty().BoldOn()
+            textActor.GetTextProperty().ShadowOn()
+
+            self.renText.AddActor(textActor)
+
         self.renText.SetInteractive(0)
         self.renText.SetLayer(1)
-
-        for i in range(0,4):
-            self.renText.AddViewProp(self.textActor[i])
     
         for actor in self.orientationActors:
-            self.renText.AddViewProp(actor)
+            self.renText.AddActor(actor)
 
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
         # size = [0.0,0.0]
