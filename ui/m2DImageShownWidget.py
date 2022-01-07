@@ -241,7 +241,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def controlSlideShow(self, flag):
         if flag:
             self.timerThread = CycleSyncThread(uiConfig.shownSlideSpeedDefault)
-            self.timerThread.signal.connect(lambda x:self.setCurrentIndex(self.imageData.currentIndex + 1))
+            self.timerThread.signal.connect(lambda :self.setCurrentIndex(self.imageData.currentIndex + 1))
             self.timerThread.start()
         else:
             print("申请退出线程")

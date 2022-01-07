@@ -123,8 +123,8 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget = m2DImageShownWidget()
         elif mode == self.mRTMode:
             print("mRTMode")
-            # self.mImageShownWidget = mRealTimeImageShownWidget()
-            self.mImageShownWidget = m2DImageShownWidget()
+            self.mImageShownWidget = mRealTimeImageShownWidget()
+            # self.mImageShownWidget = m2DImageShownWidget()
         self.curMode = mode
         self.initImageShownWidget()
         self.mImageShownWidget.initBaseData(self.imageData)

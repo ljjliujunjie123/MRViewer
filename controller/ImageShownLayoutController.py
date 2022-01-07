@@ -111,7 +111,8 @@ class ImageShownLayoutController(QObject):
         if handleContainer is emitContainer\
             or handleContainer.curMode != SingleImageShownContainer.m2DMode\
             or len(handleContainer.imageData.curFilePath) < 1:return
-        if emitContainer.curMode != SingleImageShownContainer.m2DMode:
+        if (emitContainer.curMode != SingleImageShownContainer.m2DMode) \
+            and (emitContainer.curMode != SingleImageShownContainer.mRTMode):
             handleContainer.mImageShownWidget.tryHideCrossBoxWidget()
             return
         isSameStudy = checkSameStudy(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
