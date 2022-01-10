@@ -19,17 +19,21 @@ class LJJMainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
+        # self.setWindowFlags(Qt.FramelessWindowHint)
 
         self.setObjectName("MainWindow")
         self.resize(uiConfig.screenWidth, uiConfig.screenHeight)
+        # self._move_drag = False
+        # layout = QVBoxLayout(self)
+        # layout
         self.centralwidget = QWidget(self)
         self.centralwidget.setGeometry(uiConfig.calcCenterWidgetGeometry())
         self.centralwidget.setMinimumSize(uiConfig.centralWidgetMinSize)
-        self.centralwidget.setStyleSheet("background-color:#edf0f0;")
+        self.centralwidget.setStyleSheet("background-color:#A9A9A9;")
         self.centralwidget.setObjectName("centralwidget")
         self.setCentralWidget(self.centralwidget)
-
-        print("MainWindow CentralWidget Geometry：")
+        
+        print("MainWindow CentralWidget Geometry:")
         print(self.centralwidget.geometry())
 
         #添加splitter
@@ -57,9 +61,11 @@ class LJJMainWindow(QMainWindow):
         #菜单栏部分
         self.menuBar = QMenuBar(self)
         self.menuBar.setGeometry(QRect(0, 0, uiConfig.screenWidth, uiConfig.menuHeight))
+        
         self.menuBar.setObjectName("menubar")
-        self.menu = QMenu(self.menuBar)
-        self.menu.setObjectName("menu")
+        self.setStyleSheet("background: #A9A9A9")
+        self.fileOpener = QMenu(self.menuBar)
+        self.fileOpener.setObjectName("fileOpener")
         self.setMenuBar(self.menuBar)
 
         #标题栏部分
@@ -70,6 +76,9 @@ class LJJMainWindow(QMainWindow):
         self.mainWinLayout = CustomDecoratedLayout(QVBoxLayout())
         self.mainWinLayout.initParamsForPlain()
         self.splitter.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.splitter.setChildrenCollapsible(False)
+        self.splitter.setMinimumSize(100,0)
+        # self.mainWinLayout.getLayout().addWidget(self.titleBar)
         self.mainWinLayout.getLayout().addWidget(self.splitter)
         self.centralwidget.setLayout(self.mainWinLayout.getLayout())
 
@@ -77,10 +86,9 @@ class LJJMainWindow(QMainWindow):
         self.actionopen_study.setObjectName("actionopen_study")
         self.actionopen_patient = QAction(self)
         self.actionopen_patient.setObjectName("actionopen_patient")
-
-        self.menu.addAction(self.actionopen_study)
-        self.menu.addAction(self.actionopen_patient)
-        self.menuBar.addAction(self.menu.menuAction())
+        self.fileOpener.addAction(self.actionopen_study)
+        self.fileOpener.addAction(self.actionopen_patient)
+        self.menuBar.addAction(self.fileOpener.menuAction())
 
         #跟踪鼠标
         self.setMouseTracking(True)
@@ -122,7 +130,7 @@ class LJJMainWindow(QMainWindow):
 
     def retranslateUi(self, MainWindow):
         _translate = QCoreApplication.translate
-        self.menu.setTitle(_translate("MainWindow", "文件"))
+        self.fileOpener.setTitle(_translate("MainWindow", "文件"))
         self.actionopen_study.setText(_translate("MainWindow", "打开Study"))
         self.actionopen_patient.setText(_translate("MainWindow", "打开Patient"))
 
@@ -156,4 +164,17 @@ class LJJMainWindow(QMainWindow):
         self.imageScrollContainer.closeEvent(QCloseEvent)
         self.imageShownContainer.closeEvent(QCloseEvent)
 
+    def mousePressEvent(self, event):
+        # 重写鼠标点击的事件
+        if (event.button() == Qt.LeftButton):# and self.titleBar.geometry().contains(event.pos()):
+            # 鼠标左键点击标题栏区域
+            self._move_drag = True
+            self.move_DragPosition = event.globalPos() - self.pos()
+            event.accept()
 
+    def mouseMoveEvent(self, QMouseEvent):
+        self.setCursor(Qt.ArrowCursor)
+        if Qt.LeftButton and self._move_drag:
+            # 标题栏拖放窗口位置
+            self.move(QMouseEvent.globalPos() - self.move_DragPosition)
+            QMouseEvent.accept()

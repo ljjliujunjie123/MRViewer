@@ -13,7 +13,8 @@ class UIConfig():
     shownContainerColRatio = 4
     toolsContainerColRation = 1
 
-    scrollContainerHintWidth = 400
+    scrollContainerHintWidth = 300
+    toolsContainerHintWidth = 100
 
     shownContainerMargins = QMargins(0,0,0,0)
     shownContainerContentSpace = 4
@@ -27,7 +28,7 @@ class UIConfig():
 
     toolsSelectRegionCol = 2
     toolsSelectRegionRow = 2
-    toolsSelectRegionItemSize = QSize(80,80)
+    toolsSelectRegionItemSize = QSize(50,50)
 
     imageModeIconSize = QSize(80,80)
     totalColRation = shownContainerColRatio + toolsContainerColRation
@@ -78,13 +79,10 @@ class UIConfig():
         )
 
     def calcToolsContainerGeometry(self):
-        return QRect(
-                self.scrollContainerHintWidth +
-                ((self.screenWidth - self.scrollContainerHintWidth) // self.totalColRation) * self.shownContainerColRatio,
-            0,
-                ((self.screenWidth - self.scrollContainerHintWidth) // self.totalColRation) * self.toolsContainerColRation,
-            self.calcCenterWidgetHeight()
-        )
+        return QRect(0, 0,
+                     self.toolsContainerHintWidth,
+                     self.calcCenterWidgetHeight()
+                     )
 
 
 uiConfig = UIConfig()

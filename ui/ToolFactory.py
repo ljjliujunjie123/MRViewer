@@ -30,54 +30,55 @@ class ToolFactory():
         self.parent = parent
 
     def createTool(self, tag = ToolNum.default, **kwargs):
-        frame = QFrame(self.parent)
-        frame.setFrameShape(QFrame.StyledPanel)
-        frame.setFrameShadow(QFrame.Plain)
-        frame.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-        frame.setEnabled(False)
-        hBoxLayout = QHBoxLayout()
-        hBoxLayout.setContentsMargins(0,0,0,0)
-        hBoxLayout.setAlignment(Qt.AlignCenter)
-        frame.setLayout(hBoxLayout)
+
         if len(kwargs) > 0: signal = kwargs["signal"]
+
         if tag == ToolNum.shownLayout:
             selectImageShownRegionGridWidget = CustomSelectRegionGridWidget(signal)
-            selectImageShownRegionGridWidget.setParent(frame)
             selectImageShownRegionGridWidget.setMouseTracking(True)
             selectImageShownRegionGridWidget.setEnabled(False)
-            hBoxLayout.addWidget(selectImageShownRegionGridWidget)
+            return selectImageShownRegionGridWidget
+
         elif tag == ToolNum.slideShow:
-            enableImageSlideshow = QCheckBox('跑马灯效果',frame)
-            enableImageSlideshow.setEnabled(False) #设置是否启用,可自动变灰色
-            enableImageSlideshow.setCheckState(False) #设置初始状态
-            enableImageSlideshow.setTristate(False)
-            enableImageSlideshow.stateChanged.connect(signal) #打勾就送信
-            hBoxLayout.addWidget(enableImageSlideshow)
+            imgPath = "ui_source/slide_show.png"
+            enableSlideshow = QPushButton()
+            enableSlideshow.setIcon(QIcon(imgPath))
+            enableSlideshow.setIconSize(QSize(80,80))
+            enableSlideshow.setEnabled(False) #设置是否启用,可自动变灰色
+            enableSlideshow.setCheckable(True)
+            enableSlideshow.setChecked(False)
+            enableSlideshow.clicked.connect(signal) #打勾就送信
+            return enableSlideshow
+
         elif tag == ToolNum.modeSelect:
             print("imageModeSelect")
             imageModeContainer = QFrame()
-            imageHBoxLayout =  CustomDecoratedLayout(QHBoxLayout())
-            imageHBoxLayout.initParamsForPlain()
+            imageVBoxLayout =  CustomDecoratedLayout(QVBoxLayout())
+            imageVBoxLayout.initParamsForPlain()
             bt2D = self.createImageModeButton(SingleImageShownContainer.m2DMode, signal)
             bt3D = self.createImageModeButton(SingleImageShownContainer.m3DMode, signal)
             bt3DFake = self.createImageModeButton(SingleImageShownContainer.m3DFakeMode, signal)
             btRT = self.createImageModeButton(SingleImageShownContainer.mRTMode, signal)
-            imageHBoxLayout.addWidgets([bt2D,bt3D,bt3DFake,btRT])
-            imageModeContainer.setLayout(imageHBoxLayout.getLayout())
-            hBoxLayout.addWidget(imageModeContainer)
-        elif tag == ToolNum.extraInfo:
-            print("imageExtraInfo")
-            enableImageExtraInfo = QCheckBox('展示附加信息',frame)
-            enableImageExtraInfo.setEnabled(False) #设置是否启用,可自动变灰色
-            enableImageExtraInfo.setCheckState(Qt.Unchecked) #设置初始状态
-            enableImageExtraInfo.setTristate(False)
-            enableImageExtraInfo.stateChanged.connect(signal) #打勾就送信
-            hBoxLayout.addWidget(enableImageExtraInfo)
-        else:
-            pushButton = QPushButton(frame)
-            hBoxLayout.addWidget(pushButton)
+            imageVBoxLayout.addWidgets([bt2D,bt3D,bt3DFake,btRT])
+            imageModeContainer.setLayout(imageVBoxLayout.getLayout())
+            imageModeContainer.setEnabled(False)
+            return imageModeContainer
 
-        return frame
+        elif tag == ToolNum.extraInfo:
+            imgPath = "ui_source/extra_info.png"
+            enableImageExtraInfo = QPushButton()
+            enableImageExtraInfo.setIcon(QIcon(imgPath))
+            enableImageExtraInfo.setIconSize(QSize(80,80))
+            
+            enableImageExtraInfo.setEnabled(False) #设置是否启用,可自动变灰色
+            enableImageExtraInfo.setCheckable(True)
+            enableImageExtraInfo.setChecked(False)
+            enableImageExtraInfo.clicked.connect(signal) #打勾就送信
+            return enableImageExtraInfo
+        else:
+            pushButton = QPushButton("")
+            return pushButton
+
 
     def createImageModeButton(self, mode, signal):
         button = QPushButton()

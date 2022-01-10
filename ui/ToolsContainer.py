@@ -8,9 +8,9 @@ class ToolsContainer(QFrame):
     showInfoSig = pyqtSignal()
 
     updateImageShownLayoutSignal = pyqtSignal(tuple)
-    enableImageSlideshowSignal = pyqtSignal(int)
+    enableImageSlideshowSignal = pyqtSignal(bool)
     imageModeSelectSignal = pyqtSignal(int)
-    enableImageExtraInfoSignal = pyqtSignal(int)
+    enableImageExtraInfoSignal = pyqtSignal(bool)
 
     def __init__(self, ParentWidget):
         QFrame.__init__(self, ParentWidget)
@@ -22,19 +22,20 @@ class ToolsContainer(QFrame):
         self.setFrameShadow(QFrame.Plain)
         self.setObjectName("toolsContainer")
 
-        #每一个功能用一个Frame包裹起来，用竖向ScrollArea收敛所有功能
+        #用竖向ScrollArea收敛所有功能
         self.toolsScrollArea = QScrollArea(self)
         self.toolsScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.toolsScrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.toolsScrollArea.setFixedSize(self.size())
+        self.toolsScrollArea.setStyleSheet("background-color: grey")
 
         self.toolsScrollContainer = QFrame(self.toolsScrollArea)
         self.toolsScrollContainer.setFixedSize(self.size())
         self.toolsScrollArea.setWidget(self.toolsScrollContainer)
 
         self.toolsScrollLayout = QVBoxLayout()
-        self.toolsScrollLayout.setContentsMargins(0,0,0,0)
-        self.toolsScrollLayout.setSpacing(5)
+        self.toolsScrollLayout.setContentsMargins(10,10,10,10)
+        self.toolsScrollLayout.setSpacing(10)
         self.toolsScrollLayout.setAlignment(Qt.AlignHCenter)
         self.toolsScrollContainer.setLayout(self.toolsScrollLayout)
 
@@ -66,8 +67,8 @@ class ToolsContainer(QFrame):
         self.toolsScrollLayout.addWidget(self.enableImageExtraInfoWidget)
 
         #占位的功能
-        for i in range(4):
-            self.toolsScrollLayout.addWidget(self.toolFactory.createTool())
+        # for i in range(4):
+        #     self.toolsScrollLayout.addWidget(self.toolFactory.createTool())
 
         # #用来测试各个功能的button
         # self.testButton = QPushButton(self)
@@ -86,35 +87,47 @@ class ToolsContainer(QFrame):
                 widget = self.toolsScrollLayout.itemAt(i).widget()
                 widget.setEnabled(True)
                 layout = widget.layout()
-                for j in range(layout.count()):
-                    subWidget = layout.itemAt(j).widget()
-                    print(i)
-                    subWidget.setEnabled(True)
-                    if i == 3:
-                        subWidget.setCheckState(Qt.Checked)
+                if layout != None:
+                    for j in range(layout.count()):
+                        subWidget = layout.itemAt(j).widget()
+                        print(i)
+                        if subWidget != None:
+                            subWidget.setEnabled(True)
+                        if i == 3:
+                            subWidget.setCheckState(Qt.Checked)
 
         if case == 1:# 情形1：选定另一张图片
             print("case==1 选定另一张图片")
             widget = self.toolsScrollLayout.itemAt(1).widget().layout().itemAt(0).widget()
-
-            widget.setEnabled = (curMode == 0)
-            if curMode == 0 and widget.checkState()==Qt.Checked:
+            if curMode == 0:
+                widget.setEnabled(True)
+            else:
+                widget.setEnabled(False)
+            if curMode == 0 and widget.checkState() == Qt.Checked:
                 widget.setCheckState(Qt.Checked)
             else:
                 widget.setCheckState(Qt.Unchecked)
 
             widget3 = self.toolsScrollLayout.itemAt(3).widget().layout().itemAt(0).widget()
-            widget3.setEnabled = (curMode == 0)
+            if curMode == 0:
+                widget3.setEnabled = True
+            else:
+                widget3.setEnabled = False
             widget3.setCheckState(showExtraInfoFlag and Qt.Checked or Qt.Unchecked)
 
         if case == 2:# 情形2：切换2D/3D模式
             print("case==2 切换2D/3D模式")
-            widget = self.toolsScrollLayout.itemAt(1).widget().layout().itemAt(0).widget()
-            widget.setCheckState(Qt.Unchecked)
-            widget.setEnabled(curMode == 0)
-            widget3 = self.toolsScrollLayout.itemAt(3).widget().layout().itemAt(0).widget()
-            widget3.setCheckState(curMode == 0 and Qt.Checked or Qt.Unchecked)
-            widget3.setEnabled(curMode == 0)
+            widget = self.toolsScrollLayout.itemAt(1).widget()
+            widget3 = self.toolsScrollLayout.itemAt(3).widget()
+
+            widget.setChecked(False)
+            if curMode == 0:#如果是3D
+                widget3.setChecked(True)
+                widget3.setEnabled(True)
+                widget.setEnabled(True)
+            else:
+                widget3.setChecked(False)
+                widget.setEnabled(False)
 
                 
     def retranslateUi(self):

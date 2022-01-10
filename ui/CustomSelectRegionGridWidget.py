@@ -26,6 +26,7 @@ class CustomSelectRegionGridWidget(QFrame):
         self.innerFrame.setMouseTracking(True)
         self.innerFrame.setFrameShape(QFrame.StyledPanel)
         self.innerFrame.setFrameShadow(QFrame.Plain)
+        self.innerFrame.setStyleSheet("border:2px red")
         self.hBoxLayout.addWidget(self.innerFrame)
         self.vBoxLayout.addLayout(self.hBoxLayout)
 
