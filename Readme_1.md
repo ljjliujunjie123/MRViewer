@@ -8,3 +8,6 @@
 1. 3D Orientation Marker
 2. 修改了ui\m2DImageShownWidget.py，修正extra text 无法resize的问题，简化了部分代码
 3. 修改了ui\m2DImageShownWidget.py，utils\util.py，美化代码
+
+2022-1-10
+1. 美化界面ver1.0.0

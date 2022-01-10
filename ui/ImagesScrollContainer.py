@@ -13,8 +13,7 @@ class ImageScrollContainer(QFrame):
         QFrame.__init__(self, ParentWidget)
 
         self.setGeometry(uiConfig.calcScrollContainerGeometry())
-        print("ImageScrollContainer Geometry:")
-        print(self.geometry())
+        print("ImageScrollContainer Geometry:",self.geometry())
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Plain)
         self.setObjectName("imageScrollContainer")
@@ -22,6 +21,7 @@ class ImageScrollContainer(QFrame):
         self.imageVerticalScrollLayout = CustomDecoratedLayout(QVBoxLayout())
         self.imageVerticalScrollLayout.initParamsForPlain()
         self.setLayout(self.imageVerticalScrollLayout.getLayout())
+        self.setStyleSheet("background: grey;")
 
     def updateListHeight(self, itemCount):
         listHeight = (uiConfig.iconSize.height() + uiConfig.itemSpace * 2) * itemCount

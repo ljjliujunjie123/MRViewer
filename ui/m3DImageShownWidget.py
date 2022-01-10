@@ -38,7 +38,7 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.iren.SetInteractorStyle(self.style)
         # 添加世界坐标系
         axesActor = vtk.vtkAnnotatedCubeActor()
-        ren3D.AddActor(axesActor)
+        # ren3D.AddActor(axesActor)
         # 注意这里设置的值是屏幕坐标系下的方位值，并不是解剖学上的方位
         axesActor.SetXPlusFaceText("L")
         axesActor.SetXMinusFaceText("R")

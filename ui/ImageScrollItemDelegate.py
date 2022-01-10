@@ -31,7 +31,7 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         ))
 
         #绘制series Name
-        QPainter.setPen(QColor(230, 230, 230))
+        QPainter.setPen(QColor("white"))
         font = QFont()
         font.setFamily("Microsoft YaHei")
         font.setPointSize(7)
@@ -40,7 +40,7 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
 
         #绘制series Count
         annoRect = self.calcAnnotationTargetRect(iconRect)
-        QPainter.setBrush(QColor(0, 0, 0))
+        QPainter.setBrush(QColor("black"))
         QPainter.drawRect(annoRect)
         font.setPointSize(5)
         QPainter.setFont(font)

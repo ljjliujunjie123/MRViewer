@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QIcon,QDrag
+from PyQt5.QtGui import QBrush, QColor, QIcon,QDrag
 
 from PIL.ImageQt import *
 from ui.config import uiConfig
@@ -25,6 +25,7 @@ class ImageScrollTreeWidget(QTreeWidget):
         self.setIconSize(uiConfig.iconSize)
         self.setDragEnabled(True)
         self.setItemDelegateForColumn(0, ImageScrollItemDelegate(self))
+        self.setIndentation(0)
 
     def showImageList(self, dict):
 
@@ -61,6 +62,10 @@ class ImageScrollTreeWidget(QTreeWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.dragPoint = event.pos()
+            item = self.itemAt(self.dragPoint)
+            if item == None: return
+            item.setSelected(True)
+            # item.setBackground(0,QBrush(QColor('blue')))
             self.dragItem = self.itemAt(self.dragPoint)
         super().mousePressEvent(event)
 

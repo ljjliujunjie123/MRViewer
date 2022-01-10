@@ -55,7 +55,7 @@ class SingleImageShownContainer(QFrame):
         self.title.setFrameShape(QFrame.StyledPanel)
         self.title.setFrameShadow(QFrame.Plain)
         self.title.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
-        self.title.setStyleSheet("background-color:#fce1df;")
+        self.title.setStyleSheet("background-color:grey;")
         hBoxLayout = QHBoxLayout()
         hBoxLayout.setContentsMargins(5,5,5,5)
         hBoxLayout.setSpacing(0)
@@ -68,6 +68,7 @@ class SingleImageShownContainer(QFrame):
 
         #底部image
         self.imageContainer = QFrame()
+        self.imageContainer.setStyleSheet("background-color:black;")
         self.imageContainer.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.vImageBoxLayout = CustomDecoratedLayout(QVBoxLayout())
         self.vImageBoxLayout.initParamsForPlain()
@@ -82,7 +83,7 @@ class SingleImageShownContainer(QFrame):
         if isSelected:
             self.title.setStyleSheet("background-color:#eb9076;")
         else:
-            self.title.setStyleSheet("background-color:#fce1df;")
+            self.title.setStyleSheet("background-color:grey;")
 
     def resetSelectState(self):
         self.isSelected = False

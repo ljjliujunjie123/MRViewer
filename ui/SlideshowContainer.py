@@ -46,16 +46,17 @@ class SlideshowContainer(QDialog):
     def mousePressEvent(self, event):
         # 重写鼠标点击的事件
         if (event.button() == Qt.LeftButton):
-            # 鼠标左键点击标题栏区域
             self._move_drag = True
             self.move_DragPosition = event.globalPos() - self.pos()
             event.accept()
+        return super().mousePressEvent(event)
 
-    def mouseMoveEvent(self, QMouseEvent):
+    def mouseMoveEvent(self, event):
         self.setCursor(Qt.ArrowCursor)
         if Qt.LeftButton and self._move_drag:
             # 标题栏拖放窗口位置
-            self.move(QMouseEvent.globalPos() - self.move_DragPosition)
-            QMouseEvent.accept()
+            self.move(event.globalPos() - self.move_DragPosition)
+            event.accept()
+        return super().mousePressEvent(event)
 
     
