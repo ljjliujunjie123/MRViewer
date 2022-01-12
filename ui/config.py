@@ -2,17 +2,17 @@ import sys
 from PyQt5.QtCore import QSize,QRect,QMargins
 
 class UIConfig():
-
+    #主页面size
     screenWidth = 1000
     screenHeight = 800
 
+    #缩放最小大小
     centralWidgetMinSize = QSize(800,600)
 
+    #菜单高度
     menuHeight = 22
 
-    shownContainerColRatio = 4
-    toolsContainerColRation = 1
-
+    
     scrollContainerHintWidth = 300
     toolsContainerHintWidth = 100
 
@@ -31,7 +31,6 @@ class UIConfig():
     toolsSelectRegionItemSize = QSize(50,50)
 
     imageModeIconSize = QSize(80,80)
-    totalColRation = shownContainerColRatio + toolsContainerColRation
 
     studyTag = 1
     patientTag = 2
@@ -64,25 +63,11 @@ class UIConfig():
             self.screenWidth, self.calcCenterWidgetHeight()
         )
 
-    def calcScrollContainerGeometry(self):
-        return QRect(0, 0,
-                     self.scrollContainerHintWidth,
-                     self.calcCenterWidgetHeight()
-                     )
+    def calcShownContainerWidth(self):
+        return (self.screenWidth - self.scrollContainerHintWidth - self.toolsContainerHintWidth)
+          
 
-    def calcShownContainerGeometry(self):
-        return QRect(
-            self.scrollContainerHintWidth,
-            0,
-            ((self.screenWidth - self.scrollContainerHintWidth) // self.totalColRation) * self.shownContainerColRatio,
-            self.calcCenterWidgetHeight()
-        )
 
-    def calcToolsContainerGeometry(self):
-        return QRect(0, 0,
-                     self.toolsContainerHintWidth,
-                     self.calcCenterWidgetHeight()
-                     )
 
 
 uiConfig = UIConfig()

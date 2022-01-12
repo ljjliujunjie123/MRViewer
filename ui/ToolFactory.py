@@ -67,6 +67,7 @@ class ToolFactory():
         elif tag == ToolNum.extraInfo:
             imgPath = "ui_source/extra_info.png"
             enableImageExtraInfo = QPushButton()
+            enableImageExtraInfo.setToolTip("图像注释")
             enableImageExtraInfo.setIcon(QIcon(imgPath))
             enableImageExtraInfo.setIconSize(QSize(80,80))
             

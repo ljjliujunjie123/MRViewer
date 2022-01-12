@@ -11,11 +11,13 @@ class CustomSelectRegionGridWidget(QFrame):
         self.updateImageShownLayoutSignal = signal
         width = uiConfig.toolsSelectRegionCol * uiConfig.toolsSelectRegionItemSize.width()
         height = uiConfig.toolsSelectRegionRow * uiConfig.toolsSelectRegionItemSize.height()
+        print(width,height)
         self.setFixedSize(width,height)
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Plain)
 
         self.vBoxLayout = QVBoxLayout()
+        self.vBoxLayout.setAlignment(Qt.AlignCenter)
         self.setLayout(self.vBoxLayout)
         self.hBoxLayout = QHBoxLayout()
         self.hBoxLayout.setContentsMargins(0,0,0,0)
@@ -26,7 +28,7 @@ class CustomSelectRegionGridWidget(QFrame):
         self.innerFrame.setMouseTracking(True)
         self.innerFrame.setFrameShape(QFrame.StyledPanel)
         self.innerFrame.setFrameShadow(QFrame.Plain)
-        self.innerFrame.setStyleSheet("border:2px red")
+        # self.innerFrame.setStyleSheet("border:2px red")
         self.hBoxLayout.addWidget(self.innerFrame)
         self.vBoxLayout.addLayout(self.hBoxLayout)
 

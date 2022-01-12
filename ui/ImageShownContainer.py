@@ -9,7 +9,7 @@ class ImageShownContainer(QFrame):
     def __init__(self, ParentWidget):
         QFrame.__init__(self, ParentWidget)
 
-        self.setGeometry(uiConfig.calcShownContainerGeometry())
+        self.resize(uiConfig.calcShownContainerWidth(),self.parent().height())
         print("ImageShownContainer Geometry:")
         print(self.geometry())
         self.setFrameShape(QFrame.StyledPanel)
@@ -19,7 +19,7 @@ class ImageShownContainer(QFrame):
         self.imageShownContainerWidget = QWidget(self)
         self.imageShownContainerWidget.setFixedSize(self.size())
         self.imageShownContainerWidget.setObjectName("imageShownContainerWidget")
-        self.setStyleSheet("background: black;")
+        self.setStyleSheet("background: grey;")
 
         self.imageShownContainerLayout = CustomDecoratedLayout(QGridLayout())
         self.imageShownContainerWidget.setLayout(self.imageShownContainerLayout.getLayout())
