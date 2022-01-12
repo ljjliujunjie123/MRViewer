@@ -49,7 +49,6 @@ class SlideshowContainer(QDialog):
             self._move_drag = True
             self.move_DragPosition = event.globalPos() - self.pos()
             event.accept()
-        return super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
         self.setCursor(Qt.ArrowCursor)
@@ -57,6 +56,5 @@ class SlideshowContainer(QDialog):
             # 标题栏拖放窗口位置
             self.move(event.globalPos() - self.move_DragPosition)
             event.accept()
-        return super().mousePressEvent(event)
 
     

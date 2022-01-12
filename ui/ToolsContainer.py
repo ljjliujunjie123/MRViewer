@@ -15,16 +15,16 @@ class ToolsContainer(QFrame):
     def __init__(self, ParentWidget):
         QFrame.__init__(self, ParentWidget)
 
-        self.setGeometry(uiConfig.calcToolsContainerGeometry())
         print("ToolsContainer Geometry:")
         print(self.geometry())
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Plain)
+        self.setMinimumWidth(uiConfig.toolsContainerHintWidth)
         self.setObjectName("toolsContainer")
 
         #用竖向ScrollArea收敛所有功能
         self.toolsScrollArea = QScrollArea(self)
-        self.toolsScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.toolsScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.toolsScrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.toolsScrollArea.setFixedSize(self.size())
         self.toolsScrollArea.setStyleSheet("background-color: grey")
@@ -35,9 +35,7 @@ class ToolsContainer(QFrame):
 
         self.toolsScrollLayout = QVBoxLayout()
         self.toolsScrollLayout.setContentsMargins(10,10,10,10)
-        self.toolsScrollLayout.setSpacing(10)
-        self.toolsScrollLayout.setAlignment(Qt.AlignHCenter)
-        self.toolsScrollContainer.setLayout(self.toolsScrollLayout)
+        # self.toolsScrollLayout.setAlignment(Qt.AlignHCenter)
 
         #工厂模式
         self.toolFactory = ToolFactory(self.toolsScrollContainer)
@@ -46,30 +44,32 @@ class ToolsContainer(QFrame):
         #一个可选择的表格，来调整文件渲染区的布局
         self.selectImageShownRegionWidget = \
             self.toolFactory.createTool(ToolNum.shownLayout, signal = self.updateImageShownLayoutSignal)
-        self.toolsScrollLayout.addWidget(self.selectImageShownRegionWidget)
+        self.toolsScrollLayout.addWidget(self.selectImageShownRegionWidget,0,Qt.AlignTop)
 
         # 功能2 by evermg42
         # 图像的自动轮播开启
         self.enableImageSlideShowWidget = \
             self.toolFactory.createTool(ToolNum.slideShow, signal = self.enableImageSlideshowSignal)
-        self.toolsScrollLayout.addWidget(self.enableImageSlideShowWidget)
+        self.toolsScrollLayout.addWidget(self.enableImageSlideShowWidget,0,Qt.AlignTop)
 
         #功能3
         #图像的模式切换
         self.imageModeSelectWidget = \
             self.toolFactory.createTool(ToolNum.modeSelect, signal = self.imageModeSelectSignal)
-        self.toolsScrollLayout.addWidget(self.imageModeSelectWidget)
+        self.toolsScrollLayout.addWidget(self.imageModeSelectWidget,0,Qt.AlignTop)
 
         #功能4
         #图像的附加信息开关
         self.enableImageExtraInfoWidget = \
             self.toolFactory.createTool(ToolNum.extraInfo, signal = self.enableImageExtraInfoSignal)
-        self.toolsScrollLayout.addWidget(self.enableImageExtraInfoWidget)
+        self.toolsScrollLayout.addWidget(self.enableImageExtraInfoWidget,0,Qt.AlignTop)
 
         #占位的功能
         # for i in range(4):
         #     self.toolsScrollLayout.addWidget(self.toolFactory.createTool())
 
+        self.toolsScrollLayout.addStretch()
+        self.toolsScrollContainer.setLayout(self.toolsScrollLayout)
         # #用来测试各个功能的button
         # self.testButton = QPushButton(self)
         # self.testButton.setGeometry(0, self.selectImageShownRegionTableWidget.height(), 100, 30)
@@ -85,16 +85,17 @@ class ToolsContainer(QFrame):
             print("case==0 初始化")
             for i in range(self.toolsScrollLayout.count()):
                 widget = self.toolsScrollLayout.itemAt(i).widget()
+                if widget == None:continue
                 widget.setEnabled(True)
                 layout = widget.layout()
                 if layout != None:
                     for j in range(layout.count()):
                         subWidget = layout.itemAt(j).widget()
                         print(i)
-                        if subWidget != None:
-                            subWidget.setEnabled(True)
-                        if i == 3:
-                            subWidget.setCheckState(Qt.Checked)
+                        if subWidget == None:continue
+                        subWidget.setEnabled(True)
+                if i == 3:
+                    widget.setChecked(True)
 
         if case == 1:# 情形1：选定另一张图片
             print("case==1 选定另一张图片")
@@ -108,7 +109,7 @@ class ToolsContainer(QFrame):
             else:
                 widget.setCheckState(Qt.Unchecked)
 
-            widget3 = self.toolsScrollLayout.itemAt(3).widget().layout().itemAt(0).widget()
+            widget3 = self.toolsScrollLayout.itemAt(3).widget()
             if curMode == 0:
                 widget3.setEnabled = True
             else:
@@ -127,6 +128,7 @@ class ToolsContainer(QFrame):
                 widget.setEnabled(True)
             else:
                 widget3.setChecked(False)
+                widget3.setEnabled(False)
                 widget.setEnabled(False)
 
                 

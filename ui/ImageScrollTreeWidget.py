@@ -65,7 +65,6 @@ class ImageScrollTreeWidget(QTreeWidget):
             item = self.itemAt(self.dragPoint)
             if item == None: return
             item.setSelected(True)
-            # item.setBackground(0,QBrush(QColor('blue')))
             self.dragItem = self.itemAt(self.dragPoint)
         super().mousePressEvent(event)
 

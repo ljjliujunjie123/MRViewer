@@ -29,7 +29,6 @@ class LJJMainWindow(QMainWindow):
         self.centralwidget = QWidget(self)
         self.centralwidget.setGeometry(uiConfig.calcCenterWidgetGeometry())
         self.centralwidget.setMinimumSize(uiConfig.centralWidgetMinSize)
-        self.centralwidget.setStyleSheet("background-color:#A9A9A9;")
         self.centralwidget.setObjectName("centralwidget")
         self.setCentralWidget(self.centralwidget)
         
@@ -77,8 +76,6 @@ class LJJMainWindow(QMainWindow):
         self.mainWinLayout.initParamsForPlain()
         self.splitter.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.splitter.setChildrenCollapsible(False)
-        self.splitter.setMinimumSize(100,0)
-        # self.mainWinLayout.getLayout().addWidget(self.titleBar)
         self.mainWinLayout.getLayout().addWidget(self.splitter)
         self.centralwidget.setLayout(self.mainWinLayout.getLayout())
 

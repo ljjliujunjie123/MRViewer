@@ -72,6 +72,8 @@ class titleBar(QWidget):
         pLayout.setSpacing(0)
         pLayout.setContentsMargins(5, 0, 5, 0)
         self.setLayout(pLayout)
+
+        #!返回父布局的press
         
     
     
