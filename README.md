@@ -42,7 +42,7 @@ conda install --yes --file requirements.txt #install all packages needed
 >
 > If installing processing is too long, you can manually install these critical packages: 
 >
-> `python3, vtk, opencv-python, pydicom, pillow, pyqt5, sympy`
+> `python3, vtk, pydicom, pillow, pyqt5, sympy`
 
 Open your Pycharm or other IDE
 
@@ -557,3 +557,22 @@ $$
 2021-12-29
 
 - **[陶然]** 通过修改了ui\SingleImageShownContainer.py、ui\ToolFactory.py、ui\ToolsContainer.py、controller\ImageShownLayoutController.py 完成了按钮、图片双向调控
+
+2022-1-18
+
+中期总结
+
+- 在实验室电脑上实现了一个mock版本，通过共享文件夹的方法和重建系统关联了起来，这个版本作为演示所用，封存在Gittee上，不准备继续维护
+- **[陶然]**实现了UI的美化，以及工具栏的重构，未来这块也准备继续由他负责
+- 两位新同学处于学习阶段，暂不参与开发，预期2月底能参与开发
+
+下一步目标
+
+- 缓存
+- CrossView重构
+- Layout按钮重构 （陶然）
+- DSA数据
+- 跑马灯固定位置，同时每一个SC都单独支持跑马灯
+- 3D图调节窗位窗宽
+- DICOM超大图叠加图崩溃
+- Gadgetron重建系统的重新联调
