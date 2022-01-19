@@ -16,7 +16,8 @@ from utils.util import checkSameSeries,checkSameStudy
 class ImageShownLayoutController(QObject):
 
     selectImageShownContainerSignal = pyqtSignal(SingleImageShownContainer,bool)
-    updateToolsContainerStateSignal = pyqtSignal(int,int,int)
+    initToolsContainerStateSignal = pyqtSignal()
+    updateToolsContainerStateSignal = pyqtSignal(int)
 
     #第一个参数指示发出信号的是哪一个container
     updateCrossViewSignal = pyqtSignal(SingleImageShownContainer)
@@ -49,9 +50,9 @@ class ImageShownLayoutController(QObject):
             self.selectedImageShownContainer = container
 
         if isInit:
-            self.updateToolsContainerStateSignal.emit(0,container.curMode,container.mImage2DShownData.showExtraInfoFlag)
+            self.initToolsContainerStateSignal.emit()
         else:
-            self.updateToolsContainerStateSignal.emit(1,container.curMode,container.mImage2DShownData.showExtraInfoFlag)
+            self.updateToolsContainerStateSignal.emit(container.curMode)
 
     def tryQuitImageSlideShow(self):
         # if self.imageSlideshow is not None: self.imageSlideshow.close()
@@ -314,7 +315,7 @@ class ImageShownLayoutController(QObject):
         if self.selectedImageShownContainer.curMode ==  mode: return
         self.tryQuitImageSlideShow() # 退出跑马灯
         if self.selectedImageShownContainer.switchImageContainerMode(mode) == Status.bad: return # 渲染不出就不渲染了
-        self.updateToolsContainerStateSignal.emit(2,self.selectedImageShownContainer.curMode,self.selectedImageShownContainer.mImage2DShownData.showExtraInfoFlag)
+        self.updateToolsContainerStateSignal.emit(self.selectedImageShownContainer.curMode)
 
     #imageExtraInfo开关
     def imageExtraInfoStateHandler(self, isShow):

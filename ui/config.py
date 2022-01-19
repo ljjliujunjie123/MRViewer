@@ -30,7 +30,7 @@ class UIConfig():
     toolsSelectRegionRow = 2
     toolsSelectRegionItemSize = QSize(50,50)
 
-    imageModeIconSize = QSize(80,80)
+    toolsIconSize = QSize(80,80)
 
     studyTag = 1
     patientTag = 2

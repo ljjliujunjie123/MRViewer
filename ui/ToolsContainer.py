@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from ui.config import uiConfig
-from ui.ToolFactory import ToolFactory, ToolNum
+from ui.ToolsFactory import ToolsFactory, ToolNum
 class ToolsContainer(QFrame):
 
     showInfoSig = pyqtSignal()
@@ -11,6 +11,7 @@ class ToolsContainer(QFrame):
     enableImageSlideshowSignal = pyqtSignal(bool)
     imageModeSelectSignal = pyqtSignal(int)
     enableImageExtraInfoSignal = pyqtSignal(bool)
+    initToolsContainerStateSignal = pyqtSignal()
 
     def __init__(self, ParentWidget):
         QFrame.__init__(self, ParentWidget)
@@ -38,7 +39,7 @@ class ToolsContainer(QFrame):
         # self.toolsScrollLayout.setAlignment(Qt.AlignHCenter)
 
         #工厂模式
-        self.toolFactory = ToolFactory(self.toolsScrollContainer)
+        self.toolFactory = ToolsFactory(self.toolsScrollContainer)
 
         #功能1
         #一个可选择的表格，来调整文件渲染区的布局
@@ -80,56 +81,17 @@ class ToolsContainer(QFrame):
         # self.pushButton.setGeometry(0, self.selectImageShownRegionTableWidget.height() + self.testButton.height(), 100, 30)
         # self.pushButton.clicked.connect(self.showInfoSig)
 
-    def updateToolsContainerStateHandler(self, case, curMode,showExtraInfoFlag):
-        if case == 0:# 情形0：初始化
-            print("case==0 初始化")
-            for i in range(self.toolsScrollLayout.count()):
-                widget = self.toolsScrollLayout.itemAt(i).widget()
-                if widget == None:continue
-                widget.setEnabled(True)
-                layout = widget.layout()
-                if layout != None:
-                    for j in range(layout.count()):
-                        subWidget = layout.itemAt(j).widget()
-                        print(i)
-                        if subWidget == None:continue
-                        subWidget.setEnabled(True)
-                if i == 3:
-                    widget.setChecked(True)
+    def initToolsContainerStateHandler(self):
+        self.selectImageShownRegionWidget.init()
+        self.enableImageExtraInfoWidget.init()
+        self.imageModeSelectWidget.init()
+        self.enableImageSlideShowWidget.init()
 
-        if case == 1:# 情形1：选定另一张图片
-            print("case==1 选定另一张图片")
-            widget = self.toolsScrollLayout.itemAt(1).widget().layout().itemAt(0).widget()
-            if curMode == 0:
-                widget.setEnabled(True)
-            else:
-                widget.setEnabled(False)
-            if curMode == 0 and widget.checkState() == Qt.Checked:
-                widget.setCheckState(Qt.Checked)
-            else:
-                widget.setCheckState(Qt.Unchecked)
-
-            widget3 = self.toolsScrollLayout.itemAt(3).widget()
-            if curMode == 0:
-                widget3.setEnabled = True
-            else:
-                widget3.setEnabled = False
-            widget3.setCheckState(showExtraInfoFlag and Qt.Checked or Qt.Unchecked)
-
-        if case == 2:# 情形2：切换2D/3D模式
-            print("case==2 切换2D/3D模式")
-            widget = self.toolsScrollLayout.itemAt(1).widget()
-            widget3 = self.toolsScrollLayout.itemAt(3).widget()
-
-            widget.setChecked(False)
-            if curMode == 0:#如果是3D
-                widget3.setChecked(True)
-                widget3.setEnabled(True)
-                widget.setEnabled(True)
-            else:
-                widget3.setChecked(False)
-                widget3.setEnabled(False)
-                widget.setEnabled(False)
+    def updateToolsContainerStateHandler(self, curMode):
+        # self.selectImageShownRegionWidget.update()不需要
+        self.enableImageExtraInfoWidget.update(curMode == 0)
+        # self.imageModeSelectWidget.update()不需要
+        self.enableImageSlideShowWidget.update(curMode == 0)
 
                 
     def retranslateUi(self):

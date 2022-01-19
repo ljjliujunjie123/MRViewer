@@ -1,10 +1,11 @@
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from ui.Tools.ToolsInterface import ToolsInterface
 from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 
-class CustomSelectRegionGridWidget(QFrame):
+class CustomSelectRegionGridWidget(QFrame, ToolsInterface):
 
     def __init__(self, signal):
         QFrame.__init__(self)
@@ -15,6 +16,7 @@ class CustomSelectRegionGridWidget(QFrame):
         self.setFixedSize(width,height)
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Plain)
+        self.setContentsMargins(0,0,0,0)
 
         self.vBoxLayout = QVBoxLayout()
         self.vBoxLayout.setAlignment(Qt.AlignCenter)
@@ -28,7 +30,6 @@ class CustomSelectRegionGridWidget(QFrame):
         self.innerFrame.setMouseTracking(True)
         self.innerFrame.setFrameShape(QFrame.StyledPanel)
         self.innerFrame.setFrameShadow(QFrame.Plain)
-        # self.innerFrame.setStyleSheet("border:2px red")
         self.hBoxLayout.addWidget(self.innerFrame)
         self.vBoxLayout.addLayout(self.hBoxLayout)
 
@@ -41,6 +42,9 @@ class CustomSelectRegionGridWidget(QFrame):
             widget.setStyleSheet("background-color:black;")
             widget.setMouseTracking(True)
             self.gridLayout.getLayout().addWidget(widget,rect[0],rect[1],1,1)
+        
+        self.setMouseTracking(True)
+        self.setEnabled(False)
 
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)
@@ -62,11 +66,11 @@ class CustomSelectRegionGridWidget(QFrame):
         super().mouseMoveEvent(QMouseEvent)
         point = QMouseEvent.pos()
         isInInnerFrame = self.isInInnerFrame(point)
-        print("cur point ", point)
-        print("innerframe ", self.innerFrame.pos())
+        # print("cur point ", point)
+        # print("innerframe ", self.innerFrame.pos())
         for i in range(self.gridLayout.getLayout().count()):
             widget = self.gridLayout.getLayout().itemAt(i).widget()
-            print(i," widget ", widget.pos())
+            # print(i," widget ", widget.pos())
             if isInInnerFrame and \
                 point.x() > self.innerFrame.pos().x() + widget.pos().x() and \
                 point.y() > self.innerFrame.pos().y() + widget.pos().y():
@@ -90,3 +94,10 @@ class CustomSelectRegionGridWidget(QFrame):
             else:
                 widget.setStyleSheet("background-color:gray;")
         super().setEnabled(bool)
+
+
+    def init(self):
+        self.setEnabled(True)
+
+    def update(self,enabled):
+        pass
