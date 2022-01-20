@@ -46,8 +46,8 @@ class ImageScrollContainer(QFrame):
         # 注意删除item时要先清除其所有的connect信号
         self.imageVerticalScrollWidget.clear()
 
-    def showImageList(self, dict, tag):
-        self.imageVerticalScrollWidget.showImageList(dict)
+    def showImageList(self):
+        self.imageVerticalScrollWidget.showImageList()
 
     def resizeEvent(self, *args, **kwargs):
         if self.imageVerticalScrollWidget is not None:

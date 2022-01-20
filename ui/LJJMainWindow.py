@@ -13,7 +13,7 @@ from utils.status import Status
 class LJJMainWindow(QMainWindow):
 
     updateImageShownSignal = pyqtSignal(str,str)
-    updateImageListSignal = pyqtSignal(dict,int)
+    updateImageListSignal = pyqtSignal(int)
     updateImage3DShownSignal = pyqtSignal(str)
     enableImageSlideshow = pyqtSignal(bool) #图像走马灯开关
 
@@ -114,7 +114,6 @@ class LJJMainWindow(QMainWindow):
         self.toolsContainer.updateImageShownLayoutSignal.connect(
             self.imageShownContainer.imageShownLayoutController.updateLayout
         )
-        self.toolsContainer.initToolsContainerStateSignal
         self.toolsContainer.enableImageSlideshowSignal.connect(
             self.imageShownContainer.imageShownLayoutController.imageSlideshowControl
         ) #evermg42
@@ -137,19 +136,10 @@ class LJJMainWindow(QMainWindow):
 
         self.toolsContainer.retranslateUi()
 
-    def updateImageListArea(self, dict, tag):
+    def updateImageListArea(self, tag):
         self.imageScrollContainer.initImageListView(tag)
-        if tag is uiConfig.studyTag:
-            status = self.imageScrollContainer.updateListHeight(len(dict.keys()))
-            if status is Status.bad: return
-
-        if tag is uiConfig.patientTag:
-            count = sum([len(study.keys()) for study in list(dict.values())])
-            status = self.imageScrollContainer.updateListHeight(count)
-            if status is Status.bad: return
-
         self.imageScrollContainer.clearImageList()
-        self.imageScrollContainer.showImageList(dict, tag)
+        self.imageScrollContainer.showImageList()
 
     def resizeEvent(self, *args, **kwargs):
         print("mainWindow geometry", self.geometry())

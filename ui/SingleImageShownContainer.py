@@ -95,7 +95,7 @@ class SingleImageShownContainer(QFrame):
     def getDataFromDropEvent(self, mimeData):
         self.imageData.seriesPath = mimeData["seriesPath"]
         self.imageData.seriesImageCount = mimeData["seriesImageCount"]
-        self.imageData.filePaths = [self.imageData.seriesPath + '\\' + fileName for fileName in os.listdir(self.imageData.seriesPath)]
+        self.imageData.filePaths = [os.path.join(self.imageData.seriesPath,fileName) for fileName in os.listdir(self.imageData.seriesPath)]
         self.imageData.currentIndex = 0
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
 

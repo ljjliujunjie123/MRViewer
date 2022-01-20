@@ -2,11 +2,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QIcon,QDrag
 
-from PIL.ImageQt import *
 from ui.config import uiConfig
 from ui.ImageScrollItemDelegate import ImageScrollItemDelegate
-from utils.util import dicom_to_qt,getSeriesPathFromFileName,getSeriesImageCountFromSeriesPath
+from utils.util import createDicomPixmap
 from utils.ImageItemMimeData import ImageItemMimeData
+from Model.ImagesDataModel import imageDataModel
 
 class ImageScrollListWidget(QListWidget):
 
@@ -26,29 +26,25 @@ class ImageScrollListWidget(QListWidget):
         self.setResizeMode(QListWidget.Adjust)
         self.setItemDelegate(ImageScrollItemDelegate(self))
 
-    def showImageList(self, dict):
-        for seriesName,imageFileName in dict.items():
-            self.addImageItem(imageFileName, seriesName)
+    def showImageList(self):
+        studyDict = imageDataModel.dataSets.caches()[0]
+        for seriesName,seriesDict in studyDict.items():
+            dcmFile = list(seriesDict.values())[0]
 
-    def addImageItem(self, fileName, text):
-        qim = dicom_to_qt(fileName,uiConfig.factor_contrast,
-                          uiConfig.factor_bright, uiConfig.autocontrast_mode,uiConfig.inversion_mode)
-        pix = QPixmap.fromImage(qim)
-        pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
-        imageIcon = QIcon()
-        imageIcon.addPixmap(pixmap_resized)
-        imageItem = QListWidgetItem()
-        imageItem.setIcon(imageIcon)
-        imageItem.setText(text)
-        imageItem.setSizeHint(uiConfig.itemHintSize)
-        seriesPath = getSeriesPathFromFileName(fileName)
-        seriesImageCount = getSeriesImageCountFromSeriesPath(seriesPath)
-        itemExtraData = {
-            "seriesPath": seriesPath,
-            "seriesImageCount": seriesImageCount
-        }
-        imageItem.setData(3,itemExtraData)
-        self.addItem(imageItem)
+            imageIcon = QIcon()
+            imageIcon.addPixmap(createDicomPixmap(dcmFile))
+
+            imageItem = QListWidgetItem()
+            imageItem.setIcon(imageIcon)
+            imageItem.setText(seriesName)
+            imageItem.setSizeHint(uiConfig.itemHintSize)
+
+            seriesImageCount = len(seriesDict)
+            itemExtraData = {
+                "seriesImageCount": seriesImageCount
+            }
+            imageItem.setData(3,itemExtraData)
+            self.addItem(imageItem)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

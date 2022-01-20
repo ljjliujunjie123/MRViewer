@@ -1,12 +1,12 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QBrush, QColor, QIcon,QDrag
+from PyQt5.QtGui import QIcon,QDrag
 
-from PIL.ImageQt import *
 from ui.config import uiConfig
 from ui.ImageScrollItemDelegate import ImageScrollItemDelegate
-from utils.util import dicom_to_qt,getSeriesPathFromFileName,getSeriesImageCountFromSeriesPath
+from utils.util import createDicomPixmap
 from utils.ImageItemMimeData import ImageItemMimeData
+from Model.ImagesDataModel import imageDataModel
 
 class ImageScrollTreeWidget(QTreeWidget):
 
@@ -26,37 +26,32 @@ class ImageScrollTreeWidget(QTreeWidget):
         self.setDragEnabled(True)
         self.setItemDelegateForColumn(0, ImageScrollItemDelegate(self))
         self.setIndentation(0)
+        #这里后续要做一波美化
+        # self.setStyleSheet("QTreeWidget::item{height:350px;}")
 
-    def showImageList(self, dict):
-
+    def showImageList(self):
         self.roots = []
-
-        for studyName,studyValue in dict.items():
+        for studyName in imageDataModel.dataSets.cache_names():
+            studyDict = imageDataModel.findStudyItem(studyName)
             root = QTreeWidgetItem(self)
             root.setText(0,studyName)
-            for seriesName,seriesValue in studyValue.items():
+            for seriesName, seriesDict in studyDict.items():
                 child = QTreeWidgetItem(root)
-                child.setText(0,seriesName)
-                child.setIcon(0,self.getImageIcon(seriesValue))
-                seriesPath = getSeriesPathFromFileName(seriesValue)
-                seriesImageCount = getSeriesImageCountFromSeriesPath(seriesPath)
+                child.setText(0, seriesName)
+                child.setIcon(0, self.getImageIcon(seriesDict))
+                seriesImageCount = len(seriesDict)
                 itemExtraData = {
-                    "seriesPath": seriesPath,
                     "seriesImageCount": seriesImageCount
                 }
                 child.setData(0,3,itemExtraData)
             self.roots.append(root)
-
         self.addTopLevelItems(self.roots)
         self.expandItem(self.roots[0])
 
-    def getImageIcon(self, fileName):
-        qim = dicom_to_qt(fileName,uiConfig.factor_contrast,
-                            uiConfig.factor_bright, uiConfig.autocontrast_mode, uiConfig.inversion_mode)
-        pix = QPixmap.fromImage(qim)
-        pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
+    def getImageIcon(self, seriesDict):
+        dcmFile = list(seriesDict.values())[0]
         imageIcon = QIcon()
-        imageIcon.addPixmap(pixmap_resized)
+        imageIcon.addPixmap(createDicomPixmap(dcmFile))
         return imageIcon
 
     def mousePressEvent(self, event):
