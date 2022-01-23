@@ -112,8 +112,11 @@ class ImageShownLayoutController(QObject):
             and (emitContainer.curMode != SingleImageShownContainer.mRTMode):
             handleContainer.mImageShownWidget.tryHideCrossBoxWidget()
             return
-        isSameStudy = checkSameStudy(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
-        isSameSeries = checkSameSeries(handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath)
+
+        df1 = handleContainer.imageData.getDcmDataByIndex(handleContainer.imageData.currentIndex)
+        df2 = emitContainer.imageData.getDcmDataByIndex(emitContainer.imageData.currentIndex)
+        isSameStudy = checkSameStudy(df1,df2)
+        isSameSeries = checkSameSeries(df1, df2)
         if (not isSameStudy) or isSameSeries:
             handleContainer.mImageShownWidget.tryHideCrossBoxWidget()
             return
@@ -136,16 +139,11 @@ class ImageShownLayoutController(QObject):
         img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
         ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
         img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
-        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = handleContainer.imageData.getBasePosInfo(index2)
+        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = emitContainer.imageData.getBasePosInfo(index2)
 
         if (normalvector1 == normalvector2).all():
             #平面平行
             return Status.bad
-
-        # ImageOrientationX1 = np.array([0.707,0,0.707])
-        # normalvector1 = np.array([-0.707,0,0.707])
-        # ImageOrientationX2 = np.array([0.707,0.707,0])
-        # normalvector2 = np.array([-0.707,0.707,0])
 
         #建立交线方程组
         sp.init_printing(use_unicode=True)
@@ -213,10 +211,6 @@ class ImageShownLayoutController(QObject):
 
     def getImageDisplayInfo(self, m2DWidget):
         """ 目前该函数只支持缩放中心点在视图正中央的情况，如果image被拖动到其他位置，计算错误"""
-        # focal = m2DWidget.renImage.GetActiveCamera().GetFocalPoint()
-        # m2DWidget.renImage.SetWorldPoint(focal[0],focal[1],focal[2],0)
-        # m2DWidget.renImage.WorldToDisplay()
-        # imageCenterPoint = m2DWidget.renImage.GetDisplayPoint()
 
         bounds = m2DWidget.imageViewer.GetImageActor().GetBounds()
         #图像右下角
@@ -289,7 +283,7 @@ class ImageShownLayoutController(QObject):
     def imageSlideShowFasterHandler(self):
         if not self.checkSelectContainerCanSlideShow():return
         print("fast")
-        # self.selectedImageShownContainer.mImageShownWidget.controlSlideShowSpeed(-0.1)
+        self.selectedImageShownContainer.mImageShownWidget.controlSlideShowSpeed(-0.1)
 
     #模式切换
     def imageModeSelectHandler(self, mode):
