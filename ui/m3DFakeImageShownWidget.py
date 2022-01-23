@@ -2,7 +2,6 @@ import os
 from PyQt5.QtWidgets import QFrame
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from utils.util import getDicomWindowCenterAndLevel,getImageTileInfoFromDicom
 
 class m3DFakeImageShownWidget(QFrame):
 

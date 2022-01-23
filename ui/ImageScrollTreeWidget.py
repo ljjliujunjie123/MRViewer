@@ -41,6 +41,8 @@ class ImageScrollTreeWidget(QTreeWidget):
                 child.setIcon(0, self.getImageIcon(seriesDict))
                 seriesImageCount = len(seriesDict)
                 itemExtraData = {
+                    "studyName": studyName,
+                    "seriesName": seriesName,
                     "seriesImageCount": seriesImageCount
                 }
                 child.setData(0,3,itemExtraData)

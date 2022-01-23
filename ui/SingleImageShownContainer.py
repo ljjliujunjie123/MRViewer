@@ -11,8 +11,8 @@ from ui.m3DFakeImageShownWidget import m3DFakeImageShownWidget
 from ui.m3DImageShownWidget import m3DImageShownWidget
 from ui.mRealTimeImageShownWidget import mRealTimeImageShownWidget
 from utils.BaseImageData import BaseImageData
-from utils.util import getImageTileInfoFromDicom
 from utils.mImage2DShownData import mImage2DShownData
+from Model.ImagesDataModel import imageDataModel
 
 class SingleImageShownContainer(QFrame):
 
@@ -92,11 +92,21 @@ class SingleImageShownContainer(QFrame):
     def setTileText(self, text):
         self.label.setText(text)
 
-    def getDataFromDropEvent(self, mimeData):
-        self.imageData.seriesPath = mimeData["seriesPath"]
-        self.imageData.seriesImageCount = mimeData["seriesImageCount"]
-        self.imageData.filePaths = [os.path.join(self.imageData.seriesPath,fileName) for fileName in os.listdir(self.imageData.seriesPath)]
+    def getDataFromDropEvent(self, imageExtraData):
+        # self.imageData.seriesPath = mimeData["seriesPath"]
+        # self.imageData.seriesImageCount = mimeData["seriesImageCount"]
+        # self.imageData.filePaths = [os.path.join(self.imageData.seriesPath,fileName) for fileName in os.listdir(self.imageData.seriesPath)]
+        # self.imageData.currentIndex = 0
+        # self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
+
+        self.imageData.studyName = imageExtraData["studyName"]
+        self.imageData.seriesName = imageExtraData["seriesName"]
+        self.imageData.seriesImageCount = imageExtraData["seriesImageCount"]
         self.imageData.currentIndex = 0
+        self.imageData.filePaths = [
+            os.path.join(self.imageData.getSeriesPath(), fileName)
+            for fileName in imageDataModel.findSeriesItem(self.imageData.studyName, self.imageData.seriesName).keys()
+        ]
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
 
     def initImageShownWidget(self):
@@ -109,7 +119,7 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget.clearViews()
             del self.mImageShownWidget
 
-        self.setTileText(getImageTileInfoFromDicom(self.imageData.curFilePath))
+        self.setTileText(self.imageData.getImageTileInfo(self.imageData.currentIndex))
         if mode == self.m2DMode:
             print("m2DMode")
             self.mImageShownWidget = m2DImageShownWidget()

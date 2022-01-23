@@ -37,6 +37,11 @@ class ImagesDataModel():
     def findStudyItem(self, studyName):
         return self.dataSets[studyName]
 
+    def findDefaultStudy(self):
+        names = self.dataSets.cache_names()
+        if len(names) == 1:
+            return names[0],self.dataSets[names[0]]
+
     def removeStudyItem(self, studyName):
         self.dataSets[studyName].clear()
 

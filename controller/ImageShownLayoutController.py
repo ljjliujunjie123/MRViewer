@@ -1,7 +1,4 @@
-from PyQt5.QtGui import QCloseEvent
-from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-import vtkmodules.all as vtk
 from ui.SingleImageShownContainer import SingleImageShownContainer
 from ui.SlideshowContainer import SlideshowContainer
 from ui.config import uiConfig
@@ -9,7 +6,6 @@ from ui.config import uiConfig
 from copy import deepcopy
 import numpy as np
 import sympy as sp
-import pydicom
 from utils.status import Status
 from utils.util import checkSameSeries,checkSameStudy
 
@@ -136,11 +132,11 @@ class ImageShownLayoutController(QObject):
 
     def calcCrossViewDisPos(self,handleContainer,emitContainer):
         #建立世界坐标系
-        f1,f2 = handleContainer.imageData.curFilePath, emitContainer.imageData.curFilePath
+        index1,index2 = handleContainer.imageData.currentIndex, emitContainer.imageData.currentIndex
         img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
-        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= self.getBasePosInfoFromDcm(f1)
+        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
         img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
-        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.getBasePosInfoFromDcm(f2)
+        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = handleContainer.imageData.getBasePosInfo(index2)
 
         if (normalvector1 == normalvector2).all():
             #平面平行
@@ -197,21 +193,6 @@ class ImageShownLayoutController(QObject):
         resDis = [(point.x() / size.width(),point.y() / size.height()) for point in resDis]
 
         return resDis
-
-    def getBasePosInfoFromDcm(self, filePath):
-        RefDs = pydicom.read_file(filePath)
-        img_array = RefDs.pixel_array# indexes are z,y,x
-        ImagePosition =np.array(RefDs.ImagePositionPatient,dtype=float)
-        ImageOrientation=np.array(RefDs.ImageOrientationPatient,dtype = float)
-        PixelSpacing =RefDs.PixelSpacing
-        # SliceThickness=RefDs.SliceThickness
-        ImageOrientationX=ImageOrientation[0:3]
-        ImageOrientationY=ImageOrientation[3:6]
-        Rows = RefDs.Rows
-        Cols = RefDs.Columns
-        #图像平面法向量(X与Y的叉积)
-        normalvector=np.cross(ImageOrientationX,ImageOrientationY)
-        return img_array,normalvector,ImagePosition,PixelSpacing,ImageOrientationX,ImageOrientationY,Rows,Cols
 
     def getWorldPointOnCrossLine(self,lineExpr,*args):
         x_tmp,y_tmp,z_tmp, = args

@@ -1,11 +1,7 @@
-import os
-import numpy as np
-import pydicom
 from PyQt5.QtWidgets import QFrame
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from utils.util import getDicomWindowCenterAndLevel,getImageTileInfoFromDicom
 
 class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
@@ -23,7 +19,7 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.qvtkWidget.setFixedSize(self.size())
 
     def showAllViews(self):
-        self.show3DImage(self.imageData.seriesPath)
+        self.show3DImage(self.imageData.getSeriesPath())
 
     def show3DImage(self, seriesPath):
         print("show 3D Dicom Window Begin")

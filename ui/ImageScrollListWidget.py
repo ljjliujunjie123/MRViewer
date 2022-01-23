@@ -27,7 +27,7 @@ class ImageScrollListWidget(QListWidget):
         self.setItemDelegate(ImageScrollItemDelegate(self))
 
     def showImageList(self):
-        studyDict = imageDataModel.dataSets.caches()[0]
+        studyName,studyDict = imageDataModel.findDefaultStudy()
         for seriesName,seriesDict in studyDict.items():
             dcmFile = list(seriesDict.values())[0]
 
@@ -41,6 +41,8 @@ class ImageScrollListWidget(QListWidget):
 
             seriesImageCount = len(seriesDict)
             itemExtraData = {
+                "studyName": studyName,
+                "seriesName": seriesName,
                 "seriesImageCount": seriesImageCount
             }
             imageItem.setData(3,itemExtraData)

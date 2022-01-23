@@ -7,7 +7,6 @@ from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from utils.BaseImageData import BaseImageData
 from utils.cycleSyncThread import CycleSyncThread
 import vtkmodules.all as vtk
-from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom,getImageTileInfoFromDicom
 from utils.cycleSyncThread import CycleSyncThread
 
 class mRealTimeImageShownWidget(QFrame, ImageShownWidgetInterface):
@@ -65,9 +64,9 @@ class mRealTimeImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.reader.Update()
 
         self.imageViewer.SetInputConnection(self.reader.GetOutputPort())
-        level,width = getDicomWindowCenterAndLevel(self.imageData.curFilePath)
-        self.imageViewer.SetColorLevel(level)
-        self.imageViewer.SetColorWindow(width)
+        # level,width = getDicomWindowCenterAndLevel(self.imageData.curFilePath)
+        # self.imageViewer.SetColorLevel(level)
+        # self.imageViewer.SetColorWindow(width)
         self.imageViewer.SetRenderer(self.renImage)
         self.imageViewer.SetRenderWindow(self.qvtkWidget.GetRenderWindow())
         self.imageViewer.UpdateDisplayExtent()

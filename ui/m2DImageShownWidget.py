@@ -5,7 +5,7 @@ from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 import vtkmodules.all as vtk
-from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom,getImageOrientationInfoFromDicom,Location
+from utils.BaseImageData import Location
 from utils.cycleSyncThread import CycleSyncThread
 
 class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
@@ -75,7 +75,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.reader.Update()
 
         self.imageViewer.SetInputConnection(self.reader.GetOutputPort())
-        level,width = getDicomWindowCenterAndLevel(self.imageData.curFilePath)
+        level,width = self.imageData.getDicomWindowCenterAndLevel(self.imageData.currentIndex)
         self.imageViewer.SetColorLevel(level)
         self.imageViewer.SetColorWindow(width)
         self.imageViewer.SetRenderer(self.renImage)
@@ -89,7 +89,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def showImageExtraInfoVtkView(self):
         #添加orientation注释
-        orientationInfo = getImageOrientationInfoFromDicom(self.imageData.curFilePath)
+        orientationInfo = self.imageData.getImageOrientationInfoFromDicom(self.imageData.currentIndex)
         for i in range(len(orientationInfo)):
             self.orientationActors[i].SetInput(orientationInfo[i])
             self.orientationActors[i].GetTextProperty().SetFontSize(20)
@@ -108,7 +108,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         #添加文本注释
         # self.textActor.SetTextScaleModeToProp()
-        textDict = getImageExtraInfoFromDicom(self.imageData.curFilePath)
+        textDict = self.imageData.getImageExtraInfoFromDicom(self.imageData.currentIndex)
         for location,textActor in self.textActors.items():
             textActor.SetInput(textDict[location])
 
@@ -234,9 +234,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def canSlideShow(self):
         return len(self.imageData.filePaths) > 0
-
-    def setCurrentIndexMore(self, val):
-        self.setCurrentIndex(self.imageData.currentIndex + 1)
 
     def controlSlideShow(self, flag):
         if flag:
