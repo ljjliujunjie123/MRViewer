@@ -10,6 +10,7 @@ attrs=21.2.0=pypi_0
 autobahn=21.3.1=pypi_0
 automat=20.2.0=pypi_0
 ca-certificates=2021.10.8=h5b45459_0
+cacheout=0.13.1=pypi_0
 cffi=1.15.0=pypi_0
 charset-normalizer=2.0.7=pypi_0
 click=7.1.2=pypi_0
