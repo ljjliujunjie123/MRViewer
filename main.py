@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication,QStyle
+from PyQt5.QtWidgets import *
 from ui.LJJMainWindow import LJJMainWindow
 from ui.config import uiConfig
 

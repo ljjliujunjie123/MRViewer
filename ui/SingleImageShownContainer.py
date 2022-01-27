@@ -1,7 +1,5 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QRegion
-
 import os
 from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
@@ -13,7 +11,6 @@ from ui.mRealTimeImageShownWidget import mRealTimeImageShownWidget
 from utils.BaseImageData import BaseImageData
 from utils.mImage2DShownData import mImage2DShownData
 from Model.ImagesDataModel import imageDataModel
-
 class SingleImageShownContainer(QFrame):
 
     m2DMode = 0
@@ -44,11 +41,11 @@ class SingleImageShownContainer(QFrame):
         self.setMouseTracking(True)
 
         #初始化GUI
-        vBoxLayout = QVBoxLayout()
-        vBoxLayout.setContentsMargins(0,0,0,0)
-        vBoxLayout.setSpacing(0)
-        vBoxLayout.setAlignment(Qt.AlignHCenter)
-        self.setLayout(vBoxLayout)
+        self.vBoxLayout = QVBoxLayout()
+        self.vBoxLayout.setContentsMargins(0,0,0,0)
+        self.vBoxLayout.setSpacing(0)
+        self.vBoxLayout.setAlignment(Qt.AlignHCenter)
+        self.setLayout(self.vBoxLayout)
 
         #顶部title
         self.title = QFrame()
@@ -56,18 +53,19 @@ class SingleImageShownContainer(QFrame):
         self.title.setFrameShadow(QFrame.Plain)
         self.title.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
         self.title.setStyleSheet("background-color:grey;")
-        hBoxLayout = QHBoxLayout()
-        hBoxLayout.setContentsMargins(5,5,5,5)
-        hBoxLayout.setSpacing(0)
-        hBoxLayout.setAlignment(Qt.AlignLeft)
-        self.title.setLayout(hBoxLayout)
+        self.hBoxLayout = QHBoxLayout()
+        self.hBoxLayout.setContentsMargins(5,5,5,5)
+        self.hBoxLayout.setSpacing(0)
+        self.hBoxLayout.setAlignment(Qt.AlignLeft)
+        self.title.setLayout(self.hBoxLayout)
         self.label = QLabel()
         self.label.setText("This is a image container")
         self.label.setStyleSheet("color:black;")
-        hBoxLayout.addWidget(self.label)
+        self.hBoxLayout.addWidget(self.label)
 
         #底部image
         self.imageContainer = QFrame()
+        self.imageContainer.setObjectName("imageContainer")
         self.imageContainer.setStyleSheet("background-color:black;")
         self.imageContainer.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.vImageBoxLayout = CustomDecoratedLayout(QVBoxLayout())
@@ -76,8 +74,8 @@ class SingleImageShownContainer(QFrame):
         self.imageContainer.setLayout(self.vImageBoxLayout.getLayout())
 
         #整体布局垂直
-        vBoxLayout.addWidget(self.title)
-        vBoxLayout.addWidget(self.imageContainer)
+        self.vBoxLayout.addWidget(self.title)
+        self.vBoxLayout.addWidget(self.imageContainer)
 
     def selectSignalHandler(self, isSelected):
         if isSelected:
@@ -204,6 +202,7 @@ class SingleImageShownContainer(QFrame):
 
     def resizeEvent(self, QResizeEvent):
         print('singleImageShownContainer:', self.geometry())
+        print("imageContainer: ", self.imageContainer.geometry())
         self.tryUpdateCrossBoxWidget()
 
     def closeEvent(self, QCloseEvent):

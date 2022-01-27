@@ -1,9 +1,11 @@
 from PyQt5.QtCore import *
-from PyQt5.QtWidgets import QFrame
+from PyQt5.QtWidgets import QFrame,QGridLayout,QSizePolicy,QLabel
 from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
+from ui.CustomInteractiveCrossBoxWidget import CustomInteractiveCrossBoxWidget
+from ui.CustomDecoratedLayout import CustomDecoratedLayout
 import vtkmodules.all as vtk
 from utils.BaseImageData import Location
 from utils.cycleSyncThread import CycleSyncThread
@@ -23,7 +25,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         #初始化逻辑
         self.imageShownData = None
 
-        self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
+        self.qvtkWidget = CustomQVTKRenderWindowInteractor()
+        self.qvtkWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()
         self.qvtkWidget.GetRenderWindow().SetInteractor(self.iren)
         self.vtkStyle = vtk.vtkInteractorStyleImage()
@@ -44,10 +47,21 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         #方位actor，依次是left,right,top,bottom
         self.orientationActors = [vtk.vtkTextActor() for i in range(4)]
 
-        #crossView
-        self.crossBoxWidget = CustomCrossBoxWidget(self)
-        self.installEventFilter(self.crossBoxWidget)#防止CrossBox遮挡其他应用窗口
+        # crossView
+        # self.crossBoxWidget = CustomCrossBoxWidget(self)
+        # self.installEventFilter(self.crossBoxWidget)#防止CrossBox遮挡其他应用窗口
         # self.crossBoxWidget.show()
+
+        # interactive crossView
+        self.iCrossBoxWidget = CustomInteractiveCrossBoxWidget()
+        self.iCrossBoxWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        # 用GridLayout收敛它们
+        self.gridLayout = CustomDecoratedLayout(QGridLayout())
+        self.gridLayout.initParamsForPlain()
+        self.gridLayout.getLayout().setAlignment(Qt.AlignCenter)
+        self.gridLayout.getLayout().addWidget(self.qvtkWidget, 0, 0, 1, 1)
+        self.setLayout(self.gridLayout.getLayout())
 
         self.timerThread = None
 
@@ -155,20 +169,39 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def tryHideCrossBoxWidget(self):
         if self.imageShownData.showCrossFlag:
-            self.crossBoxWidget.hide()
+            # self.crossBoxWidget.hide()
+            self.iCrossBoxWidget.hide()
             self.imageShownData.showCrossFlag = False
-            self.crossBoxWidget.isShowContent = False
+            # self.crossBoxWidget.isShowContent = False
 
     def updateCrossBoxWidget(self):
-        self.updateCrossBoxWidgetGeometry()
-        self.updateCrossBoxWidgetContent()
+        pass
+        # self.updateCrossBoxWidgetGeometry()
+        # self.updateCrossBoxWidgetContent()
+        self.updateInteractiveCrossBoxContent()
+        self.updateInteractiveCrossBoxGeometry()
+        self.iCrossBoxWidget.show()
+
+    def updateInteractiveCrossBoxGeometry(self):
+        pos = self.mapToGlobal(QPoint(0,0))
+        x,y = pos.x(),pos.y()
+        width,height = self.width(),self.height()
+        print("update ic View Geometry ", x,y,width,height)
+        self.iCrossBoxWidget.setGeometry(x,y,width,height)
+        self.iCrossBoxWidget.update()
+        print("update res ", self.iCrossBoxWidget.geometry())
+
+    def updateInteractiveCrossBoxContent(self):
+        pass
 
     def updateCrossBoxWidgetGeometry(self):
         pos = self.mapToGlobal(QPoint(0,0))
         x,y = pos.x(),pos.y()
         width,height = self.width(),self.height()
+        print("update ic View Geometry ", x,y,width,height)
         self.crossBoxWidget.setGeometry(x,y,width,height)
         self.crossBoxWidget.update()
+        print("update res ", self.crossBoxWidget.geometry())
 
     def updateCrossBoxWidgetContent(self):
         x1,y1 = self.imageShownData.crossViewRatios[0]
@@ -194,8 +227,9 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def resizeEvent(self, QResizeEvent):
         super().resizeEvent(QResizeEvent)
-        print("resize: ",self.geometry())
-        self.qvtkWidget.setFixedSize(self.size())
+        print("resize parent: ", self.parent().geometry())
+        print("resize m2D: ",self.geometry())
+        print("resize qvtWidget: ", self.qvtkWidget.geometry())
         self.showImageExtraInfoVtkView()
 
     #滚轮调用sigWheelChanged
@@ -269,5 +303,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def hideEvent(self, *args, **kwargs):
         if self.imageShownData.showCrossFlag:
-            self.crossBoxWidget.hide()
-            self.crossBoxWidget.isShowContent = True
+            # self.crossBoxWidget.hide()
+            # self.crossBoxWidget.isShowContent = True
+            self.iCrossBoxWidget.hide()
