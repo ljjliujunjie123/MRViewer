@@ -1,9 +1,7 @@
 import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt
 from ui.LJJMainWindow import LJJMainWindow
 from ui.config import uiConfig
-from ui.mGraphicRectItem import mGraphicRectItem
 
 # D:\python\envs\MRViewer\Lib\site-packages\PyQt5\Qt5\plugins
 if __name__ == "__main__":
@@ -17,14 +15,5 @@ if __name__ == "__main__":
     screenRect = app.desktop().screenGeometry(curMonitorNum)
     uiConfig.setScreenSize(screenRect.width(),screenRect.height() - 60)
     mainWindow = LJJMainWindow()
-    # 用于演示新版CrossView
-    scene = QGraphicsScene()
-    scene.setBackgroundBrush(Qt.black)
-
-    scene.addItem(mGraphicRectItem())
-
-    view = QGraphicsView(scene)
-    view.resize(1024, 768)
-    view.show()
     sys.exit(app.exec_())
 

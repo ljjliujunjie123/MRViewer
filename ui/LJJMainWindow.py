@@ -8,7 +8,6 @@ from ui.ImagesScrollContainer import ImageScrollContainer
 from ui.ToolsContainer import ToolsContainer
 from ui.ImageShownContainer import ImageShownContainer
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
-from utils.status import Status
 
 class LJJMainWindow(QMainWindow):
 

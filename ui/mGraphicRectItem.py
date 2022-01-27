@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt,QPointF,QObject,QRectF
-from PyQt5.QtGui import QPen,QPolygonF
+from PyQt5.QtCore import Qt,QPointF,QRectF
+from PyQt5.QtGui import QPen,QPolygonF,QBrush,QColor
 from math import atan,atan2,sin,cos,pi,sqrt
 from enum import Enum
 
@@ -18,7 +18,7 @@ class mGraphicRectItem(QGraphicsItem):
     def __init__(self, parent = None):
         super(QGraphicsItem,self).__init__(parent)
         self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
-        self.mOldRect = QRectF(0,0,100,100)
+        self.mOldRect = QRectF(0,0,300,300)
         self.mOldRectPolygon = QPolygonF()
         self.mRotateCenter = QPointF()
         self.mRotateAreaRect = QRectF()
@@ -39,6 +39,7 @@ class mGraphicRectItem(QGraphicsItem):
         self.isResize = False
         self.isRotate = False
 
+        self.setPos(-1*self.mOldRect.width()/2,-1*self.mOldRect.height()/2)
         self.setRectSize(self.mOldRect)
         self.setToolTip("Click and drag me!")
         self.mPointFofSmallRotateRect = []
@@ -76,23 +77,39 @@ class mGraphicRectItem(QGraphicsItem):
         self.mSmallRotateRect = self.getSmallRotateRect(rect.topLeft(),rect.topRight())
         self.mSmallRotatePolygon = self.getRotatePolygonFromRect(self.mRotateCenter,self.mSmallRotateRect,self.mRotateAngle)
 
+        print("init icView polygon ", self.boundingRect())
+        print("init left polygon ", self.mLeftPolygon.boundingRect())
+        print("init right polygon ", self.mRightPolygon.boundingRect())
+        print("init top polygon ", self.mTopPolygon.boundingRect())
+        print("init bottom polygon ", self.mBottomPolygon.boundingRect())
+        print("init rotate polygon ", self.mSmallRotatePolygon.boundingRect())
+
     def paint(self, QPainter, QStyleOptionGraphicsItem, widget=None):
-        mPen = QPen(Qt.yellow)
-        QPainter.setPen(mPen)
+        pf = self.getSmallRotateRectCenter(self.mOldRectPolygon[0],self.mOldRectPolygon[1])
+        rect = QRectF(pf.x()-10,pf.y()-10,20,20)
+
+        mBrush = QBrush(QColor(0,0,0,1))
+        QPainter.setBrush(mBrush)
+        QPainter.fillRect(rect, mBrush)
         QPainter.drawPolygon(self.mOldRectPolygon)
+
+        mPen = QPen(Qt.green)
         mPen.setWidth(2)
-        mPen.setColor(Qt.green)
         QPainter.setPen(mPen)
         pf = self.getSmallRotateRectCenter(self.mOldRectPolygon[0],self.mOldRectPolygon[1])
         rect = QRectF(pf.x()-10,pf.y()-10,20,20)
         QPainter.drawEllipse(rect)
         QPainter.drawPoint(pf)
+        mPen.setColor(Qt.yellow)
+        QPainter.setPen(mPen)
+        QPainter.drawPolygon(self.mOldRectPolygon)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        print("press")
+        print("graphicRect press")
         if event.button() == Qt.LeftButton:
             self.mStartPos = event.pos()
-
+            print("press point ", self.mStartPos)
+            print(self.mSmallRotatePolygon.boundingRect())
             if self.mSmallRotatePolygon.containsPoint(self.mStartPos, Qt.WindingFill):
                 self.setCursor(Qt.PointingHandCursor)
                 self.mStateFlag = STATE_FLAG.ROTATE
@@ -118,7 +135,7 @@ class mGraphicRectItem(QGraphicsItem):
             super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event:QGraphicsSceneMouseEvent):
-        print("move")
+        print("graphicRect move")
         pos = event.pos()
         if self.mStateFlag == STATE_FLAG.ROTATE:
             rotateAngle = atan2(
@@ -227,6 +244,7 @@ class mGraphicRectItem(QGraphicsItem):
             self.scene().update()
 
     def mouseReleaseEvent(self, event:QGraphicsSceneMouseEvent):
+        print("graphicRect release")
         self.setCursor(Qt.ArrowCursor)
         if self.mStateFlag == STATE_FLAG.MOV_RECT:
             self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
@@ -264,7 +282,6 @@ class mGraphicRectItem(QGraphicsItem):
         pts.append(self.getRotatePoint(ptCenter,rectIn.topRight(),angle))
         pts.append(self.getRotatePoint(ptCenter,rectIn.bottomRight(),angle))
         pts.append(self.getRotatePoint(ptCenter,rectIn.bottomLeft(),angle))
-        # pts.append(self.getRotatePoint(ptCenter,rectIn.topLeft(),angle))
         return QPolygonF(pts)
 
     def getCrtPosRectToScreen(self):
