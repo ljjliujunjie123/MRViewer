@@ -14,7 +14,7 @@ class LJJMainWindow(QMainWindow):
     updateImageShownSignal = pyqtSignal(str,str)
     updateImageListSignal = pyqtSignal(int)
     updateImage3DShownSignal = pyqtSignal(str)
-    enableImageSlideshow = pyqtSignal(bool) #图像走马灯开关
+    tryClearImageShownSignal = pyqtSignal()
 
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
@@ -96,11 +96,13 @@ class LJJMainWindow(QMainWindow):
         self.openFileController = OpenFileController(
                 self,
                 self.imageScrollContainer,
-                self.updateImageListSignal
+                self.updateImageListSignal,
+                self.tryClearImageShownSignal
         )
 
         #信号绑定部分
         self.updateImageListSignal.connect(self.updateImageListArea)
+        self.tryClearImageShownSignal.connect(self.tryClearImageShownHandler)
         self.actionopen_study.triggered.connect(self.openFileController.openStudyDirectory)
         self.actionopen_patient.triggered.connect(self.openFileController.openPatientDirectory)
         # self.toolsContainer.showInfoSig.connect(self.showImageShownLayoutInfo)
@@ -134,6 +136,9 @@ class LJJMainWindow(QMainWindow):
         self.actionopen_patient.setText(_translate("MainWindow", "打开Patient"))
 
         self.toolsContainer.retranslateUi()
+
+    def tryClearImageShownHandler(self):
+        self.imageShownContainer.clearViews()
 
     def updateImageListArea(self, tag):
         self.imageScrollContainer.initImageListView(tag)

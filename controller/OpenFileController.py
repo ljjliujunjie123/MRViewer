@@ -13,11 +13,13 @@ class OpenFileController():
             self,
             mainWindow,
             imageScrollContainer,
-            updateImageListSignal
+            updateImageListSignal,
+            tryClearImageShownSignal
     ):
         self.mainWindow = mainWindow
         self.imageScrollContainer = imageScrollContainer
         self.updateImageListSignal = updateImageListSignal
+        self.tryClearImageShownSignal = tryClearImageShownSignal
 
     def openStudyDirectory(self):
         # filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
@@ -26,6 +28,7 @@ class OpenFileController():
         if checkDirValidity(filePath) is Status.bad: return
         rootPath,studyName = os.path.split(filePath)[0], os.path.split(filePath)[-1]
         imageDataModel.clearAll()
+        self.tryClearImageShownSignal.emit()
         imageDataModel.setRootPath(rootPath)
         imageDataModel.addStudyItem(studyName)
 
@@ -36,6 +39,7 @@ class OpenFileController():
         # filePath = r"D:\respository\MRViewer_Scource\Patient_Test_data"
         if checkDirValidity(filePath) is Status.bad: return
         imageDataModel.clearAll()
+        self.tryClearImageShownSignal.emit()
         imageDataModel.setRootPath(filePath)
         studyNames = os.listdir(filePath)
         for studyName in studyNames:

@@ -39,3 +39,7 @@ class ImageShownContainer(QFrame):
     def resizeEvent(self, *args, **kwargs):
         print("ImageShonwContainer ", self.rect())
         self.imageShownContainerWidget.setFixedSize(self.size())
+
+    def clearViews(self):
+        if self.imageShownLayoutController.selectedImageShownContainer is not None:
+            self.imageShownLayoutController.clearViews()

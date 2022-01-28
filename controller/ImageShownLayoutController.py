@@ -303,3 +303,9 @@ class ImageShownLayoutController(QObject):
         self.fourthImageShownContainer.closeEvent(QCloseEvent)
         if self.imageSlideshow is not None:self.imageSlideshow.closeEvent(QCloseEvent)
 
+    def clearViews(self):
+        self.selectedImageShownContainer = None
+        self.imageShownContainerLayout.mapWidgetsFunc(lambda container,*args:container.close(),None)
+        self.imageShownContainerLayout.clearLayout()
+        self.imageShownWidgetPool.clear()
+        self.initWidget()
