@@ -4,7 +4,7 @@ from PyQt5.QtGui import QIcon,QDrag
 
 from ui.config import uiConfig
 from ui.ImageScrollItemDelegate import ImageScrollItemDelegate
-from utils.util import createDicomPixmap
+from utils.util import createDicomPixmap,checkMultiFrame
 from utils.ImageItemMimeData import ImageItemMimeData
 from Model.ImagesDataModel import imageDataModel
 
@@ -38,23 +38,23 @@ class ImageScrollTreeWidget(QTreeWidget):
             for seriesName, seriesDict in studyDict.items():
                 child = QTreeWidgetItem(root)
                 child.setText(0, seriesName)
-                child.setIcon(0, self.getImageIcon(seriesDict))
+
+                dcmFile = list(seriesDict.values())[0]
+                imageIcon = QIcon()
+                imageIcon.addPixmap(createDicomPixmap(dcmFile))
+
+                child.setIcon(0, imageIcon)
                 seriesImageCount = len(seriesDict)
                 itemExtraData = {
                     "studyName": studyName,
                     "seriesName": seriesName,
-                    "seriesImageCount": seriesImageCount
+                    "seriesImageCount": seriesImageCount,
+                    "isMultiFrame": checkMultiFrame(dcmFile)
                 }
                 child.setData(0,3,itemExtraData)
             self.roots.append(root)
         self.addTopLevelItems(self.roots)
         self.expandItem(self.roots[0])
-
-    def getImageIcon(self, seriesDict):
-        dcmFile = list(seriesDict.values())[0]
-        imageIcon = QIcon()
-        imageIcon.addPixmap(createDicomPixmap(dcmFile))
-        return imageIcon
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon,QColor,QFont
+from PyQt5.QtGui import QIcon,QColor,QFont,QPixmap
 from PyQt5.QtCore import QRect,QSize
 from PyQt5.Qt import Qt
 from ui.config import uiConfig
@@ -46,12 +46,17 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         QPainter.setFont(font)
         QPainter.drawText(annoRect, Qt.AlignCenter, str(itemExtraData["seriesImageCount"]))
 
+        #绘制特殊格式标志
+        if itemExtraData["isMultiFrame"]:
+            specialSymbolRect = self.calcSpecialSymbolTargetRect(iconRect)
+            QPainter.drawPixmap(
+                specialSymbolRect, self.createSpecialSymbolPixmap()
+            )
+
     def calcTextTargetRect(self, itemRect):
-        textRect = QRect(
+        return QRect(
             itemRect.x(), itemRect.y(), itemRect.width(), uiConfig.textHeight
         )
-        # print("textRect ", textRect)
-        return textRect
 
     def calcIconTargetRect(self, itemRect):
         delta = uiConfig.textHeight + uiConfig.iconTextSpace
@@ -60,17 +65,25 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         clipIconSize = QSize(originIconSize.width() - delta, originIconSize.height() - delta)
         centerX = itemRect.x() + itemRect.width() // 2
         iconLeftX = centerX - clipIconSize.width() // 2
-        iconRect = QRect(
+        return QRect(
             iconLeftX, iconLeftY, clipIconSize.width(), clipIconSize.height()
         )
-        # print("IconRect ", iconRect)
-        return iconRect
 
     def calcAnnotationTargetRect(self, iconRect):
         annoLeftX = iconRect.x() + iconRect.width() - uiConfig.annotationSize.width()
         annoLeftY = iconRect.y() + iconRect.height() - uiConfig.annotationSize.height()
-        annoRect = QRect(
+        return QRect(
             annoLeftX, annoLeftY, uiConfig.annotationSize.width(), uiConfig.annotationSize.height()
         )
-        # print("annoRect ", annoRect)
-        return annoRect
+
+    def calcSpecialSymbolTargetRect(self, iconRect):
+        symbolLeftX = iconRect.x()
+        symbolLeftY = iconRect.y() + iconRect.height() - uiConfig.specialSymbolSize.height()
+        return QRect(
+            symbolLeftX, symbolLeftY, uiConfig.specialSymbolSize.width(), uiConfig.specialSymbolSize.height()
+        )
+
+    def createSpecialSymbolPixmap(self):
+        pixmap = QPixmap("ui_source/video_pause_flag.png")
+        pixmap = pixmap.scaled(uiConfig.specialSymbolSize,  Qt.KeepAspectRatio)
+        return pixmap

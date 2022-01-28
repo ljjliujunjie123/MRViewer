@@ -6,15 +6,33 @@ from utils.status import Status
 from ui.config import uiConfig
 from PyQt5.QtCore import *
 
+def checkMultiFrame(dcmFile):
+    try:
+        _ = dcmFile.NumberOfFrames
+    except:
+        return False
+    else:
+        return True
+
 def createDicomPixmap(dcmFile):
-    image_2d = dcmFile.pixel_array.astype(float)
-    image_2d_scaled = (np.maximum(image_2d, 0) / image_2d.max()) * 255.0
-    image_2d_scaled = np.uint8(image_2d_scaled)
-    image = Image.fromarray(image_2d_scaled)
-    dcmImage = ImageQt(image)
-    pix = QPixmap.fromImage(dcmImage)
-    pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
-    return pixmap_resized
+
+    def createSingleFrameDicom(image_2d):
+        image_2d_scaled = (np.maximum(image_2d, 0) / image_2d.max()) * 255.0
+        image_2d_scaled = np.uint8(image_2d_scaled)
+        image = Image.fromarray(image_2d_scaled)
+        dcmImage = ImageQt(image)
+        pix = QPixmap.fromImage(dcmImage)
+        pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
+        return pixmap_resized
+
+    if checkMultiFrame(dcmFile):
+        images = dcmFile.pixel_array.astype(float)
+        image = images[0]
+        return createSingleFrameDicom(image)
+    else:
+        image = dcmFile.pixel_array.astype(float)
+        return createSingleFrameDicom(image)
+
 
 def getSeriesPathFromFileName(fileName):
     return os.path.split(fileName)[0]
@@ -23,10 +41,16 @@ def getSeriesImageCountFromSeriesPath(seriesPath):
     return len(os.listdir(seriesPath))
 
 def checkSameStudy(df1,df2):
-    return (df1["PatientName"] == df2["PatientName"]) and (df1["StudyDescription"] == df2["StudyDescription"])
+    try:
+        return (df1["PatientName"] == df2["PatientName"]) and (df1["StudyDescription"] == df2["StudyDescription"])
+    except:
+        return False
 
 def checkSameSeries(df1,df2):
-    return df1["SeriesDescription"] == df2["SeriesDescription"]
+    try:
+        return df1["SeriesDescription"] == df2["SeriesDescription"]
+    except:
+        True
 
 def checkDirValidity(filePath):
     #非文件夹检查

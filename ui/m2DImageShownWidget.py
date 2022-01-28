@@ -9,6 +9,7 @@ from ui.CustomDecoratedLayout import CustomDecoratedLayout
 import vtkmodules.all as vtk
 from utils.BaseImageData import Location
 from utils.cycleSyncThread import CycleSyncThread
+from utils.status import Status
 
 class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
@@ -102,23 +103,31 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renImage)
 
     def showImageExtraInfoVtkView(self):
-        #添加orientation注释
-        orientationInfo = self.imageData.getImageOrientationInfoFromDicom(self.imageData.currentIndex)
-        for i in range(len(orientationInfo)):
-            self.orientationActors[i].SetInput(orientationInfo[i])
-            self.orientationActors[i].GetTextProperty().SetFontSize(20)
-            self.orientationActors[i].GetTextProperty().SetColor(1, 0, 0)
+        self.renText.SetInteractive(0)
+        self.renText.SetLayer(1)
 
         truWidth,truHeight = self.parent().width(),self.parent().height()
-        self.orientationActors[0].SetDisplayPosition(20,truHeight//2)
-        self.orientationActors[1].SetDisplayPosition(truWidth - 20,truHeight//2)
-        self.orientationActors[2].SetDisplayPosition(truWidth//2,truHeight - 40)
-        self.orientationActors[3].SetDisplayPosition(truWidth//2,20)
 
-        self.orientationActors[0].GetTextProperty().SetJustificationToLeft()
-        self.orientationActors[1].GetTextProperty().SetJustificationToRight()
-        self.orientationActors[2].GetTextProperty().SetJustificationToLeft()
-        self.orientationActors[3].GetTextProperty().SetJustificationToLeft()
+        #添加orientation注释
+        orientationInfo = self.imageData.getImageOrientationInfoFromDicom(self.imageData.currentIndex)
+        if orientationInfo != Status.bad:
+            for i in range(len(orientationInfo)):
+                self.orientationActors[i].SetInput(orientationInfo[i])
+                self.orientationActors[i].GetTextProperty().SetFontSize(20)
+                self.orientationActors[i].GetTextProperty().SetColor(1, 0, 0)
+
+            self.orientationActors[0].SetDisplayPosition(20,truHeight//2)
+            self.orientationActors[1].SetDisplayPosition(truWidth - 20,truHeight//2)
+            self.orientationActors[2].SetDisplayPosition(truWidth//2,truHeight - 40)
+            self.orientationActors[3].SetDisplayPosition(truWidth//2,20)
+
+            self.orientationActors[0].GetTextProperty().SetJustificationToLeft()
+            self.orientationActors[1].GetTextProperty().SetJustificationToRight()
+            self.orientationActors[2].GetTextProperty().SetJustificationToLeft()
+            self.orientationActors[3].GetTextProperty().SetJustificationToLeft()
+
+            for actor in self.orientationActors:
+                self.renText.AddActor(actor)
 
         #添加文本注释
         # self.textActor.SetTextScaleModeToProp()
@@ -150,12 +159,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             textActor.GetTextProperty().ShadowOn()
 
             self.renText.AddActor(textActor)
-
-        self.renText.SetInteractive(0)
-        self.renText.SetLayer(1)
-    
-        for actor in self.orientationActors:
-            self.renText.AddActor(actor)
 
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
         # size = [0.0,0.0]

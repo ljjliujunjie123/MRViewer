@@ -2,6 +2,7 @@ from Model.ImagesDataModel import imageDataModel
 import numpy as np
 from enum import Enum
 import os
+from utils.status import Status
 
 class Location(Enum):
     """顺序为左上、右上、左下、右下"""
@@ -70,22 +71,39 @@ class BaseImageData():
     def getImageTileInfo(self, index):
         dcmData = self.getDcmDataByIndex(index)
 
+        try:
+            patientName = str(dcmData["PatientName"].value)
+        except:
+            patientName = "Unknown"
+
+        try:
+            seriesDescription = str(dcmData["SeriesDescription"].value)
+        except:
+            seriesDescription = "Unknown"
+
         res = ""
-        res += (normalKeyDict[Location.UL]["PatientName"] +  str(dcmData["PatientName"].value))
+        res += (normalKeyDict[Location.UL]["PatientName"] +  patientName)
         res += " - "
-        res += (normalKeyDict[Location.UL]["SeriesDescription"] +  str(dcmData["SeriesDescription"].value))
+        res += (normalKeyDict[Location.UL]["SeriesDescription"] + seriesDescription)
         return res
 
     def getDicomWindowCenterAndLevel(self, index):
         dcmData = self.getDcmDataByIndex(index)
-        return (dcmData.WindowCenter, dcmData.WindowWidth)
+        try:
+            center,width = dcmData.WindowCenter,dcmData.WindowWidth
+        except:
+            center,width = 500,500
+        return center,width
 
     def getImageOrientationInfoFromDicom(self, index):
         """
             判断方向向量与标准轴的cos值，如果大于阈值，则增加一个标识
         """
         dcmData = self.getDcmDataByIndex(index)
-        ImageOrientation=np.array(dcmData.ImageOrientationPatient,dtype = float)
+        try:
+            ImageOrientation=np.array(dcmData.ImageOrientationPatient,dtype = float)
+        except:
+            return Status.bad
         xVector,yVector = ImageOrientation[:3],ImageOrientation[3:]
         func = lambda x:round(x,1)
         xVector,yVector = tuple(map(func,xVector)),tuple(map(func,yVector))
@@ -102,7 +120,11 @@ class BaseImageData():
         for location,tagDict in normalKeyDict.items():
             tp = ""
             for tag,text in tagDict.items():
-                tp = tp + text + str(dcmData[tag].value) + "\n"
+                try:
+                    tagValue = str(dcmData[tag].value)
+                except:
+                    tagValue = "Unknown"
+                tp = tp + text + tagValue + "\n"
             res[location] = tp
         print(res)
         return res

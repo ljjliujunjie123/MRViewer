@@ -4,7 +4,7 @@ from PyQt5.QtGui import QIcon,QDrag
 
 from ui.config import uiConfig
 from ui.ImageScrollItemDelegate import ImageScrollItemDelegate
-from utils.util import createDicomPixmap
+from utils.util import createDicomPixmap,checkMultiFrame
 from utils.ImageItemMimeData import ImageItemMimeData
 from Model.ImagesDataModel import imageDataModel
 
@@ -43,7 +43,8 @@ class ImageScrollListWidget(QListWidget):
             itemExtraData = {
                 "studyName": studyName,
                 "seriesName": seriesName,
-                "seriesImageCount": seriesImageCount
+                "seriesImageCount": seriesImageCount,
+                "isMultiFrame": checkMultiFrame(dcmFile)
             }
             imageItem.setData(3,itemExtraData)
             self.addItem(imageItem)

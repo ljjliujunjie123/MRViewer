@@ -3,6 +3,8 @@ import os
 import pydicom as pyd
 from utils.util import checkDirValidity
 from utils.status import Status
+from copy import deepcopy
+from utils.util import checkMultiFrame
 
 class ImagesDataModel():
     """
@@ -12,6 +14,10 @@ class ImagesDataModel():
         Cache实例中的Key是SeriesName,Value是一个Dict
         Dict的Key是FileName,Value是dcmFile
     """
+
+    class MultiFrameExceptionError(Exception):
+        pass
+
     def __init__(self):
         print("ImagesDataModel Init.")
         self.dataSets = CacheManager()
@@ -29,7 +35,12 @@ class ImagesDataModel():
         for seriesName in os.listdir(studyPath):
             seriesPath = os.path.join(studyPath, seriesName)
             if checkDirValidity(seriesPath) is Status.bad:continue
-            self.addSeriesItem(studyName, seriesName)
+            try:
+                self.addSeriesItem(studyName, seriesName)
+            except self.MultiFrameExceptionError:
+                print("当前series的dcm为多帧格式dcm")
+                for dcmFileName in os.listdir(seriesPath):
+                    self.addSeriesMultiFrameItem(studyName, seriesName, dcmFileName)
 
         print("current ImageDataModel:")
         print(self.dataSets.cache_names())
@@ -51,8 +62,24 @@ class ImagesDataModel():
         for sliceName in os.listdir(seriesPath):
             slicePath = os.path.join(seriesPath,sliceName)
             dcmFile = pyd.dcmread(slicePath)
+            if checkMultiFrame(dcmFile):
+                raise self.MultiFrameExceptionError()
             seriesDict[sliceName] = dcmFile
         self.dataSets[studyName].add(seriesName, seriesDict)
+
+    def addSeriesMultiFrameItem(self, studyName, seriesName, dcmFileName):
+        """
+            兼容多帧DCM的特殊情况，此时的seriesName是单张dcm的文件名
+        """
+        filePath = os.path.join(self.rootPath, studyName, seriesName, dcmFileName)
+        dcmFile = pyd.dcmread(filePath)
+        images = dcmFile.pixel_array
+        seriesDict = {}
+        for i in range(dcmFile.NumberOfFrames):
+            _dcmFile = deepcopy(dcmFile)
+            _dcmFile.pix_array = deepcopy(images[i])
+            seriesDict['{}-{}'.format(dcmFileName,i)] = _dcmFile
+        self.dataSets[studyName].add(dcmFileName, seriesDict)
 
     def findSeriesItem(self, studyName, seriesName):
         return self.dataSets[studyName].get(seriesName)

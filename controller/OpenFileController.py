@@ -20,8 +20,9 @@ class OpenFileController():
         self.updateImageListSignal = updateImageListSignal
 
     def openStudyDirectory(self):
-        filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
+        # filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
         # filePath = r"D:\respository\MRViewer_Scource\study_Test_data"
+        filePath = r"D:\respository\MRViewer_Scource\PCI\4_LXM_DSA\DICOM\3231435"
         if checkDirValidity(filePath) is Status.bad: return
         rootPath,studyName = os.path.split(filePath)[0], os.path.split(filePath)[-1]
         imageDataModel.clearAll()

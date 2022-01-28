@@ -39,7 +39,8 @@ class UIConfig():
     itemSpace = 2
     iconSize = QSize(280,280)
     textHeight = 40
-    annotationSize = QSize(40,20)
+    annotationSize = QSize(30,30)
+    specialSymbolSize = QSize(40,40)
     iconTextSpace = 10
     listHeight = 1000
 
