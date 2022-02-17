@@ -44,7 +44,7 @@ class ImageScrollListWidget(QListWidget):
                 "studyName": studyName,
                 "seriesName": seriesName,
                 "seriesImageCount": seriesImageCount,
-                "isMultiFrame": checkMultiFrame(dcmFile)
+                "isMultiFrame": checkMultiFrame(seriesDict)
             }
             imageItem.setData(3,itemExtraData)
             self.addItem(imageItem)

@@ -7,6 +7,9 @@ from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 from ui.CustomInteractiveCrossBoxWidget import CustomInteractiveCrossBoxWidget
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 import vtkmodules.all as vtk
+import numpy as np
+from vtkmodules.util.numpy_support import numpy_to_vtk
+from vtkmodules.util.vtkConstants import *
 from utils.BaseImageData import Location
 from utils.cycleSyncThread import CycleSyncThread
 from utils.status import Status
@@ -77,20 +80,40 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             self.showImageExtraInfoVtkView()
             self.renderVtkWindow()
         else:
-            self.show2DImageVtkView()
             self.renderVtkWindow(1)
             # self.showCrossView()
 
-    def getSingleContainerParent(self):
-        return self.parent().parent().parent()
-
     def show2DImageVtkView(self):
-        self.reader.SetDataByteOrderToLittleEndian()
-        self.reader.SetFileName(self.imageData.curFilePath)
-        self.reader.Update()
 
-        self.imageViewer.SetInputConnection(self.reader.GetOutputPort())
+        def numpy2VTK(img):
+            shape = img.shape
+            if len(shape) < 2:
+                raise Exception('numpy array must have dimensionality of at least 2')
+
+            height, width = shape[0], shape[1]
+            c = shape[2] if len(shape) == 3 else 1
+
+            linear_array = np.reshape(img, (width * height, c))
+            vtk_array = numpy_to_vtk(linear_array)
+
+            imageData = vtk.vtkImageData()
+            imageData.SetDimensions(width, height, 1)
+            imageData.AllocateScalars(VTK_UNSIGNED_CHAR, 1)
+            imageData.GetPointData().GetScalars().DeepCopy(vtk_array)
+
+            return imageData
+
+        dcmFile = self.imageData.getDcmDataByIndex(self.imageData.currentIndex)
+        vtkImageData = numpy2VTK(np.uint8(dcmFile.pixel_array))
+
+        flip = vtk.vtkImageFlip()
+        flip.SetInputData(vtkImageData)
+        flip.SetFilteredAxes(1)
+        flip.Update()
+
+        self.imageViewer.SetInputConnection(flip.GetOutputPort())
         level,width = self.imageData.getDicomWindowCenterAndLevel(self.imageData.currentIndex)
+        print("当前帧的窗位，窗宽依次是：{0} {1}".format(level,width))
         self.imageViewer.SetColorLevel(level)
         self.imageViewer.SetColorWindow(width)
         self.imageViewer.SetRenderer(self.renImage)
@@ -217,10 +240,13 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.crossBoxWidget.show()
 
     def renderVtkWindow(self, layerCount = 2):
-        self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(layerCount)
-        self.qvtkWidget.Initialize()
-        self.qvtkWidget.Start()
-        if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
+        try:
+            self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(layerCount)
+            self.qvtkWidget.Initialize()
+            self.qvtkWidget.Start()
+            if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
+        except:
+            print("render error")
 
     def calcExtraInfoWidth(self):
         return uiConfig.shownTextInfoX
@@ -256,15 +282,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageData.currentIndex = ind
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
         
-        self.reader.SetFileName(self.imageData.curFilePath)
-        self.reader.Update()
-
-        if self.imageShownData.showExtraInfoFlag:
-            self.showImageExtraInfoVtkView()
-            self.renderVtkWindow()
-        else:
-            self.renderVtkWindow(1)
-
+        self.showAllViews()
 
         self.update2DImageShownSignal.emit()
         self.updateCrossViewSubSignal.emit()

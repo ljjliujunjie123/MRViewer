@@ -4,7 +4,10 @@ import pydicom as pyd
 from utils.util import checkDirValidity
 from utils.status import Status
 from copy import deepcopy
-from utils.util import checkMultiFrame
+
+class SeriesDict(dict):
+
+        isMultiFrame = False
 
 class ImagesDataModel():
     """
@@ -40,6 +43,7 @@ class ImagesDataModel():
             except self.MultiFrameExceptionError:
                 print("当前series的dcm为多帧格式dcm")
                 for dcmFileName in os.listdir(seriesPath):
+                    print(dcmFileName)
                     self.addSeriesMultiFrameItem(studyName, seriesName, dcmFileName)
 
         print("current ImageDataModel:")
@@ -58,27 +62,72 @@ class ImagesDataModel():
 
     def addSeriesItem(self, studyName, seriesName):
         seriesPath = os.path.join(self.rootPath, studyName, seriesName)
-        seriesDict = {}
+        seriesDict = SeriesDict()
         for sliceName in os.listdir(seriesPath):
             slicePath = os.path.join(seriesPath,sliceName)
             dcmFile = pyd.dcmread(slicePath)
-            if checkMultiFrame(dcmFile):
-                raise self.MultiFrameExceptionError()
-            seriesDict[sliceName] = dcmFile
+            try:
+                _ = dcmFile.NumberOfFrames
+            except:
+                seriesDict[sliceName] = dcmFile
+                continue
+            else:
+                if _ > 1:
+                    raise self.MultiFrameExceptionError()
+                else:
+                    seriesDict[sliceName] = dcmFile
+
         self.dataSets[studyName].add(seriesName, seriesDict)
 
     def addSeriesMultiFrameItem(self, studyName, seriesName, dcmFileName):
         """
             兼容多帧DCM的特殊情况，此时的seriesName是单张dcm的文件名
         """
+        def genearte_single_frame_dicom(dcmFile,index, filename):
+            #create metadata
+            file_meta = pyd.Dataset()
+            file_meta.ImplementationClassUID = dcmFile.file_meta.ImplementationClassUID
+            file_meta.FileMetaInformationGroupLength = dcmFile.file_meta.FileMetaInformationGroupLength
+            file_meta.FileMetaInformationVersion = dcmFile.file_meta.FileMetaInformationVersion
+            file_meta.ImplementationVersionName = dcmFile.file_meta.ImplementationVersionName
+            file_meta.TransferSyntaxUID = dcmFile.file_meta.TransferSyntaxUID
+            ds = pyd.FileDataset(filename, {},file_meta = file_meta,preamble=b"\x00" * 128)
+
+            ds.is_little_endian = dcmFile.is_little_endian
+            ds.is_implicit_VR = dcmFile.is_implicit_VR
+            ds.Modality = dcmFile.Modality
+            ds.ContentDate = dcmFile.ContentDate
+            ds.ContentTime = dcmFile.ContentTime
+            ds.StudyInstanceUID = dcmFile.StudyInstanceUID
+            ds.SeriesInstanceUID = dcmFile.SeriesInstanceUID
+            ds.SOPInstanceUID =  dcmFile.SOPInstanceUID
+            ds.SOPClassUID = dcmFile.SOPClassUID
+            # ds.SecondaryCaptureDeviceManufctur = dcmFile.SecondaryCaptureDeviceManufctur
+            # ds.FrameOfReferenceUID = dcmFile.FrameOfReferenceUID
+            ds.PatientName = dcmFile.PatientName
+            ds.PatientID = dcmFile.PatientID
+            ds.SamplesPerPixel = dcmFile.SamplesPerPixel
+            ds.PhotometricInterpretation = dcmFile.PhotometricInterpretation
+            ds.PixelRepresentation = dcmFile.PixelRepresentation
+            ds.HighBit = dcmFile.HighBit
+            ds.BitsStored = dcmFile.BitsStored
+            ds.BitsAllocated = dcmFile.BitsAllocated
+            # core tag
+            images = dcmFile.pixel_array
+            ds.PixelData = deepcopy(images[index]).tobytes()
+            ds.Columns = images[index].shape[1]
+            ds.Rows = images[index].shape[0]
+            # ds.ImagesInAcquisition = dcmFile.ImagesInAcquisition
+            return ds
+
         filePath = os.path.join(self.rootPath, studyName, seriesName, dcmFileName)
         dcmFile = pyd.dcmread(filePath)
-        images = dcmFile.pixel_array
-        seriesDict = {}
+        seriesDict = SeriesDict()
+        seriesDict.isMultiFrame = True
         for i in range(dcmFile.NumberOfFrames):
-            _dcmFile = deepcopy(dcmFile)
-            _dcmFile.pix_array = deepcopy(images[i])
-            seriesDict['{}-{}'.format(dcmFileName,i)] = _dcmFile
+            fileName = '{}-{}'.format(dcmFileName,i)
+            _dcmFile = genearte_single_frame_dicom(dcmFile,i, fileName)
+            seriesDict[fileName] = _dcmFile
         self.dataSets[studyName].add(dcmFileName, seriesDict)
 
     def findSeriesItem(self, studyName, seriesName):

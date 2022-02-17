@@ -49,7 +49,7 @@ class ImageScrollTreeWidget(QTreeWidget):
                     "studyName": studyName,
                     "seriesName": seriesName,
                     "seriesImageCount": seriesImageCount,
-                    "isMultiFrame": checkMultiFrame(dcmFile)
+                    "isMultiFrame": checkMultiFrame(seriesDict)
                 }
                 child.setData(0,3,itemExtraData)
             self.roots.append(root)

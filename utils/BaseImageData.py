@@ -92,7 +92,7 @@ class BaseImageData():
         try:
             center,width = dcmData.WindowCenter,dcmData.WindowWidth
         except:
-            center,width = 500,500
+            center,width = 125,125
         return center,width
 
     def getImageOrientationInfoFromDicom(self, index):

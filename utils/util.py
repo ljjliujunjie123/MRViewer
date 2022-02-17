@@ -1,38 +1,22 @@
 import numpy as np
-import pydicom as pyd
 import os
 from PIL.ImageQt import *
 from utils.status import Status
 from ui.config import uiConfig
 from PyQt5.QtCore import *
 
-def checkMultiFrame(dcmFile):
-    try:
-        _ = dcmFile.NumberOfFrames
-    except:
-        return False
-    else:
-        return True
+def checkMultiFrame(seriesDict):
+    return seriesDict.isMultiFrame
 
 def createDicomPixmap(dcmFile):
-
-    def createSingleFrameDicom(image_2d):
-        image_2d_scaled = (np.maximum(image_2d, 0) / image_2d.max()) * 255.0
-        image_2d_scaled = np.uint8(image_2d_scaled)
-        image = Image.fromarray(image_2d_scaled)
-        dcmImage = ImageQt(image)
-        pix = QPixmap.fromImage(dcmImage)
-        pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
-        return pixmap_resized
-
-    if checkMultiFrame(dcmFile):
-        images = dcmFile.pixel_array.astype(float)
-        image = images[0]
-        return createSingleFrameDicom(image)
-    else:
-        image = dcmFile.pixel_array.astype(float)
-        return createSingleFrameDicom(image)
-
+    image_2d = dcmFile.pixel_array.astype(float)
+    image_2d_scaled = (np.maximum(image_2d, 0) / max(image_2d.max(),1)) * 255.0
+    image_2d_scaled = np.uint8(image_2d_scaled)
+    image = Image.fromarray(image_2d_scaled)
+    dcmImage = ImageQt(image)
+    pix = QPixmap.fromImage(dcmImage)
+    pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
+    return pixmap_resized
 
 def getSeriesPathFromFileName(fileName):
     return os.path.split(fileName)[0]
