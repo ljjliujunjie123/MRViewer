@@ -28,6 +28,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageData = None
         #初始化逻辑
         self.imageShownData = None
+        self.isInit = True
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor()
         self.qvtkWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
@@ -98,13 +99,13 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
             imageData = vtk.vtkImageData()
             imageData.SetDimensions(width, height, 1)
-            imageData.AllocateScalars(VTK_UNSIGNED_CHAR, 1)
+            imageData.AllocateScalars(VTK_UNSIGNED_INT, 1)
             imageData.GetPointData().GetScalars().DeepCopy(vtk_array)
 
             return imageData
 
         dcmFile = self.imageData.getDcmDataByIndex(self.imageData.currentIndex)
-        vtkImageData = numpy2VTK(np.uint8(dcmFile.pixel_array))
+        vtkImageData = numpy2VTK(np.uint16(dcmFile.pixel_array))
 
         flip = vtk.vtkImageFlip()
         flip.SetInputData(vtkImageData)
@@ -121,7 +122,9 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageViewer.UpdateDisplayExtent()
 
         self.renImage.SetLayer(0)
-        self.renImage.ResetCamera()
+        if self.isInit:
+            self.renImage.ResetCamera()
+            self.isInit = False
 
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renImage)
 
@@ -173,7 +176,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
                 self.calcExtraInfoWidth(), self.calcExtraInfoHeight())
         self.textActors[Location.DR].SetDisplayPosition(
                 truWidth - self.calcExtraInfoWidth(), self.calcExtraInfoHeight())
-        
+
         #调整文本字体颜色，并添加到render中
         for textActor in self.textActors.values():
             textActor.GetTextProperty().SetFontSize(20)
@@ -281,7 +284,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             ind += len(self.imageData.filePaths)
         self.imageData.currentIndex = ind
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
-        
+
         self.showAllViews()
 
         self.update2DImageShownSignal.emit()
