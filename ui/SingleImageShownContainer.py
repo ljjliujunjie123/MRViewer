@@ -5,7 +5,7 @@ from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 from ui.m2DImageShownWidget import m2DImageShownWidget
-from ui.m3DFakeImageShownWidget import m3DFakeImageShownWidget
+# from ui.m3DFakeImageShownWidget import m3DFakeImageShownWidget
 from ui.m3DImageShownWidget import m3DImageShownWidget
 from ui.mRealTimeImageShownWidget import mRealTimeImageShownWidget
 from utils.BaseImageData import BaseImageData
