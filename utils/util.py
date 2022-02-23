@@ -11,7 +11,7 @@ def checkMultiFrame(seriesDict):
 def createDicomPixmap(dcmFile):
     image_2d = dcmFile.pixel_array.astype(float)
     image_2d_scaled = (np.maximum(image_2d, 0) / max(image_2d.max(),1)) * 255.0
-    image_2d_scaled = np.uint8(image_2d_scaled)
+    image_2d_scaled = np.uint8(image_2d_scaled)#!
     image = Image.fromarray(image_2d_scaled)
     dcmImage = ImageQt(image)
     pix = QPixmap.fromImage(dcmImage)

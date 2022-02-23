@@ -26,8 +26,8 @@ class UIConfig():
     shownSlideSpeedMax = 0.05 #时间间隔
     shownSlideSpeedMin = 1
 
-    toolsSelectRegionCol = 2
-    toolsSelectRegionRow = 2
+    toolsSelectRegionCol = 5
+    toolsSelectRegionRow = 5
     toolsSelectRegionItemSize = QSize(50,50)
 
     toolsIconSize = QSize(80,80)

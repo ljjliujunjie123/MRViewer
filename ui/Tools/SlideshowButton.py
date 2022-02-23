@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon,QColor,QFont
 from PyQt5.QtCore import QRect,QSize
-from PyQt5.Qt import Qt
+from PyQt5 import Qt
 from ui.Tools.ToolsInterface import ToolsInterface
 from ui.config import uiConfig
 class SlideshowButton(QFrame, ToolsInterface):

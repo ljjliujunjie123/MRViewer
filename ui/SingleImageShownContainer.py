@@ -51,7 +51,7 @@ class SingleImageShownContainer(QFrame):
         self.title = QFrame()
         self.title.setFrameShape(QFrame.StyledPanel)
         self.title.setFrameShadow(QFrame.Plain)
-        self.title.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
+        self.title.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
         self.title.setStyleSheet("background-color:grey;")
         self.hBoxLayout = QHBoxLayout()
         self.hBoxLayout.setContentsMargins(5,5,5,5)

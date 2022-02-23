@@ -1,6 +1,7 @@
 from PyQt5.QtCore import *
 from ui.SingleImageShownContainer import SingleImageShownContainer
 from ui.SlideshowContainer import SlideshowContainer
+from ui.CustomSelectRegionGridWidget import CustomSelectRegionGridWidget
 from ui.config import uiConfig
 
 from copy import deepcopy
@@ -14,7 +15,7 @@ class ImageShownLayoutController(QObject):
     selectImageShownContainerSignal = pyqtSignal(SingleImageShownContainer,bool)
     initToolsContainerStateSignal = pyqtSignal()
     updateToolsContainerStateSignal = pyqtSignal(int)
-
+    updateImageShownLayoutSignal = pyqtSignal(tuple)
     #第一个参数指示发出信号的是哪一个container
     updateCrossViewSignal = pyqtSignal(SingleImageShownContainer)
 
@@ -61,23 +62,12 @@ class ImageShownLayoutController(QObject):
         self.imageShownContainerLayout.getLayout().setSpacing(uiConfig.shownContainerContentSpace)
 
     def initWidget(self):
-        self.firstImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
-        self.secondImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
-        self.thirdImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
-        self.fourthImageShownContainer = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
-
-        self.addWidget(self.firstImageShownContainer, 0, 0)
-        self.addWidget(self.secondImageShownContainer, 0, 1)
-        self.addWidget(self.thirdImageShownContainer, 1, 0)
-        self.addWidget(self.fourthImageShownContainer, 1, 1)
-
-        self.imageShownWidgetPool[(0, 0)] = self.firstImageShownContainer
-        self.imageShownWidgetPool[(0, 1)] = self.secondImageShownContainer
-        self.imageShownWidgetPool[(1, 0)] = self.thirdImageShownContainer
-        self.imageShownWidgetPool[(1, 1)] = self.fourthImageShownContainer
-
-        # self.crossXZContainer.update2DImageShownSignal.connect(self.controlCrossView)
-        # self.crossYZContainer.update2DImageShownSignal.connect(self.controlCrossView)
+        self.imageShownContainer = [[""] * (5)] * 5
+        for col in range(5):
+            for row in range(5):
+                self.imageShownContainer[col][row] = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
+                self.addWidget(self.imageShownContainer[col][row], col, row)
+                self.imageShownWidgetPool[(col, row)] = self.imageShownContainer[col][row]
 
     def addWidget(self, childWidget, row, col, rowSpan = 1, colSpan = 1):
         self.imageShownContainerLayout.getLayout().addWidget(childWidget, row, col, rowSpan, colSpan)
@@ -240,6 +230,25 @@ class ImageShownLayoutController(QObject):
                 None
         )
 
+# 选择展示窗口数量 evermg42
+    def selectRegionGridWidgetControl(self, isShown):
+        if(isShown):
+            
+            self.selectRegionGridWidget=CustomSelectRegionGridWidget(
+                self.updateImageShownLayoutSignal
+            )
+
+            self.selectRegionGridWidget.setWindowFlags(
+                Qt.FramelessWindowHint|Qt.WindowStaysOnTopHint
+            )# 隐藏标题栏|在主窗口前
+            # self.dialog.setWindowModality(Qt.ApplicationModal) #只有该dialog关闭，才可以关闭父界面
+
+            self.selectRegionGridWidget.setWindowModality(Qt.NonModal)
+            self.selectRegionGridWidget.show()
+        else:
+            # self.tryQuitSelectRegionGridWidget()
+            self.selectRegionGridWidget.close() #直觉如此
+
     #走马灯播放控制器(得搬到container里)evermg42
     def imageSlideshowControl(self,isShown):
         if(isShown):
@@ -297,10 +306,9 @@ class ImageShownLayoutController(QObject):
         self.selectedImageShownContainer.controlImageExtraInfoState(isShow)
 
     def closeEvent(self, QCloseEvent):
-        self.firstImageShownContainer.closeEvent(QCloseEvent)
-        self.secondImageShownContainer.closeEvent(QCloseEvent)
-        self.thirdImageShownContainer.closeEvent(QCloseEvent)
-        self.fourthImageShownContainer.closeEvent(QCloseEvent)
+        for col in range(5):
+            for row in range(5):
+                self.imageShownContainer[col][row].closeEvent(QCloseEvent)
         if self.imageSlideshow is not None:self.imageSlideshow.closeEvent(QCloseEvent)
 
     def clearViews(self):

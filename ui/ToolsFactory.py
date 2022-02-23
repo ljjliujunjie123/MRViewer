@@ -1,5 +1,6 @@
-from ui.Tools.CustomSelectRegionGridWidget import CustomSelectRegionGridWidget
+from ui.CustomSelectRegionGridWidget import CustomSelectRegionGridWidget
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
+from ui.Tools.SelectRegionGridButton import SelectRegionGridButton
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from ui.Tools.SlideshowButton import SlideshowButton
@@ -34,7 +35,7 @@ class ToolsFactory():
         if len(kwargs) > 0: signal = kwargs["signal"]
 
         if tag == ToolNum.shownLayout:
-            selectImageShownRegionGridWidget = CustomSelectRegionGridWidget(signal)
+            selectImageShownRegionGridWidget = SelectRegionGridButton(signal)
             return selectImageShownRegionGridWidget
 
         elif tag == ToolNum.slideShow:

@@ -7,7 +7,8 @@ class ToolsContainer(QFrame):
 
     showInfoSig = pyqtSignal()
 
-    updateImageShownLayoutSignal = pyqtSignal(tuple)
+    
+    enableImageShownLayoutSignal = pyqtSignal(bool)
     enableImageSlideshowSignal = pyqtSignal(bool)
     imageModeSelectSignal = pyqtSignal(int)
     enableImageExtraInfoSignal = pyqtSignal(bool)
@@ -44,9 +45,8 @@ class ToolsContainer(QFrame):
         #功能1
         #一个可选择的表格，来调整文件渲染区的布局
         self.selectImageShownRegionWidget = \
-            self.toolFactory.createTool(ToolNum.shownLayout, signal = self.updateImageShownLayoutSignal)
+            self.toolFactory.createTool(ToolNum.shownLayout, signal = self.enableImageShownLayoutSignal)
         self.toolsScrollLayout.addWidget(self.selectImageShownRegionWidget,0,Qt.AlignTop)
-
         # 功能2 by evermg42
         # 图像的自动轮播开启
         self.enableImageSlideShowWidget = \
@@ -98,9 +98,6 @@ class ToolsContainer(QFrame):
         _translate = QCoreApplication.translate
         # self.pushButton.setText(_translate("MainWindow", "展示信息"))
         # self.testButton.setText(_translate("MainWindow", "确认布局"))
-
-    def enableImageSlideshowSignalHandler(self):
-        self.enableImageSlideshowSignal.emit(self.enableImageSlideShowWidget.isChecked())
 
     def resizeEvent(self, *args, **kwargs):
         print("cur ToolContainer Geometry ", self.geometry())
