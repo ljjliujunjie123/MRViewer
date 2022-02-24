@@ -29,7 +29,7 @@ class ImageShownContainer(QFrame):
             self.imageShownContainerWidget,
             self.imageShownContainerLayout
         )
-        self.imageShownLayoutController.initLayoutParams(uiConfig)
+        self.imageShownLayoutController.initLayoutParams()
         self.imageShownLayoutController.initWidget()
 
     def closeEvent(self, QCloseEvent):

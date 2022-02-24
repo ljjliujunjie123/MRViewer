@@ -8,7 +8,7 @@ class ToolsContainer(QFrame):
     showInfoSig = pyqtSignal()
 
     
-    enableImageShownLayoutSignal = pyqtSignal(bool)
+    updateImageShownLayoutSignal = pyqtSignal(tuple)
     enableImageSlideshowSignal = pyqtSignal(bool)
     imageModeSelectSignal = pyqtSignal(int)
     enableImageExtraInfoSignal = pyqtSignal(bool)
@@ -42,11 +42,11 @@ class ToolsContainer(QFrame):
         #工厂模式
         self.toolFactory = ToolsFactory(self.toolsScrollContainer)
 
-        #功能1
-        #一个可选择的表格，来调整文件渲染区的布局
-        self.selectImageShownRegionWidget = \
-            self.toolFactory.createTool(ToolNum.shownLayout, signal = self.enableImageShownLayoutSignal)
-        self.toolsScrollLayout.addWidget(self.selectImageShownRegionWidget,0,Qt.AlignTop)
+        # 功能1
+        # 按钮唤起一个可选择的表格，来调整文件渲染区的布局
+        self.selectRegionGridButton = \
+            self.toolFactory.createTool(ToolNum.shownLayout, signal = self.updateImageShownLayoutSignal)
+        self.toolsScrollLayout.addWidget(self.selectRegionGridButton,0,Qt.AlignTop)
         # 功能2 by evermg42
         # 图像的自动轮播开启
         self.enableImageSlideShowWidget = \
@@ -82,13 +82,13 @@ class ToolsContainer(QFrame):
         # self.pushButton.clicked.connect(self.showInfoSig)
 
     def initToolsContainerStateHandler(self):
-        self.selectImageShownRegionWidget.init()
+        self.selectRegionGridButton.init()
         self.enableImageExtraInfoWidget.init()
         self.imageModeSelectWidget.init()
         self.enableImageSlideShowWidget.init()
 
     def updateToolsContainerStateHandler(self, curMode):
-        # self.selectImageShownRegionWidget.update()不需要
+        # self.selectRegionGridButton.update()不需要
         self.enableImageExtraInfoWidget.update(curMode == 0)
         # self.imageModeSelectWidget.update()不需要
         self.enableImageSlideShowWidget.update(curMode == 0)

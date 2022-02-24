@@ -5,16 +5,22 @@ from ui.Tools.ToolsInterface import ToolsInterface
 from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 
-class CustomSelectRegionGridWidget(QWidget):
+class CustomSelectRegionGridWidget(QDialog):
 
-    def __init__(self, signal):
+    def __init__(self, parent, signal):
         QFrame.__init__(self)
         self.updateImageShownLayoutSignal = signal
+        self.parent = parent
+        self.setWindowFlags(
+            Qt.FramelessWindowHint|Qt.WindowStaysOnTopHint
+        )# 隐藏标题栏|在主窗口前
+        self.setWindowModality(Qt.NonModal)
         width = uiConfig.toolsSelectRegionCol * uiConfig.toolsSelectRegionItemSize.width()
         height = uiConfig.toolsSelectRegionRow * uiConfig.toolsSelectRegionItemSize.height()
         print(width,height)
         self.setFixedSize(width,height)
         self.setContentsMargins(0,0,0,0)
+        self.setWindowOpacity(0.7)
 
         self.vBoxLayout = QVBoxLayout()
         self.vBoxLayout.setAlignment(Qt.AlignCenter)
@@ -59,8 +65,6 @@ class CustomSelectRegionGridWidget(QWidget):
             widget = self.gridLayout.getLayout().itemAt(i).widget()
             if point.y() - widget.size().height()//2 - widget.pos().y() > 0:
                 row += 1
-        print("point: ", point.x(),point.y())
-        print("rc",row,col)
         self.updateImageShownLayoutSignal.emit((0,0,row,col))
 
     def mouseMoveEvent(self, QMouseEvent):
@@ -72,20 +76,22 @@ class CustomSelectRegionGridWidget(QWidget):
         for i in range(self.gridLayout.getLayout().count()):
             widget = self.gridLayout.getLayout().itemAt(i).widget()
             if isInInnerFrame and \
-                point.x() > widget.size().width()//2 + widget.pos().x() and \
-                point.y() > widget.size().height()//2 + widget.pos().y():
+                point.x() > self.innerFrame.pos().x() + widget.pos().x() and \
+                point.y() > self.innerFrame.pos().y() + widget.pos().y():
                 widget.setStyleSheet("background-color:white;")
             else:
                 widget.setStyleSheet("background-color:black;")
             widget.show()
 
     def isInInnerFrame(self, point):
-        widget = self.gridLayout.getLayout().itemAt(0).widget()
-        minX = self.innerFrame.rect().topLeft().x()
-        minY = self.innerFrame.rect().topLeft().y()
-        maxX = self.innerFrame.rect().bottomRight().x() + widget.width()//2
-        maxY = self.innerFrame.rect().bottomRight().y() + widget.height()//2
+        linMin = self.innerFrame.rect().topLeft()
+        linMax = self.innerFrame.rect().bottomRight()
 
-        if point.x() < minX or point.y() < minY or \
-            point.x() > maxX or point.y() > maxY: return False
+        if point.x() < linMin.x() or point.y() < linMin.y() or \
+            point.x() > linMax.x() or point.y() > linMax.y(): return False
         return True
+
+    def eventFilter(self, object: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.WindowDeactivate:
+            a=1# self.close()
+        return super().eventFilter(object, event)

@@ -1,5 +1,5 @@
 from PyQt5.QtCore import *
-from PyQt5.QtWidgets import QFrame,QGridLayout,QSizePolicy,QLabel
+from PyQt5.QtWidgets import *
 from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
@@ -31,6 +31,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.isInit = True
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor()
+        # self.setMinimumSize(uiConfig.calcVtkImageContainerSize())
+        # print("!", uiConfig.calcVtkImageContainerSize().width(), uiConfig.calcVtkImageContainerSize().height())
         self.qvtkWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()
         self.qvtkWidget.GetRenderWindow().SetInteractor(self.iren)
@@ -62,10 +64,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.iCrossBoxWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # 用GridLayout收敛它们
-        self.gridLayout = CustomDecoratedLayout(QGridLayout())
+        self.gridLayout = CustomDecoratedLayout(QVBoxLayout())
         self.gridLayout.initParamsForPlain()
-        self.gridLayout.getLayout().setAlignment(Qt.AlignCenter)
-        self.gridLayout.getLayout().addWidget(self.qvtkWidget, 0, 0, 1, 1)
+        self.gridLayout.getLayout().setAlignment(Qt.AlignHCenter)
+        self.gridLayout.getLayout().addWidget(self.qvtkWidget)
         self.setLayout(self.gridLayout.getLayout())
 
         self.timerThread = None

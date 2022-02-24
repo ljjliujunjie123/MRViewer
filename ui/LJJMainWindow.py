@@ -111,14 +111,11 @@ class LJJMainWindow(QMainWindow):
         self.imageShownContainer.imageShownLayoutController.updateToolsContainerStateSignal.connect(
             self.toolsContainer.updateToolsContainerStateHandler
         )
-        self.imageShownContainer.imageShownLayoutController.updateImageShownLayoutSignal.connect(
+        self.toolsContainer.updateImageShownLayoutSignal.connect(
             self.imageShownContainer.imageShownLayoutController.updateLayout
         )
         self.toolsContainer.enableImageSlideshowSignal.connect(
             self.imageShownContainer.imageShownLayoutController.imageSlideshowControl
-        ) #evermg42
-        self.toolsContainer.enableImageShownLayoutSignal.connect(
-            self.imageShownContainer.imageShownLayoutController.selectRegionGridWidgetControl
         ) #evermg42
         self.toolsContainer.imageModeSelectSignal.connect(
             self.imageShownContainer.imageShownLayoutController.imageModeSelectHandler

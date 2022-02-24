@@ -18,6 +18,7 @@ class UIConfig():
 
     shownContainerMargins = QMargins(0,0,0,0)
     shownContainerContentSpace = 4
+    shownContainerTitleHeight = 30
     shownTextInfoX = 20
     shownTextInfoY = 10
 
@@ -67,7 +68,12 @@ class UIConfig():
     def calcShownContainerWidth(self):
         return (self.screenWidth - self.scrollContainerHintWidth - self.toolsContainerHintWidth)
           
-
+    # def calcVtkImageContainerSize(self):
+    #     """重设单个Vtk大小，防止压缩其他区域"""
+    #     return QSize(
+    #         (self.calcShownContainerWidth() - self.shownContainerContentSpace * (self.toolsSelectRegionCol - 1) - self.shownContainerMargins.left() - self.shownContainerMargins.right()) // self.toolsSelectRegionCol,
+    #         (self.calcCenterWidgetHeight() - self.shownContainerContentSpace * (self.toolsSelectRegionRow - 1) - self.shownContainerMargins.top() - self.shownContainerMargins.bottom()) // self.toolsSelectRegionRow,
+    #     )
 
 
 

@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from ui.Tools.SlideshowButton import SlideshowButton
 from ui.config import uiConfig
-from ui.SingleImageShownContainer import SingleImageShownContainer
 
 from ui.Tools.ExtraInfoButton import ExtraInfoButton
 from ui.Tools.ImageModeContainer import ImageModeContainer
@@ -35,8 +34,8 @@ class ToolsFactory():
         if len(kwargs) > 0: signal = kwargs["signal"]
 
         if tag == ToolNum.shownLayout:
-            selectImageShownRegionGridWidget = SelectRegionGridButton(signal)
-            return selectImageShownRegionGridWidget
+            selectRegionGridButton = SelectRegionGridButton(signal)
+            return selectRegionGridButton
 
         elif tag == ToolNum.slideShow:
             imgPath = "ui_source/slide_show.png"
@@ -56,7 +55,7 @@ class ToolsFactory():
             layout.addWidget(pushButton)
 
         frame.setLayout(layout)
-        frame.setEnabled(False)
+        frame.setEnabled(True)
         return frame
 
 #     ui->toolButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);

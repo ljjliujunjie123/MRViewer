@@ -51,8 +51,9 @@ class SingleImageShownContainer(QFrame):
         self.title = QFrame()
         self.title.setFrameShape(QFrame.StyledPanel)
         self.title.setFrameShadow(QFrame.Plain)
-        self.title.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
+        self.title.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
         self.title.setStyleSheet("background-color:grey;")
+        self.title.setFixedHeight(uiConfig.shownContainerTitleHeight)
         self.hBoxLayout = QHBoxLayout()
         self.hBoxLayout.setContentsMargins(5,5,5,5)
         self.hBoxLayout.setSpacing(0)
@@ -197,14 +198,17 @@ class SingleImageShownContainer(QFrame):
             self.selectSignal.emit(self.isSelected)
             self.selectImageShownContainerSignal.emit(self, self.isSelected)
             self.switchImageContainerMode(self.m2DMode)
+            if self.mImageShownWidget is not None: print("23333")#!
         else:
             event.ignore()
 
     def resizeEvent(self, QResizeEvent):
-        print('singleImageShownContainer:', self.geometry())
-        print("imageContainer: ", self.imageContainer.geometry())
+        # print('singleImageShownContainer:', self.geometry())
+        # print("imageContainer: ", self.imageContainer.geometry())
         self.tryUpdateCrossBoxWidget()
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
-        if self.mImageShownWidget is not None: self.mImageShownWidget.closeEvent(QCloseEvent)
+        if self.mImageShownWidget is not None: 
+            print("sc vtk finalize")
+            self.mImageShownWidget.closeEvent(QCloseEvent)

@@ -5,7 +5,10 @@ class CustomDecoratedLayout():
 
     def initParamsForPlain(self):
         self.layout.setContentsMargins(0,0,0,0)
-        self.layout.setSpacing(5)
+        self.layout.setSpacing(0)
+
+    def setLayout(self, layout):
+        self.layout = layout
 
     def getLayout(self):
         return self.layout
