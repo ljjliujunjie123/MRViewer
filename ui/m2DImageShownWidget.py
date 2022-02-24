@@ -118,13 +118,15 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         if orientationInfo != Status.bad:
             for i in range(len(orientationInfo)):
                 self.orientationActors[i].SetInput(orientationInfo[i])
-                self.orientationActors[i].GetTextProperty().SetFontSize(20)
+                self.orientationActors[i].SetTextScaleModeToViewport()
+                self.orientationActors[i].SetNonLinearFontScale(0.7,10)
                 self.orientationActors[i].GetTextProperty().SetColor(1, 0, 0)
 
             self.orientationActors[0].SetDisplayPosition(20,truHeight//2)
             self.orientationActors[1].SetDisplayPosition(truWidth - 20,truHeight//2)
-            self.orientationActors[2].SetDisplayPosition(truWidth//2,truHeight - 40)
-            self.orientationActors[3].SetDisplayPosition(truWidth//2,20)
+            self.orientationActors[2].SetDisplayPosition(truWidth//2,truHeight - 10)
+            self.orientationActors[2].GetTextProperty().SetVerticalJustificationToTop()
+            self.orientationActors[3].SetDisplayPosition(truWidth//2,10)
 
             self.orientationActors[0].GetTextProperty().SetJustificationToLeft()
             self.orientationActors[1].GetTextProperty().SetJustificationToRight()
@@ -135,9 +137,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
                 self.renText.AddActor(actor)
 
         #添加文本注释
-        # self.textActor.SetTextScaleModeToProp()
         textDict = self.imageData.getImageExtraInfoFromDicom(self.imageData.currentIndex)
         for location,textActor in self.textActors.items():
+            textActor.SetTextScaleModeToViewport()
+            textActor.SetNonLinearFontScale(0.6,12)
             textActor.SetInput(textDict[location])
 
         #调整文本位置
@@ -158,7 +161,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         #调整文本字体颜色，并添加到render中
         for textActor in self.textActors.values():
-            textActor.GetTextProperty().SetFontSize(20)
             textActor.GetTextProperty().SetColor(1, 1, 1)
             textActor.GetTextProperty().BoldOn()
             textActor.GetTextProperty().ShadowOn()
