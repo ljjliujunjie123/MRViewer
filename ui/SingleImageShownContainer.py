@@ -1,16 +1,17 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import os
-from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
-from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 from ui.m2DImageShownWidget import m2DImageShownWidget
-# from ui.m3DFakeImageShownWidget import m3DFakeImageShownWidget
+from ui.m3DFakeImageShownWidget import m3DFakeImageShownWidget
 from ui.m3DImageShownWidget import m3DImageShownWidget
 from ui.mRealTimeImageShownWidget import mRealTimeImageShownWidget
 from utils.BaseImageData import BaseImageData
 from utils.mImage2DShownData import mImage2DShownData
 from Model.ImagesDataModel import imageDataModel
+from utils.status import Status
+import numpy as np
+
 class SingleImageShownContainer(QFrame):
 
     m2DMode = 0
@@ -91,12 +92,6 @@ class SingleImageShownContainer(QFrame):
         self.label.setText(text)
 
     def getDataFromDropEvent(self, imageExtraData):
-        # self.imageData.seriesPath = mimeData["seriesPath"]
-        # self.imageData.seriesImageCount = mimeData["seriesImageCount"]
-        # self.imageData.filePaths = [os.path.join(self.imageData.seriesPath,fileName) for fileName in os.listdir(self.imageData.seriesPath)]
-        # self.imageData.currentIndex = 0
-        # self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
-
         self.imageData.studyName = imageExtraData["studyName"]
         self.imageData.seriesName = imageExtraData["seriesName"]
         self.imageData.seriesImageCount = imageExtraData["seriesImageCount"]
@@ -112,6 +107,11 @@ class SingleImageShownContainer(QFrame):
         self.vImageBoxLayout.getLayout().addWidget(self.mImageShownWidget)
 
     def switchImageContainerMode(self, mode):
+        filterRes = self.switchImageContainerModeFilter(mode)
+        if filterRes != Status.good:
+            print("当前series不能切换到{0}模式，原因是{1}".format(mode,filterRes))
+            return
+
         if self.mImageShownWidget is not None:
             self.vImageBoxLayout.clearLayout()
             self.mImageShownWidget.clearViews()
@@ -128,8 +128,7 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget = m3DImageShownWidget()
         elif mode == self.m3DFakeMode:
             print("m3DFakeMode")
-            # self.mImageShownWidget = m3DFakeImageShownWidget()
-            self.mImageShownWidget = m2DImageShownWidget()
+            self.mImageShownWidget = m3DFakeImageShownWidget()
         elif mode == self.mRTMode:
             print("mRTMode")
             self.mImageShownWidget = mRealTimeImageShownWidget()
@@ -139,6 +138,22 @@ class SingleImageShownContainer(QFrame):
         self.mImageShownWidget.initBaseData(self.imageData)
         self.mImageShownWidget.showAllViews()
         self.tryUpdateCrossViewSignalEmit()
+
+    def switchImageContainerModeFilter(self, mode):
+        if mode == self.m3DFakeMode:
+            if self.imageData.seriesImageCount != 3:
+                return "localizer 必须是3张图片，请检查您的数据是否是三张"
+
+            dcmList = [self.imageData.getDcmDataByIndex(i) for i in range(3)]
+            orientations = [np.array(dcmData.ImageOrientationPatient,dtype = float) for dcmData in dcmList]
+            nVectors = [np.cross(orientation[:3],orientation[3:]) for orientation in orientations]
+            for i in range(len(nVectors) - 1):
+                for j in range(i + 1,len(nVectors)):
+                    if np.dot(nVectors[i],nVectors[j]) != 0:
+                        return "localizer 必须彼此正交，请检查您的数据是否正交"
+
+            return Status.good
+        return Status.good
 
     def controlImageExtraInfoState(self, isShow):
         self.mImage2DShownData.showExtraInfoFlag = isShow
@@ -207,4 +222,7 @@ class SingleImageShownContainer(QFrame):
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
-        if self.mImageShownWidget is not None: self.mImageShownWidget.closeEvent(QCloseEvent)
+        print("sc close")
+        if self.mImageShownWidget is not None:
+            print('vtk close')
+            self.mImageShownWidget.closeEvent(QCloseEvent)

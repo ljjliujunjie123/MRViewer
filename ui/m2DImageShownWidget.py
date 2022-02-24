@@ -1,18 +1,16 @@
 from PyQt5.QtCore import *
-from PyQt5.QtWidgets import QFrame,QGridLayout,QSizePolicy,QLabel
+from PyQt5.QtWidgets import QFrame,QGridLayout,QSizePolicy
 from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
-from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 from ui.CustomInteractiveCrossBoxWidget import CustomInteractiveCrossBoxWidget
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 import vtkmodules.all as vtk
 import numpy as np
-from vtkmodules.util.numpy_support import numpy_to_vtk
-from vtkmodules.util.vtkConstants import *
 from utils.BaseImageData import Location
 from utils.cycleSyncThread import CycleSyncThread
 from utils.status import Status
+from utils.util import numpy2VTK
 
 class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
@@ -85,25 +83,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             # self.showCrossView()
 
     def show2DImageVtkView(self):
-
-        def numpy2VTK(img):
-            shape = img.shape
-            if len(shape) < 2:
-                raise Exception('numpy array must have dimensionality of at least 2')
-
-            height, width = shape[0], shape[1]
-            c = shape[2] if len(shape) == 3 else 1
-
-            linear_array = np.reshape(img, (width * height, c))
-            vtk_array = numpy_to_vtk(linear_array)
-
-            imageData = vtk.vtkImageData()
-            imageData.SetDimensions(width, height, 1)
-            imageData.AllocateScalars(VTK_UNSIGNED_INT, 1)
-            imageData.GetPointData().GetScalars().DeepCopy(vtk_array)
-
-            return imageData
-
         dcmFile = self.imageData.getDcmDataByIndex(self.imageData.currentIndex)
         vtkImageData = numpy2VTK(np.uint16(dcmFile.pixel_array))
 
