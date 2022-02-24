@@ -18,8 +18,27 @@ class CustomDecoratedLayout():
             widget = self.layout.itemAt(i).widget()
             widget.setParent(None)
 
-    def setSpacing(self, int):
-        self.layout.setSpacing(int)
+    def setSpacing(self, space):
+        self.layout.setSpacing(space)
+
+    def setLeftMargin(self, left):
+        _left,_right,_top,_bottom = self.layout.getContentsMargins()
+        self.layout.setContentsMargins(left,_right,_top,_bottom)
+
+    def setRightMargin(self, right):
+        _left,_right,_top,_bottom = self.layout.getContentsMargins()
+        self.layout.setContentsMargins(_left,right,_top,_bottom)
+
+    def setTopMargin(self, top):
+        _left,_right,_top,_bottom = self.layout.getContentsMargins()
+        self.layout.setContentsMargins(_left,_right,top,_bottom)
+
+    def setBottomMargin(self, bottom):
+        _left,_right,_top,_bottom = self.layout.getContentsMargins()
+        self.layout.setContentsMargins(_left,_right,_top,bottom)
+
+    def setMargins(self, margins):
+        self.layout.setContentsMargins(margins)
 
     def addWidgets(self, widgetList):
         for widget in widgetList:

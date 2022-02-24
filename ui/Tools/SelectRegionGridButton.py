@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon,QColor,QFont
-from PyQt5.QtCore import QRect,QSize,QPoint
-from PyQt5 import Qt
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QPoint
 from ui.CustomSelectRegionGridWidget import CustomSelectRegionGridWidget
 from ui.Tools.ToolsInterface import ToolsInterface
 from ui.config import uiConfig
@@ -9,18 +8,20 @@ class SelectRegionGridButton(QFrame, ToolsInterface):
     def __init__(self, signal):
         super().__init__()
         imgPath = "ui_source/select_region_grid.png"
+        self.signal = signal
         self.selectRegionGridBtn = QPushButton()
         self.selectRegionGridBtn.setIcon(QIcon(imgPath))
         self.selectRegionGridBtn.setIconSize(uiConfig.toolsIconSize)
         self.selectRegionGridBtn.setCheckable(True)
         self.selectRegionGridBtn.setChecked(False)
-        self.selectRegionGridBtn.clicked.connect(lambda:self.createGridWidget(signal))
+        self.selectRegionGridBtn.clicked.connect(self.clickHandler)
         layout = QHBoxLayout()
         layout.setContentsMargins(0,0,0,0)
         layout.addWidget(self.selectRegionGridBtn)
         self.setLayout(layout)
         self.setEnabled(False)
 
+        self.selectRegionGridWidget = None
 
     def init(self):
         self.setEnabled(True)
@@ -28,6 +29,13 @@ class SelectRegionGridButton(QFrame, ToolsInterface):
     def update(self, available):
         self.selectRegionGridBtn.setChecked(False)
         self.setEnabled(available)
+
+    def clickHandler(self):
+        if self.selectRegionGridWidget is None:
+            self.createGridWidget(self.signal)
+        else:
+            self.selectRegionGridWidget.close()
+            self.selectRegionGridWidget = None
 
     def createGridWidget(self, signal):
         print(self.geometry)

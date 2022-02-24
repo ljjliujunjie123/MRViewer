@@ -1,14 +1,12 @@
-from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from ui.Tools.ToolsInterface import ToolsInterface
 from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 
-class CustomSelectRegionGridWidget(QDialog):
+class CustomSelectRegionGridWidget(QWidget):
 
     def __init__(self, parent, signal):
-        QFrame.__init__(self)
+        QWidget.__init__(self)
         self.updateImageShownLayoutSignal = signal
         self.parent = parent
         self.setWindowFlags(
@@ -22,28 +20,36 @@ class CustomSelectRegionGridWidget(QDialog):
         self.setContentsMargins(0,0,0,0)
         self.setWindowOpacity(0.7)
 
-        self.vBoxLayout = QVBoxLayout()
-        self.vBoxLayout.setAlignment(Qt.AlignCenter)
-        self.setLayout(self.vBoxLayout)
-        self.hBoxLayout = QHBoxLayout()
-        self.hBoxLayout.setContentsMargins(0,0,0,0)
-        self.hBoxLayout.setAlignment(Qt.AlignCenter)
+        self.vBoxLayout = CustomDecoratedLayout(QVBoxLayout())
+        self.vBoxLayout.initParamsForPlain()
+        self.vBoxLayout.setLeftMargin(uiConfig.toolsSelectRegionItemSize.width()//2)
+        self.vBoxLayout.setRightMargin(uiConfig.toolsSelectRegionItemSize.width()//2)
+        self.vBoxLayout.getLayout().setAlignment(Qt.AlignHCenter)
+        self.setLayout(self.vBoxLayout.getLayout())
+
+        self.hBoxLayout = CustomDecoratedLayout(QHBoxLayout())
+        self.hBoxLayout.initParamsForPlain()
+        self.hBoxLayout.setTopMargin(uiConfig.toolsSelectRegionItemSize.height()//2)
+        self.hBoxLayout.setBottomMargin(uiConfig.toolsSelectRegionItemSize.height()//2)
+        self.hBoxLayout.getLayout().setAlignment(Qt.AlignVCenter)
 
         self.innerFrame = QFrame(self)
-        self.innerFrame.setFixedSize(self.width()//5 * 4, self.height()//5 * 4)
+        self.innerFrame.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.innerFrame.setMouseTracking(True)
         self.innerFrame.setFrameShape(QFrame.StyledPanel)
         self.innerFrame.setFrameShadow(QFrame.Plain)
-        self.hBoxLayout.addWidget(self.innerFrame)
-        self.vBoxLayout.addLayout(self.hBoxLayout)
+        self.hBoxLayout.getLayout().addWidget(self.innerFrame)
+        self.vBoxLayout.getLayout().addLayout(self.hBoxLayout.getLayout())
 
-        self.gridLayout = CustomDecoratedLayout(QGridLayout(self.innerFrame))
+        self.gridLayout = CustomDecoratedLayout(QGridLayout())
+        self.innerFrame.setLayout(self.gridLayout.getLayout())
         self.gridLayout.initParamsForPlain()
         self.gridLayout.setSpacing(2)
 
         for x in range(5):
             for y in range(5):
                 widget = QWidget(self)
+                widget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
                 widget.setStyleSheet("background-color:black;")
                 widget.setMouseTracking(True)
                 self.gridLayout.getLayout().addWidget(widget,x,y,1,1)
@@ -71,8 +77,6 @@ class CustomSelectRegionGridWidget(QDialog):
         super().mouseMoveEvent(QMouseEvent)
         point = QMouseEvent.pos()
         isInInnerFrame = self.isInInnerFrame(point)
-        # print("cur point ", point)
-        # print("innerframe ", self.innerFrame.pos())
         for i in range(self.gridLayout.getLayout().count()):
             widget = self.gridLayout.getLayout().itemAt(i).widget()
             if isInInnerFrame and \
@@ -84,11 +88,9 @@ class CustomSelectRegionGridWidget(QDialog):
             widget.show()
 
     def isInInnerFrame(self, point):
-        linMin = self.innerFrame.rect().topLeft()
-        linMax = self.innerFrame.rect().bottomRight()
-
-        if point.x() < linMin.x() or point.y() < linMin.y() or \
-            point.x() > linMax.x() or point.y() > linMax.y(): return False
+        x,y = self.innerFrame.x(), self.innerFrame.y()
+        if point.x() < x or point.y() < y or \
+            point.x() > x + self.innerFrame.width() or point.y() > y + self.innerFrame.height(): return False
         return True
 
     def eventFilter(self, object: QObject, event: QEvent) -> bool:
