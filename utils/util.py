@@ -4,6 +4,11 @@ from PIL.ImageQt import *
 from utils.status import Status
 from ui.config import uiConfig
 from PyQt5.QtCore import *
+from vtkmodules.vtkCommonColor import vtkNamedColors
+from vtkmodules.vtkRenderingAnnotation import vtkAnnotatedCubeActor
+from vtkmodules.util.numpy_support import numpy_to_vtk
+import vtkmodules.all as vtk
+from vtkmodules.util.vtkConstants import *
 
 def checkMultiFrame(seriesDict):
     return seriesDict.isMultiFrame
@@ -49,3 +54,48 @@ def checkDirValidity(filePath):
         print("Warning:", filePath, "is a empty directory!")
         return Status.bad
     return Status.good
+
+def MakeAnnotatedCubeActor(colors: vtkNamedColors):
+        """
+        :param colors: Used to determine the cube color.
+        :return: The annotated cube actor.
+        """
+        # A cube with labeled faces.
+        cube = vtkAnnotatedCubeActor()
+        cube.SetXPlusFaceText('R')  # Right
+        cube.SetXMinusFaceText('L')  # Left
+        cube.SetYPlusFaceText('A')  # Anterior
+        cube.SetYMinusFaceText('P')  # Posterior
+        cube.SetZPlusFaceText('S')  # Superior/Cranial
+        cube.SetZMinusFaceText('I')  # Inferior/Caudal
+        cube.SetFaceTextScale(0.5)
+        cube.GetCubeProperty().SetColor(colors.GetColor3d('Gainsboro'))
+
+        cube.GetTextEdgesProperty().SetColor(colors.GetColor3d('LightSlateGray'))
+
+        # Change the vector text colors.
+        cube.GetXPlusFaceProperty().SetColor(colors.GetColor3d('Tomato'))
+        cube.GetXMinusFaceProperty().SetColor(colors.GetColor3d('Tomato'))
+        cube.GetYPlusFaceProperty().SetColor(colors.GetColor3d('DeepSkyBlue'))
+        cube.GetYMinusFaceProperty().SetColor(colors.GetColor3d('DeepSkyBlue'))
+        cube.GetZPlusFaceProperty().SetColor(colors.GetColor3d('SeaGreen'))
+        cube.GetZMinusFaceProperty().SetColor(colors.GetColor3d('SeaGreen'))
+        return cube
+
+def numpy2VTK(img):
+    shape = img.shape
+    if len(shape) < 2:
+        raise Exception('numpy array must have dimensionality of at least 2')
+
+    height, width = shape[0], shape[1]
+    c = shape[2] if len(shape) == 3 else 1
+
+    linear_array = np.reshape(img, (width * height, c))
+    vtk_array = numpy_to_vtk(linear_array)
+
+    imageData = vtk.vtkImageData()
+    imageData.SetDimensions(width, height, 1)
+    imageData.AllocateScalars(VTK_UNSIGNED_INT, 1)
+    imageData.GetPointData().GetScalars().DeepCopy(vtk_array)
+
+    return imageData

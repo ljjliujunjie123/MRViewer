@@ -3,16 +3,14 @@ from PyQt5.QtWidgets import *
 from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
-from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 from ui.CustomInteractiveCrossBoxWidget import CustomInteractiveCrossBoxWidget
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 import vtkmodules.all as vtk
 import numpy as np
-from vtkmodules.util.numpy_support import numpy_to_vtk
-from vtkmodules.util.vtkConstants import *
 from utils.BaseImageData import Location
 from utils.cycleSyncThread import CycleSyncThread
 from utils.status import Status
+from utils.util import numpy2VTK
 
 class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
@@ -31,8 +29,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.isInit = True
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor()
-        # self.setMinimumSize(uiConfig.calcVtkImageContainerSize())
-        # print("!", uiConfig.calcVtkImageContainerSize().width(), uiConfig.calcVtkImageContainerSize().height())
         self.qvtkWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()
         self.qvtkWidget.GetRenderWindow().SetInteractor(self.iren)
@@ -64,10 +60,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.iCrossBoxWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # 用GridLayout收敛它们
-        self.gridLayout = CustomDecoratedLayout(QVBoxLayout())
+        self.gridLayout = CustomDecoratedLayout(QGridLayout())
         self.gridLayout.initParamsForPlain()
-        self.gridLayout.getLayout().setAlignment(Qt.AlignHCenter)
-        self.gridLayout.getLayout().addWidget(self.qvtkWidget)
+        self.gridLayout.getLayout().setAlignment(Qt.AlignCenter)
+        self.gridLayout.getLayout().addWidget(self.qvtkWidget, 0, 0, 1, 1)
         self.setLayout(self.gridLayout.getLayout())
 
         self.timerThread = None
@@ -87,25 +83,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             # self.showCrossView()
 
     def show2DImageVtkView(self):
-
-        def numpy2VTK(img):
-            shape = img.shape
-            if len(shape) < 2:
-                raise Exception('numpy array must have dimensionality of at least 2')
-
-            height, width = shape[0], shape[1]
-            c = shape[2] if len(shape) == 3 else 1
-
-            linear_array = np.reshape(img, (width * height, c))
-            vtk_array = numpy_to_vtk(linear_array)
-
-            imageData = vtk.vtkImageData()
-            imageData.SetDimensions(width, height, 1)
-            imageData.AllocateScalars(VTK_UNSIGNED_INT, 1)
-            imageData.GetPointData().GetScalars().DeepCopy(vtk_array)
-
-            return imageData
-
         dcmFile = self.imageData.getDcmDataByIndex(self.imageData.currentIndex)
         vtkImageData = numpy2VTK(np.uint16(dcmFile.pixel_array))
 
@@ -141,13 +118,15 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         if orientationInfo != Status.bad:
             for i in range(len(orientationInfo)):
                 self.orientationActors[i].SetInput(orientationInfo[i])
-                self.orientationActors[i].GetTextProperty().SetFontSize(20)
+                self.orientationActors[i].SetTextScaleModeToViewport()
+                self.orientationActors[i].SetNonLinearFontScale(0.7,10)
                 self.orientationActors[i].GetTextProperty().SetColor(1, 0, 0)
 
             self.orientationActors[0].SetDisplayPosition(20,truHeight//2)
             self.orientationActors[1].SetDisplayPosition(truWidth - 20,truHeight//2)
-            self.orientationActors[2].SetDisplayPosition(truWidth//2,truHeight - 40)
-            self.orientationActors[3].SetDisplayPosition(truWidth//2,20)
+            self.orientationActors[2].SetDisplayPosition(truWidth//2,truHeight - 10)
+            self.orientationActors[2].GetTextProperty().SetVerticalJustificationToTop()
+            self.orientationActors[3].SetDisplayPosition(truWidth//2,10)
 
             self.orientationActors[0].GetTextProperty().SetJustificationToLeft()
             self.orientationActors[1].GetTextProperty().SetJustificationToRight()
@@ -158,9 +137,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
                 self.renText.AddActor(actor)
 
         #添加文本注释
-        # self.textActor.SetTextScaleModeToProp()
         textDict = self.imageData.getImageExtraInfoFromDicom(self.imageData.currentIndex)
         for location,textActor in self.textActors.items():
+            textActor.SetTextScaleModeToViewport()
+            textActor.SetNonLinearFontScale(0.6,12)
             textActor.SetInput(textDict[location])
 
         #调整文本位置
@@ -181,7 +161,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         #调整文本字体颜色，并添加到render中
         for textActor in self.textActors.values():
-            textActor.GetTextProperty().SetFontSize(20)
             textActor.GetTextProperty().SetColor(1, 1, 1)
             textActor.GetTextProperty().BoldOn()
             textActor.GetTextProperty().ShadowOn()

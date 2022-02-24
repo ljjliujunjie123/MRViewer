@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QFrame
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from utils.util import MakeAnnotatedCubeActor
 
 class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
@@ -33,21 +34,8 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.style.SetDefaultRenderer(ren3D)
         self.iren.SetInteractorStyle(self.style)
         # 添加世界坐标系
-        axesActor = vtk.vtkAnnotatedCubeActor()
-        # ren3D.AddActor(axesActor)
-        # 注意这里设置的值是屏幕坐标系下的方位值，并不是解剖学上的方位
-        axesActor.SetXPlusFaceText("L")
-        axesActor.SetXMinusFaceText("R")
-        axesActor.SetYMinusFaceText("I")
-        axesActor.SetYPlusFaceText("S")
-        axesActor.SetZMinusFaceText("P")
-        axesActor.SetZPlusFaceText("A")
-        axesActor.SetXFaceTextRotation(-90)
-        axesActor.SetYFaceTextRotation(180)
-        axesActor.SetZFaceTextRotation(90)
-        axesActor.GetTextEdgesProperty().SetColor(1,0,0)
-        axesActor.GetTextEdgesProperty().SetLineWidth(2)
-        axesActor.GetCubeProperty().SetColor(0,0,1)
+        axesActor = MakeAnnotatedCubeActor(vtk.vtkNamedColors())
+        self.axes_widget.SetViewport(0.8, 0.8, 1.0, 1.0)
         self.axes_widget.SetOrientationMarker(axesActor)
         self.axes_widget.SetInteractor(self.iren)
         self.axes_widget.EnabledOn()
