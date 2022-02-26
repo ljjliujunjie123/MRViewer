@@ -1,10 +1,12 @@
 from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QCursor
+from PyQt5.QtWidgets import QFrame,QGridLayout,QSizePolicy,QMenu,QAction
 from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from ui.CustomInteractiveCrossBoxWidget import CustomInteractiveCrossBoxWidget
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
+from ui.CustomDicomTagsWindow import CustomDicomTagsWindow
 import vtkmodules.all as vtk
 import numpy as np
 from utils.BaseImageData import Location
@@ -21,12 +23,14 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def __init__(self):
         QFrame.__init__(self)
         #初始化GUI配置
-
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.createRightMenu)  # 连接到菜单显示函数
         #初始化数据
         self.imageData = None
         #初始化逻辑
         self.imageShownData = None
         self.isInit = True
+        self.dicomWins = list()
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor()
         self.qvtkWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
@@ -237,6 +241,21 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def calcExtraInfoHeight(self):
         return uiConfig.shownTextInfoY
+
+    def createRightMenu(self):
+        self.groupBox_menu = QMenu()
+
+        self.actionA = QAction(u'show DICOM tags')
+        self.groupBox_menu.addAction(self.actionA)
+        self.actionA.triggered.connect(self.showDicomTagsWindow)
+        self.groupBox_menu.popup(QCursor.pos())
+
+    def showDicomTagsWindow(self):
+        def dicomWindowsCallBack(dicomWin):
+            self.dicomWins.remove(dicomWin)
+        self.dicomWins.append(CustomDicomTagsWindow(dicomWindowsCallBack))
+        self.dicomWins[-1].injectDicomData(self.imageData.getDcmDataByIndex(self.imageData.currentIndex))
+        self.dicomWins[-1].show()
 
     def resizeEvent(self, QResizeEvent):
         super().resizeEvent(QResizeEvent)
