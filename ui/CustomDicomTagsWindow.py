@@ -20,7 +20,7 @@ class CustomDicomTagsWindow(QDialog):
         'Description': 5,
         'Value': 7
     }  # 为表头宽度设置默认值
-    tableHeaderHeight=40
+    tableHeaderHeight=50
 
     def __init__(self,closeCallBack, parent=None):
         QDialog.__init__(self,parent)
@@ -41,11 +41,12 @@ class CustomDicomTagsWindow(QDialog):
         mainLayout.setContentsMargins(10,10,10,0)
         mainLayout.setSpacing(0)
 
+        self.setGeometry(self.RectWidth/4,self.RectHeight/4, self.RectWidth/2, self.RectHeight/2)
+
         self.table = self.createTable()
         mainLayout.addWidget(self.table)  # 在主页面插入表格
         mainLayout.addLayout(self.createHboxGroupBoxLayout())  # 再整体插入下方的水平布局
         self.setLayout(mainLayout)
-        self.setGeometry(self.RectWidth/4,self.RectHeight/4, self.RectWidth/2, self.RectHeight/2)
         self.setWindowTitle('DICOM')
 
     def injectDicomData(self, dcmData):
