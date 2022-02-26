@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtGui import QIcon
+
 from ui.config import uiConfig
 
 class CustomDicomTagsWindow(QDialog):
@@ -26,7 +27,7 @@ class CustomDicomTagsWindow(QDialog):
         QDialog.__init__(self,parent)
         flags = self.windowFlags()
         flags |= Qt.WindowMinMaxButtonsHint
-        self.setStyleSheet("QDialog{background-color:#d1d5d9;}")
+        self.setStyleSheet("QDialog{background-color:#A9A9A9;}")
         self.setWindowFlags(flags)
         self.table = None
         self.updataSearchSignal.connect(self.updataSearch)
@@ -40,14 +41,13 @@ class CustomDicomTagsWindow(QDialog):
         mainLayout = QVBoxLayout()
         mainLayout.setContentsMargins(10,10,10,0)
         mainLayout.setSpacing(0)
-
         self.setGeometry(self.RectWidth/4,self.RectHeight/4, self.RectWidth/2, self.RectHeight/2)
-
         self.table = self.createTable()
         mainLayout.addWidget(self.table)  # 在主页面插入表格
         mainLayout.addLayout(self.createHboxGroupBoxLayout())  # 再整体插入下方的水平布局
         self.setLayout(mainLayout)
-        self.setWindowTitle('DICOM')
+        self.setWindowIcon(QIcon("ui_source/win_title_icon_color.png"))
+        self.setWindowTitle('Dicom Tags')
 
     def injectDicomData(self, dcmData):
         self.updateTable(dcmData)
@@ -60,10 +60,13 @@ class CustomDicomTagsWindow(QDialog):
         #搜索框
         searchLineEdit=QLineEdit()
         searchLineEdit.setPlaceholderText("Find text...")
+        searchLineEdit.setStyleSheet('background-color:grey')
         searchLineEdit.textChanged.connect(self.textsearch)#输入文本后自动搜索
 
-        #打开文件和关闭窗口
+        #关闭窗口
         CloseBtn=QPushButton("Close")
+        CloseBtn.setStyleSheet('''QPushButton{background:grey}''')
+
         CloseBtn.clicked.connect(self.close)#点击“close”关闭窗口
 
         layout.addWidget(searchLineEdit,2)
@@ -110,9 +113,11 @@ class CustomDicomTagsWindow(QDialog):
         for key in self.tableHeaderDict.keys():
             table.horizontalHeader().resizeSection(self.tableHeaderDict[key],self.width()*self.tableHeaderWidthDict[key]/sum(self.tableHeaderWidthDict.values()))
         table.horizontalHeader().setFixedHeight(self.tableHeaderHeight)  # 表头高度
-
-        table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)  # 设置第6列宽度自动调整，充满屏幕
+        table.horizontalHeader().setSectionResizeMode(len(self.tableHeaderDict.keys())-1, QHeaderView.Stretch)  # 设置第最后一列宽度自动调整，充满屏幕
         table.horizontalHeader().setStretchLastSection(True)  # 设置最后一列拉伸至最大列无限延伸
+        table.setStyleSheet("background-color:grey;")
+        table.horizontalHeader().setStyleSheet("QHeaderView::section{background-color:grey;}")
+
 
         for key in self.tableHeaderDict.keys():
             item=QTableWidgetItem()
