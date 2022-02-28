@@ -63,7 +63,7 @@ class ImageShownLayoutController(QObject):
         for col in range(uiConfig.toolsSelectRegionCol):
             for row in range(uiConfig.toolsSelectRegionRow):
                 self.imageShownWidgetPool[(row, col)] = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
-                self.addWidget(self.imageShownWidgetPool[(row, col)], row, col)
+        self.reAddImageContainers()
 
     def addWidget(self, childWidget, row, col, rowSpan = 1, colSpan = 1):
         self.imageShownContainerLayout.getLayout().addWidget(childWidget, row, col, rowSpan, colSpan)
@@ -71,8 +71,10 @@ class ImageShownLayoutController(QObject):
     def updateLayout(self, layoutTuple):
         if layoutTuple == self.curlayout: return
         self.curlayout = deepcopy(layoutTuple)
+        self.reAddImageContainers()
 
-        topRow, leftCol, bottomRow, rightCol = layoutTuple
+    def reAddImageContainers(self):
+        topRow, leftCol, bottomRow, rightCol = self.curlayout
 
         #从Layout移除所有子Widget
         self.imageShownContainerLayout.clearLayout()
@@ -81,7 +83,6 @@ class ImageShownLayoutController(QObject):
             for col in range(leftCol, rightCol + 1):
                 childWidget = self.imageShownWidgetPool[(row, col)]
                 self.addWidget(childWidget, row, col)
-                print("childWidget ", childWidget.geometry())
 
     #crossView 逻辑控制
     def updateCrossViewSignalHandler(self, emitContainer):

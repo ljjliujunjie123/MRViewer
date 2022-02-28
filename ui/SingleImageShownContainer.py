@@ -218,8 +218,8 @@ class SingleImageShownContainer(QFrame):
             event.ignore()
 
     def resizeEvent(self, QResizeEvent):
-        print('singleImageShownContainer:', self.geometry())
-        print("imageContainer: ", self.imageContainer.geometry())
+        # print('singleImageShownContainer:', self.geometry())
+        # print("imageContainer: ", self.imageContainer.geometry())
         self.tryUpdateCrossBoxWidget()
 
     def closeEvent(self, QCloseEvent):

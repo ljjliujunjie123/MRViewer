@@ -32,8 +32,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.isInit = True
         self.dicomWins = list()
 
-        self.qvtkWidget = CustomQVTKRenderWindowInteractor()
-        self.qvtkWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
         self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()
         self.qvtkWidget.GetRenderWindow().SetInteractor(self.iren)
         self.vtkStyle = vtk.vtkInteractorStyleImage()
@@ -62,13 +61,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         # interactive crossView
         self.iCrossBoxWidget = CustomInteractiveCrossBoxWidget()
         self.iCrossBoxWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        # 用GridLayout收敛它们
-        self.gridLayout = CustomDecoratedLayout(QGridLayout())
-        self.gridLayout.initParamsForPlain()
-        self.gridLayout.getLayout().setAlignment(Qt.AlignCenter)
-        self.gridLayout.getLayout().addWidget(self.qvtkWidget, 0, 0, 1, 1)
-        self.setLayout(self.gridLayout.getLayout())
 
         self.timerThread = None
 
@@ -259,9 +251,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def resizeEvent(self, QResizeEvent):
         super().resizeEvent(QResizeEvent)
-        print("resize parent: ", self.parent().geometry())
-        print("resize m2D: ",self.geometry())
-        print("resize qvtWidget: ", self.qvtkWidget.geometry())
+        self.qvtkWidget.setFixedSize(self.size())
         self.showImageExtraInfoVtkView()
 
     #滚轮调用sigWheelChanged
