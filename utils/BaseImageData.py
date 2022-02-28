@@ -65,7 +65,7 @@ class BaseImageData():
         Rows = dcmData.Rows
         Cols = dcmData.Columns
         #图像平面法向量(X与Y的叉积)
-        normalvector = np.cross(ImageOrientationX,ImageOrientationY)
+        normalvector = np.around(np.cross(ImageOrientationX,ImageOrientationY), decimals=2)
         return img_array,normalvector,ImagePosition,PixelSpacing,ImageOrientationX,ImageOrientationY,Rows,Cols
 
     def getImageTileInfo(self, index):
@@ -101,12 +101,10 @@ class BaseImageData():
         """
         dcmData = self.getDcmDataByIndex(index)
         try:
-            ImageOrientation=np.array(dcmData.ImageOrientationPatient,dtype = float)
+            ImageOrientation=np.around(np.array(dcmData.ImageOrientationPatient,dtype = float),decimals=1)
         except:
             return Status.bad
         xVector,yVector = ImageOrientation[:3],ImageOrientation[3:]
-        func = lambda x:round(x,1)
-        xVector,yVector = tuple(map(func,xVector)),tuple(map(func,yVector))
         print("orientation vector ", xVector, yVector)
         xInfo = self.calcImageOrientation(xVector)
         yInfo = self.calcImageOrientation(yVector)
