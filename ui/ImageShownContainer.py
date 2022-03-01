@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import *
 from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from controller.ImageShownLayoutController import ImageShownLayoutController
+from controller.InteractiveCrossBoxController import InteractiveCrossBoxController
 
 class ImageShownContainer(QFrame):
 
@@ -24,13 +25,16 @@ class ImageShownContainer(QFrame):
         self.imageShownContainerLayout = CustomDecoratedLayout(QGridLayout())
         self.imageShownContainerWidget.setLayout(self.imageShownContainerLayout.getLayout())
 
-        #初始化controller
+        #初始化controllers
         self.imageShownLayoutController = ImageShownLayoutController(
-            self.imageShownContainerWidget,
             self.imageShownContainerLayout
         )
         self.imageShownLayoutController.initLayoutParams()
         self.imageShownLayoutController.initWidget()
+
+        self.interactiveCrossBoxController = InteractiveCrossBoxController(
+            self.imageShownContainerLayout
+        )
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)

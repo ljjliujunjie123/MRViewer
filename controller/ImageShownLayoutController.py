@@ -20,11 +20,9 @@ class ImageShownLayoutController(QObject):
     #此处imageShownContainerLayout类型是ui.CustomDecoratedLayout
     def __init__(
             self,
-            imageShownContainerWidget,
             imageShownContainerLayout
     ):
         QObject.__init__(self)
-        self.imageShownContainerWidget = imageShownContainerWidget
         self.imageShownContainerLayout = imageShownContainerLayout
 
         self.curlayout = (0, 0, 1, 1)
@@ -86,65 +84,7 @@ class ImageShownLayoutController(QObject):
 
     #crossView 逻辑控制
     def updateCrossViewSignalHandler(self, emitContainer):
-        if emitContainer.curMode == SingleImageShownContainer.mRTMode:
-            self.imageShownContainerLayout.mapWidgetsFunc(self.updateInteractiveCrossViewSignalSCHandler, emitContainer)
-        else:
-            self.imageShownContainerLayout.mapWidgetsFunc(self.updateCrossViewSignalSCHandler, emitContainer)
-
-    def updateInteractiveCrossViewSignalSCHandler(self, handleContainer, emitContainerTuple):
-        emitContainer, = emitContainerTuple
-        if handleContainer is emitContainer\
-            or handleContainer.curMode != SingleImageShownContainer.m2DMode\
-            or len(handleContainer.imageData.curFilePath) < 1:return
-
-        df1 = handleContainer.imageData.getDcmDataByIndex(handleContainer.imageData.currentIndex)
-        df2 = emitContainer.imageData.getDcmDataByIndex(emitContainer.imageData.currentIndex)
-        isSameStudy = checkSameStudy(df1,df2)
-        isSameSeries = checkSameSeries(df1, df2)
-        if (not isSameStudy) or isSameSeries:
-            return
-
-        #建立世界坐标系
-        index1,index2 = handleContainer.imageData.currentIndex, emitContainer.imageData.currentIndex
-        img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
-        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
-        img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
-        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = emitContainer.imageData.getBasePosInfo(index2)
-
-        #定义Base面的面方程, 求出 Ax + By + Cz + D = 0 中的A,B,C,D
-        A,B,C = normalvector1[0],normalvector1[1],normalvector1[2]
-        D = -1 * sum([normalvector1[i] * ImagePosition1[i] for i in range(len(normalvector1))])
-
-        #定义Projection面的四个三维空间点
-        point1 = ImagePosition2
-        point2 = ImagePosition2 + ImageOrientationX2 * Rows2 * PixelSpacing2[0]
-        point3 = ImagePosition2 + ImageOrientationY2 * Cols2 * PixelSpacing2[1]
-        point4 = ImagePosition2 + ImageOrientationX2 * Rows2 * PixelSpacing2[0] + ImageOrientationY2 * Cols2 * PixelSpacing2[1]
-
-        points = [point1, point2, point3, point4]
-
-        #根据公式求这四个点在Base面上的投影点
-        def calcPointToPlaneProjection(point, A, B, C, D):
-            """A,B,C,D是三维面一般方程的四个参数"""
-            x,y,z = point[0],point[1],point[2]
-            A2,B2,C2 = A*A,B*B,C*C
-            sumSquare = A2 + B2 + C2
-            xp,yp,zp = ((B2 + C2)*x - A * (B*y + C*z + D))//sumSquare,\
-                       ((A2 + C2)*y - B * (A*x + C*z + D))//sumSquare,\
-                       ((A2 + B2)*z - C * (A*x + B*y + D))//sumSquare
-            return (xp,yp,zp)
-        points_p = [calcPointToPlaneProjection(point, A, B, C, D) for point in points]
-
-        #将投影点的三维坐标转到Base面上的二维坐标
-        def calcPoint3DTo2D(point, pos, vectorX, vectorY, spaceX, spaceY):
-            vectorOtoP = np.array(point) - pos
-            x = np.dot(vectorOtoP,vectorX) / spaceX
-            y = np.dot(vectorOtoP,vectorY) / spaceY
-            return (x,y)
-        points_2d = [
-            calcPoint3DTo2D(point, ImagePosition1, ImageOrientationX1, ImageOrientationY1, PixelSpacing1[0], PixelSpacing1[1])
-            for point in points_p
-        ]
+        self.imageShownContainerLayout.mapWidgetsFunc(self.updateCrossViewSignalSCHandler, emitContainer)
 
     def updateCrossViewSignalSCHandler(self, handleContainer, emitContainerTuple):
         emitContainer, = emitContainerTuple
