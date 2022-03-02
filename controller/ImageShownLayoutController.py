@@ -63,6 +63,7 @@ class ImageShownLayoutController(QObject):
                 self.imageShownWidgetPool[(row, col)] = SingleImageShownContainer(self.selectImageShownContainerSignal, self.updateCrossViewSignal)
         self.reAddImageContainers()
 
+
     def addWidget(self, childWidget, row, col, rowSpan = 1, colSpan = 1):
         self.imageShownContainerLayout.getLayout().addWidget(childWidget, row, col, rowSpan, colSpan)
 

@@ -22,6 +22,7 @@ class SingleImageShownContainer(QFrame):
     #这个signal负责SC之外的处理
     selectImageShownContainerSignal = None
     updateCrossViewSignal = None
+    shownContainerPositionSignal = pyqtSignal()
     #这个signal负责SC本身的处理
     selectSignal = pyqtSignal(bool)
 
@@ -36,6 +37,7 @@ class SingleImageShownContainer(QFrame):
         self.selectImageShownContainerSignal = selectImageShownContainerSignal
         self.updateCrossViewSignal = updateCrossViewSignal
         self.selectSignal.connect(self.selectSignalHandler)
+        self.shownContainerPositionSignal.connect(self.slideShowPlayer)
         #初始化配置
         self.setAcceptDrops(True)
         self.setFrameShape(QFrame.StyledPanel)
@@ -228,3 +230,15 @@ class SingleImageShownContainer(QFrame):
         if self.mImageShownWidget is not None:
             print('vtk close')
             self.mImageShownWidget.closeEvent(QCloseEvent)
+
+    def slideShowPlayer(self):
+        self.slideShowPlayer = QDialog()
+        self.slideShowPlayer.setWindowTitle("播放器")
+        self.slideShowPlayer.setWindowFlag(Qt.FramelessWindowHint)
+
+        pos = self.mapToGlobal(QPoint(0,0))
+        x,y = pos.x(),pos.y()
+        width,height = self.width(),self.height()
+
+        self.slideShowPlayer.setGeometry(x,y,width,height)
+        self.slideShowPlayer.show()
