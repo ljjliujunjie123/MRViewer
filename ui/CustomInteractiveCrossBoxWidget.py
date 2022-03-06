@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPen,QPainter
 from PyQt5.QtCore import QRectF,Qt
-from ui.mGraphicRectItem import mGraphicRectItem
+from ui.mGraphicRectItem import mGraphicParallelogramItem, mGraphicParallelogramParams
 
 class CustomInteractiveCrossBoxWidget(QGraphicsView):
 
@@ -20,11 +20,13 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         self.setScene(self.scene)
 
         #将border View和CrossView组装入scene
-        self.scene.addItem(mGraphicRectItem())
-        # self.testItem = QGraphicsTextItem()
-        # self.testItem.setPlainText("hello world")
-        # self.testItem.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
-        # self.scene.addItem(self.testItem)
+        params = mGraphicParallelogramParams()
+        params.setCenterPoint((100, 100))
+        params.setTopLeftPoint((0,0))
+        params.setTopRightPoint((200,0))
+        params.setBottomLeftPoint((0,200))
+        params.setBottomRightPoint((200,200))
+        self.scene.addItem(mGraphicParallelogramItem(params))
         self.borderItem = QGraphicsRectItem(sceneRect)
         pen = QPen()
         pen.setColor(Qt.white)
@@ -35,18 +37,6 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
     def calcSceneRect(self):
         width,height = self.width(),self.height()
         return QRectF(-1*width/2,-1*height/2,width,height)
-
-    def mousePressEvent(self, QMouseEvent):
-        print("iC View press ", QMouseEvent.pos())
-        super().mousePressEvent(QMouseEvent)
-
-    def mouseMoveEvent(self, QMouseEvent):
-        print("iC View move ", QMouseEvent.pos())
-        super().mouseMoveEvent(QMouseEvent)
-
-    def mouseReleaseEvent(self, QMouseEvent):
-        print("iC View release ", QMouseEvent.pos())
-        super().mouseReleaseEvent(QMouseEvent)
 
     def resizeEvent(self, QResizeEvent):
         self.scene.setSceneRect(self.calcSceneRect())

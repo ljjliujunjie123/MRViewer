@@ -61,7 +61,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         # interactive crossView
         self.iCrossBoxWidget = CustomInteractiveCrossBoxWidget()
         self.iCrossBoxWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
+        self.iCrossBoxWidget.show()
         self.timerThread = None
 
         self.sigWheelChanged.connect(self.wheelChangeEvent)

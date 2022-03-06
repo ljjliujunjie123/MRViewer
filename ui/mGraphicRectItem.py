@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt,QPointF,QRectF
+from PyQt5.QtCore import Qt,QPointF,QRectF,QLineF
 from PyQt5.QtGui import QPen,QPolygonF,QBrush,QColor
 from math import atan,atan2,sin,cos,pi,sqrt
 from enum import Enum
+from functools import singledispatch
 
 class STATE_FLAG(Enum):
     DEFAULT_FLAG=0
@@ -12,306 +13,472 @@ class STATE_FLAG(Enum):
     MOV_BOTTOM_LINE=4 #标记当前为用户按下矩形的下边界区域
     MOV_RECT=6 #标记当前为鼠标拖动图片移动状态
     ROTATE=7 #标记当前为旋转状态
+    MOV_TOP_LEFT_POINT = 8
+    MOV_TOP_RIGHT_POINT = 9
+    MOV_BOTTOM_LEFT_POINT = 10
+    MOV_BOTTOM_RIGHT_POINT = 11
 
-class mGraphicRectItem(QGraphicsItem):
+class mGraphicParallelogramParams():
 
-    def __init__(self, parent = None):
-        super(QGraphicsItem,self).__init__(parent)
-        self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
-        self.mOldRect = QRectF(0,0,300,300)
-        self.mOldRectPolygon = QPolygonF()
-        self.mRotateCenter = QPointF()
-        self.mRotateAreaRect = QRectF()
-        self.mSmallRotateRect = QRectF()
-        self.mSmallRotatePolygon = QPolygonF()
-        self.mInsicedRect = QRectF()
-        self.mInsicedPolygon = QPolygonF()
-        self.mLeftRect = QRectF()
-        self.mRightRect = QRectF()
-        self.mTopRect = QRectF()
-        self.mBottomRect = QRectF()
+    UnDefined = -1
+
+    def __init__(self):
+        self.keyPointTopLeft = self.UnDefined
+        self.keyPointTopRight = self.UnDefined
+        self.keyPointBottomLeft= self.UnDefined
+        self.keyPointBottomRight = self.UnDefined
+        #定义平行四边形的中心点
+        self.mCenterPoint = self.UnDefined
+
+    def setTopLeftPoint(self, obj):
+        @singledispatch
+        def setPoint(obj):
+            return NotImplemented
+
+        @setPoint.register(tuple)
+        def _(obj):
+            x,y = obj
+            self.keyPointTopLeft = QPointF(x,y)
+
+        @setPoint.register(QPointF)
+        def _(obj):
+            self.keyPointTopLeft = obj
+
+        setPoint(obj)
+
+    def setTopRightPoint(self, obj):
+        @singledispatch
+        def setPoint(obj):
+            return NotImplemented
+
+        @setPoint.register(tuple)
+        def _(obj):
+            x,y = obj
+            self.keyPointTopRight = QPointF(x,y)
+
+        @setPoint.register(QPointF)
+        def _(obj):
+            self.keyPointTopRight = obj
+
+        setPoint(obj)
+
+    def setBottomLeftPoint(self, obj):
+        @singledispatch
+        def setPoint(obj):
+            return NotImplemented
+
+        @setPoint.register(tuple)
+        def _(obj):
+            x,y = obj
+            self.keyPointBottomLeft = QPointF(x,y)
+
+        @setPoint.register(QPointF)
+        def _(obj):
+            self.keyPointBottomLeft = obj
+
+        setPoint(obj)
+
+    def setBottomRightPoint(self, obj):
+        @singledispatch
+        def setPoint(obj):
+            return NotImplemented
+
+        @setPoint.register(tuple)
+        def _(obj):
+            x,y = obj
+            self.keyPointBottomRight = QPointF(x,y)
+
+        @setPoint.register(QPointF)
+        def _(obj):
+            self.keyPointBottomRight = obj
+
+        setPoint(obj)
+
+    def setCenterPoint(self, obj):
+        @singledispatch
+        def setPoint(obj):
+            return NotImplemented
+
+        @setPoint.register(tuple)
+        def _(obj):
+            x,y = obj
+            self.mCenterPoint = QPointF(x,y)
+
+        @setPoint.register(QPointF)
+        def _(obj):
+            self.mCenterPoint = obj
+
+        setPoint(obj)
+
+class mGraphicParallelogramItem(QGraphicsItem):
+
+    borderEventAreaSize = 10.0
+    rotateEventAreaSize = 20.0 #半径
+
+    transformScale = 0.8
+
+    def __init__(self, params:mGraphicParallelogramParams,parent = None):
+        super(QGraphicsItem, self).__init__(parent)
+
+        self.keyPointsList = []
+        #定义平行四边形的四个顶点
+        self.keyPointTopLeft = QPointF()
+        self.keyPointTopRight = QPointF()
+        self.keyPointBottomLeft= QPointF()
+        self.keyPointBottomRight = QPointF()
+        #定义平行四边形的中心点
+        self.mCenterPoint = QPointF()
+
+        #初始化所有keyPoint
+        self.initKeyPoints(params)
+
+        #定义平行四边形的边框polygon
+        self.mBorderPolygon = QPolygonF()
+        #定义贴附于平行四边形四边的四个梯形响应区
         self.mLeftPolygon = QPolygonF()
         self.mTopPolygon = QPolygonF()
         self.mRightPolygon = QPolygonF()
         self.mBottomPolygon = QPolygonF()
+        #定义贴附于平行四边形顶点的四个三角形响应区
+        self.mTopLeftPolygon = QPolygonF()
+        self.mTopRightPolygon = QPolygonF()
+        self.mBottomRightPolygon = QPolygonF()
+        self.mBottomLeftPolygon = QPolygonF()
+        #定义位于平行四边形中心的旋转响应区
+        self.mRotatePolygon = QPolygonF()
+
+        #初始化所有Polygon
+        self.initPolygons()
+
+        #定义辅助变量
+        self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
         self.mStartPos = QPointF()
         self.mRotateAngle = 0
-        self.isResize = False
-        self.isRotate = False
 
-        self.setPos(-1*self.mOldRect.width()/2,-1*self.mOldRect.height()/2)
-        self.setRectSize(self.mOldRect)
+        #初始化位置
+        self.setPos(-1*self.mCenterPoint.x(),-1*self.mCenterPoint.y())
+        #设置GUI配置
         self.setToolTip("Click and drag me!")
-        self.mPointFofSmallRotateRect = []
-        self.setRotate(0)
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemIsSelectable)
 
     def boundingRect(self):
-        boundingRectF = self.mOldRectPolygon.boundingRect()
-        return QRectF(boundingRectF.x() - 40, boundingRectF.y() - 40,
-                      boundingRectF.width() + 80, boundingRectF.height() + 80)
+        return self.mBorderPolygon.boundingRect()
 
-    def setRectSize(self, rect: QRectF, isResetRotateCenter = True):
-        self.mOldRect = rect
-        if isResetRotateCenter:
-            self.mRotateCenter.setX(self.mOldRect.x() + self.mOldRect.width() / 2)
-            self.mRotateCenter.setY(self.mOldRect.y() + self.mOldRect.height() / 2)
-        self.mOldRectPolygon = self.getRotatePolygonFromRect(self.mRotateCenter, self.mOldRect, self.mRotateAngle)
+    def initKeyPoints(self, params: mGraphicParallelogramParams):
+        """
+        根据外部输入来确定平行四边形的位置和大小
+        """
+        def checkPointUnDefined(fromPoint, toPoint:QPointF, x, y):
+            if fromPoint is mGraphicParallelogramParams.UnDefined:
+                toPoint.setX(x)
+                toPoint.setY(y)
+            else:
+                toPoint.setX(fromPoint.x())
+                toPoint.setY(fromPoint.y())
 
-        self.mInsicedRect = QRectF(self.mOldRect.x() + 8, self.mOldRect.y() + 8, self.mOldRect.width() - 16, self.mOldRect.height() - 16)
-        self.mInsicedPolygon = self.getRotatePolygonFromRect(self.mRotateCenter, self.mInsicedRect, self.mRotateAngle)
+        checkPointUnDefined(params.keyPointTopLeft,self.keyPointTopLeft, 0.0, 0.0)
+        checkPointUnDefined(params.keyPointTopRight, self.keyPointTopRight, 100.0, 0.0)
+        checkPointUnDefined(params.keyPointBottomLeft, self.keyPointBottomLeft, 0.0, 100.0)
+        checkPointUnDefined(params.keyPointBottomRight, self.keyPointBottomRight, 100.0, 100.0)
+        self.mCenterPoint = self.calcCenterPoint(self.keyPointTopLeft, self.keyPointBottomRight)
 
-        self.mLeftRect = QRectF(self.mOldRect.x(),self.mOldRect.y(),8,self.mOldRect.height()-8)
-        self.mLeftPolygon = self.getRotatePolygonFromRect(self.mRotateCenter,self.mLeftRect,self.mRotateAngle)
+    def calcCenterPoint(self, aPoint:QPointF, bPoint:QPointF):
+        return QPointF((aPoint.x() + bPoint.x())/2, (aPoint.y() + bPoint.y())/2)
 
-        self.mTopRect = QRectF(self.mOldRect.x()+8,self.mOldRect.y(),self.mOldRect.width()-8,8)
-        self.mTopPolygon = self.getRotatePolygonFromRect(self.mRotateCenter,self.mTopRect,self.mRotateAngle)
+    def initPolygons(self):
+        self.mBorderPolygon = QPolygonF(
+            [self.keyPointTopLeft, self.keyPointTopRight, self.keyPointBottomRight, self.keyPointBottomLeft]
+        )
+        topLeftTopPoint = self.calcOptionalPointFromEndPoints(self.keyPointTopLeft, self.keyPointTopRight, self.borderEventAreaSize)
+        topLeftLeftPoint = self.calcOptionalPointFromEndPoints(self.keyPointTopLeft, self.keyPointBottomLeft, self.borderEventAreaSize)
+        topRightTopPoint = self.calcOptionalPointFromEndPoints(self.keyPointTopRight, self.keyPointTopLeft, self.borderEventAreaSize)
+        topRightRightPoint = self.calcOptionalPointFromEndPoints(self.keyPointTopRight, self.keyPointBottomRight, self.borderEventAreaSize)
+        bottomLeftLeftPoint = self.calcOptionalPointFromEndPoints(self.keyPointBottomLeft, self.keyPointTopLeft, self.borderEventAreaSize)
+        bottomLeftBottomPoint = self.calcOptionalPointFromEndPoints(self.keyPointBottomLeft, self.keyPointBottomRight, self.borderEventAreaSize)
+        bottomRightRightPoint = self.calcOptionalPointFromEndPoints(self.keyPointBottomRight, self.keyPointTopRight, self.borderEventAreaSize)
+        bottomRightBottomPoint = self.calcOptionalPointFromEndPoints(self.keyPointBottomRight, self.keyPointBottomLeft, self.borderEventAreaSize)
+        self.mLeftPolygon = QPolygonF(
+            [topLeftTopPoint, bottomLeftBottomPoint, bottomLeftLeftPoint, topLeftLeftPoint]
+        )
+        self.mTopPolygon = QPolygonF(
+            [topLeftLeftPoint, topRightRightPoint, topRightTopPoint, topLeftTopPoint]
+        )
+        self.mRightPolygon = QPolygonF(
+            [topRightTopPoint, bottomRightBottomPoint, bottomRightRightPoint, topRightRightPoint]
+        )
+        self.mBottomPolygon = QPolygonF(
+            [bottomLeftLeftPoint, bottomRightRightPoint, bottomRightBottomPoint, bottomLeftBottomPoint]
+        )
+        self.mTopLeftPolygon = QPolygonF([self.keyPointTopLeft, topLeftTopPoint, topLeftLeftPoint])
+        self.mTopRightPolygon = QPolygonF([self.keyPointTopRight, topRightRightPoint, topRightTopPoint])
+        self.mBottomRightPolygon = QPolygonF([self.keyPointBottomRight, bottomRightBottomPoint, bottomRightRightPoint])
+        self.mBottomLeftPolygon = QPolygonF([self.keyPointBottomLeft, bottomLeftLeftPoint, bottomLeftBottomPoint])
 
-        self.mRightRect = QRectF(self.mOldRect.right()-8,self.mOldRect.y()+8,8,self.mOldRect.height()-16)
-        self.mRightPolygon = self.getRotatePolygonFromRect(self.mRotateCenter,self.mRightRect,self.mRotateAngle)
+        x,y = self.mCenterPoint.x(), self.mCenterPoint.y()
+        rotateTopLeft = QPointF(x - self.rotateEventAreaSize, y - self.rotateEventAreaSize)
+        rotateTopRight = QPointF(x + self.rotateEventAreaSize, y - self.rotateEventAreaSize)
+        rotateBottomLeft = QPointF(x - self.rotateEventAreaSize, y + self.rotateEventAreaSize)
+        rotateBottomRight = QPointF(x + self.rotateEventAreaSize, y + self.rotateEventAreaSize)
+        self.mRotatePolygon = QPolygonF([rotateTopLeft, rotateTopRight, rotateBottomRight, rotateBottomLeft])
 
-        self.mBottomRect = QRectF(self.mOldRect.x(),self.mOldRect.bottom()-8,self.mOldRect.width()-8,8)
-        self.mBottomPolygon = self.getRotatePolygonFromRect(self.mRotateCenter,self.mBottomRect,self.mRotateAngle)
+    def calcOptionalPointFromEndPoints(self, startPoint: QPointF, endPoint: QPointF, vectorLength):
+        """
+        计算从startPoint和endPoint构成的射线上，距离startPoint距离vectorLength的点的坐标
+        """
+        resPoint = QPointF()
+        totalLength2 = self.calcDisBetweenPoints(startPoint, endPoint, isSqrt=False)
+        vectorLength2 = vectorLength*vectorLength
+        ratio = sqrt(vectorLength2 / totalLength2)
+        resPoint.setX(startPoint.x() + ratio * (endPoint.x() - startPoint.x()))
+        resPoint.setY(startPoint.y() + ratio * (endPoint.y() - startPoint.y()))
+        return resPoint
 
-        self.mSmallRotateRect = self.getSmallRotateRect(rect.topLeft(),rect.topRight())
-        self.mSmallRotatePolygon = self.getRotatePolygonFromRect(self.mRotateCenter,self.mSmallRotateRect,self.mRotateAngle)
-
-        print("init icView polygon ", self.boundingRect())
-        print("init left polygon ", self.mLeftPolygon.boundingRect())
-        print("init right polygon ", self.mRightPolygon.boundingRect())
-        print("init top polygon ", self.mTopPolygon.boundingRect())
-        print("init bottom polygon ", self.mBottomPolygon.boundingRect())
-        print("init rotate polygon ", self.mSmallRotatePolygon.boundingRect())
-
-    def paint(self, QPainter, QStyleOptionGraphicsItem, widget=None):
-        pf = self.getSmallRotateRectCenter(self.mOldRectPolygon[0],self.mOldRectPolygon[1])
-        rect = QRectF(pf.x()-10,pf.y()-10,20,20)
-
-        mBrush = QBrush(QColor(0,0,0,1))
-        QPainter.setBrush(mBrush)
-        QPainter.fillRect(rect, mBrush)
-        QPainter.drawPolygon(self.mOldRectPolygon)
-
-        mPen = QPen(Qt.green)
-        mPen.setWidth(2)
-        QPainter.setPen(mPen)
-        pf = self.getSmallRotateRectCenter(self.mOldRectPolygon[0],self.mOldRectPolygon[1])
-        rect = QRectF(pf.x()-10,pf.y()-10,20,20)
-        QPainter.drawEllipse(rect)
-        QPainter.drawPoint(pf)
-        mPen.setColor(Qt.yellow)
-        QPainter.setPen(mPen)
-        QPainter.drawPolygon(self.mOldRectPolygon)
+    def calcDisBetweenPoints(self, aPoint:QPointF, bPoint:QPointF, isSqrt:bool = True):
+        dis2 = (bPoint.y() - aPoint.y())**2 + (bPoint.x() - aPoint.x())**2
+        if isSqrt:
+            return sqrt(dis2)
+        else:
+            return dis2
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        print("graphicRect press")
+        print("mouse press", event.pos())
         if event.button() == Qt.LeftButton:
             self.mStartPos = event.pos()
-            print("press point ", self.mStartPos)
-            print(self.mSmallRotatePolygon.boundingRect())
-            if self.mSmallRotatePolygon.containsPoint(self.mStartPos, Qt.WindingFill):
+            if self.mRotatePolygon.containsPoint(self.mStartPos, Qt.WindingFill):
                 self.setCursor(Qt.PointingHandCursor)
                 self.mStateFlag = STATE_FLAG.ROTATE
-            elif self.mInsicedPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
-                self.setCursor(Qt.ClosedHandCursor)
-                self.mStateFlag = STATE_FLAG.MOV_RECT
+                return
             elif self.mLeftPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
                 self.setCursor(Qt.SizeHorCursor)
                 self.mStateFlag = STATE_FLAG.MOV_LEFT_LINE
+                return
             elif self.mTopPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
                 self.setCursor(Qt.SizeVerCursor)
                 self.mStateFlag = STATE_FLAG.MOV_TOP_LINE
+                return
             elif self.mRightPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
                 self.setCursor(Qt.SizeHorCursor)
                 self.mStateFlag = STATE_FLAG.MOV_RIGHT_LINE
+                return
             elif self.mBottomPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
                 self.setCursor(Qt.SizeVerCursor)
                 self.mStateFlag = STATE_FLAG.MOV_BOTTOM_LINE
+                return
+            elif self.mTopLeftPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
+                self.setCursor(Qt.SizeFDiagCursor)
+                self.mStateFlag = STATE_FLAG.MOV_TOP_LEFT_POINT
+                return
+            elif self.mTopRightPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
+                self.setCursor(Qt.SizeBDiagCursor)
+                self.mStateFlag = STATE_FLAG.MOV_TOP_RIGHT_POINT
+                return
+            elif self.mBottomLeftPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
+                self.setCursor(Qt.SizeBDiagCursor)
+                self.mStateFlag = STATE_FLAG.MOV_BOTTOM_LEFT_POINT
+                return
+            elif self.mBottomRightPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
+                self.setCursor(Qt.SizeFDiagCursor)
+                self.mStateFlag = STATE_FLAG.MOV_BOTTOM_RIGHT_POINT
+                return
+            elif self.mBorderPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
+                self.setCursor(Qt.ClosedHandCursor)
+                self.mStateFlag = STATE_FLAG.MOV_RECT
+                return
             else:
                 self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
-
+                return
         else:
             super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event:QGraphicsSceneMouseEvent):
-        print("graphicRect move")
         pos = event.pos()
+        print("moving pos", pos, self.mStateFlag)
         if self.mStateFlag == STATE_FLAG.ROTATE:
-            rotateAngle = atan2(
-                    (pos.x() - self.mRotateCenter.x()),
-                    (pos.y() - self.mRotateCenter.y())
-            )*180/pi
-            self.setRotate(180 - rotateAngle)
-            self.setRectSize(self.mOldRect)
+            lineBegin = QLineF(self.mCenterPoint, self.mStartPos)
+            lineEnd = QLineF(self.mCenterPoint, pos)
+            mouseAngle = (360 - lineBegin.angleTo(lineEnd))%360*pi/180
+            self.rotateHandler(mouseAngle)
+            self.mStartPos = pos
+            return
 
-        elif self.mStateFlag == STATE_FLAG.MOV_RECT:
-            pf = event.pos() - self.mStartPos
-            self.moveBy(pf.x(), pf.y())
-            self.setRectSize(self.mOldRect)
-            self.scene().update()
+        dis = self.transformScale * self.calcDisBetweenPoints(self.mStartPos, pos)
+        #移动距离过小跳过
+        posToCenterPoint = pos - self.mCenterPoint
+        startToCenterPoint = self.mStartPos - self.mCenterPoint
+        direction = 1 if posToCenterPoint.manhattanLength() > startToCenterPoint.manhattanLength() else -1
+
+        if self.mStateFlag == STATE_FLAG.MOV_RECT:
+            self.moveRectHandler(pos)
+            return
 
         elif self.mStateFlag == STATE_FLAG.MOV_LEFT_LINE:
-            pf = QPointF(
-                    (self.mOldRectPolygon.at(1).x()+self.mOldRectPolygon.at(2).x())/2,
-                    (self.mOldRectPolygon.at(1).y()+self.mOldRectPolygon.at(2).y())/2
-            )
-            dis = sqrt((pos.x()-pf.x())**2 +(pos.y()-pf.y())**2)
-            dis2LT = sqrt((pos.x()-self.mOldRectPolygon.at(0).x())**2 + (pos.y()-self.mOldRectPolygon.at(0).y())**2)
-            dis2RT = sqrt((pos.x()-self.mOldRectPolygon.at(1).x())**2 + (pos.y()-self.mOldRectPolygon.at(1).y())**2)
-
-            if dis<16 or dis2LT>dis2RT : return
-
-            newRect = QRectF(self.mOldRect)
-            newRect.setLeft(self.mOldRect.right()-dis)
-            newRect.setRight(self.mOldRect.right())
-            self.setRectSize(newRect,False)
-            self.mRotateCenter=QPointF(
-                    (self.mOldRectPolygon.at(0).x()+self.mOldRectPolygon.at(2).x())/2,
-                    (self.mOldRectPolygon.at(0).y()+self.mOldRectPolygon.at(2).y())/2
-            )
-            self.mOldRect.moveCenter(self.mRotateCenter)
-            self.setRectSize(self.mOldRect)
-            self.scene().update()
+            #向外变大为正方向
+            self.moveLineHandler(direction, dis, self.keyPointTopLeft, self.keyPointTopRight, self.keyPointBottomLeft, self.keyPointBottomRight)
+            self.mStartPos = pos
+            return
 
         elif self.mStateFlag == STATE_FLAG.MOV_TOP_LINE:
-            pf = QPointF(
-                    (self.mOldRectPolygon.at(2).x()+self.mOldRectPolygon.at(3).x())/2,
-                    (self.mOldRectPolygon.at(2).y()+self.mOldRectPolygon.at(3).y())/2
-            )
-            dis = sqrt((pos.x()-pf.x())**2 +(pos.y()-pf.y())**2)
-            dis2LT = sqrt((pos.x()-self.mOldRectPolygon.at(0).x())**2 + (pos.y()-self.mOldRectPolygon.at(0).y())**2)
-            dis2LB = sqrt((pos.x()-self.mOldRectPolygon.at(3).x())**2 + (pos.y()-self.mOldRectPolygon.at(3).y())**2)
-
-            if dis<16 or dis2LT>dis2LB : return
-
-            newRect = QRectF(self.mOldRect)
-            newRect.setTop(self.mOldRect.bottom()-dis)
-            newRect.setBottom(self.mOldRect.bottom())
-            self.setRectSize(newRect,False)
-            self.mRotateCenter=QPointF(
-                    (self.mOldRectPolygon.at(0).x()+self.mOldRectPolygon.at(2).x())/2,
-                    (self.mOldRectPolygon.at(0).y()+self.mOldRectPolygon.at(2).y())/2
-            )
-            self.mOldRect.moveCenter(self.mRotateCenter)
-            self.setRectSize(self.mOldRect)
-            self.scene().update()
+            self.moveLineHandler(direction, dis, self.keyPointTopLeft, self.keyPointBottomLeft, self.keyPointTopRight, self.keyPointBottomRight)
+            self.mStartPos = pos
+            return
 
         elif self.mStateFlag == STATE_FLAG.MOV_RIGHT_LINE:
-            pf = QPointF(
-                    (self.mOldRectPolygon.at(0).x()+self.mOldRectPolygon.at(3).x())/2,
-                    (self.mOldRectPolygon.at(0).y()+self.mOldRectPolygon.at(3).y())/2
-            )
-            dis = sqrt((pos.x()-pf.x())**2 +(pos.y()-pf.y())**2)
-            dis2LT = sqrt((pos.x()-self.mOldRectPolygon.at(0).x())**2 + (pos.y()-self.mOldRectPolygon.at(0).y())**2)
-            dis2RT = sqrt((pos.x()-self.mOldRectPolygon.at(1).x())**2 + (pos.y()-self.mOldRectPolygon.at(1).y())**2)
-
-            if dis<16 or dis2LT<dis2RT : return
-
-            newRect = QRectF(self.mOldRect)
-            newRect.setLeft(self.mOldRect.left())
-            newRect.setRight(self.mOldRect.left()+dis)
-            self.setRectSize(newRect,False)
-            self.mRotateCenter=QPointF(
-                    (self.mOldRectPolygon.at(0).x()+self.mOldRectPolygon.at(2).x())/2,
-                    (self.mOldRectPolygon.at(0).y()+self.mOldRectPolygon.at(2).y())/2
-            )
-            self.mOldRect.moveCenter(self.mRotateCenter)
-            self.setRectSize(self.mOldRect)
-            self.scene().update()
+            self.moveLineHandler(direction, dis, self.keyPointTopRight, self.keyPointTopLeft, self.keyPointBottomRight, self.keyPointBottomLeft)
+            self.mStartPos = pos
+            return
 
         elif self.mStateFlag == STATE_FLAG.MOV_BOTTOM_LINE:
-            pf = QPointF(
-                    (self.mOldRectPolygon.at(0).x()+self.mOldRectPolygon.at(1).x())/2,
-                    (self.mOldRectPolygon.at(0).y()+self.mOldRectPolygon.at(1).y())/2
-            )
-            dis = sqrt((pos.x()-pf.x())**2 +(pos.y()-pf.y())**2)
-            dis2LT = sqrt((pos.x()-self.mOldRectPolygon.at(0).x())**2 + (pos.y()-self.mOldRectPolygon.at(0).y())**2)
-            dis2LB = sqrt((pos.x()-self.mOldRectPolygon.at(3).x())**2 + (pos.y()-self.mOldRectPolygon.at(3).y())**2)
+            self.moveLineHandler(direction, dis, self.keyPointBottomLeft, self.keyPointTopLeft, self.keyPointBottomRight, self.keyPointTopRight)
+            self.mStartPos = pos
+            return
 
-            if dis<16 or dis2LT<dis2LB : return
+        elif self.mStateFlag == STATE_FLAG.MOV_TOP_LEFT_POINT:
+            self.moveKeyPointHandler(direction, dis, self.keyPointTopLeft, self.keyPointBottomRight, self.keyPointTopRight, self.keyPointBottomLeft)
+            self.mStartPos = pos
+            return
 
-            newRect = QRectF(self.mOldRect)
-            newRect.setTop(self.mOldRect.top())
-            newRect.setBottom(self.mOldRect.top()+dis)
-            self.setRectSize(newRect,False)
-            self.mRotateCenter=QPointF(
-                    (self.mOldRectPolygon.at(0).x()+self.mOldRectPolygon.at(2).x())/2,
-                    (self.mOldRectPolygon.at(0).y()+self.mOldRectPolygon.at(2).y())/2
+        elif self.mStateFlag == STATE_FLAG.MOV_TOP_RIGHT_POINT:
+            self.moveKeyPointHandler(direction, dis, self.keyPointTopRight, self.keyPointBottomLeft, self.keyPointTopLeft, self.keyPointBottomRight)
+            self.mStartPos = pos
+
+        elif self.mStateFlag == STATE_FLAG.MOV_BOTTOM_LEFT_POINT:
+            self.moveKeyPointHandler(direction, dis, self.keyPointBottomLeft, self.keyPointTopRight, self.keyPointTopLeft, self.keyPointBottomRight)
+            self.mStartPos = pos
+            return
+
+        elif self.mStateFlag == STATE_FLAG.MOV_BOTTOM_RIGHT_POINT:
+            self.moveKeyPointHandler(direction, dis, self.keyPointBottomRight, self.keyPointTopLeft, self.keyPointTopRight, self.keyPointBottomLeft)
+            self.mStartPos = pos
+            return
+
+        else:
+            super().mouseMoveEvent(event)
+
+    def moveLineHandler(self, direction, dis, keyPointA, keyPointB, keyPointC, keyPointD):
+        """
+        A,C是基准点，B,D是参考点
+        direction为正在变大，此时基准点远离参考点，反之接近参考点
+        """
+        if direction < 0:
+            newKeyPointA = self.calcOptionalPointFromEndPoints(
+                keyPointA,keyPointB, dis
             )
-            self.mOldRect.moveCenter(self.mRotateCenter)
-            self.setRectSize(self.mOldRect)
-            self.scene().update()
+            keyPointA.setX(newKeyPointA.x())
+            keyPointA.setY(newKeyPointA.y())
+
+            newKeyPointC = self.calcOptionalPointFromEndPoints(
+                keyPointC, keyPointD, dis
+            )
+            keyPointC.setX(newKeyPointC.x())
+            keyPointC.setY(newKeyPointC.y())
+        else:
+            newKeyPointA = self.calcOptionalPointFromEndPoints(
+                keyPointB,
+                keyPointA,
+                dis + self.calcDisBetweenPoints(keyPointA, keyPointB)
+            )
+            keyPointA.setX(newKeyPointA.x())
+            keyPointA.setY(newKeyPointA.y())
+            newKeyPointC = self.calcOptionalPointFromEndPoints(
+                keyPointD,
+                keyPointC,
+                dis + self.calcDisBetweenPoints(keyPointC, keyPointD)
+            )
+            keyPointC.setX(newKeyPointC.x())
+            keyPointC.setY(newKeyPointC.y())
+        self.mCenterPoint = self.calcCenterPoint(self.keyPointTopLeft, self.keyPointBottomRight)
+        self.initPolygons()
+        self.scene().update()
+        pass
+
+    def moveKeyPointHandler(self, direction, dis, keyPointMoving, keyPointAcross, keyPointNextA, keyPointNextB):
+        """
+        moving是正在移动的点，across是与之不共线的顶点，nextA,B是与之共线的两个顶点
+        direction为正表示变大，远离across，相反接近
+        """
+        def calcNextPoints(direction, dis, keyPointAcross, keyPointNext):
+            if direction > 0:
+                _keyPointNext = self.calcOptionalPointFromEndPoints(
+                    keyPointAcross,
+                    keyPointNext,
+                    dis + self.calcDisBetweenPoints(keyPointAcross, keyPointNext)
+                )
+            else:
+                availableDis = self.calcDisBetweenPoints(keyPointNext, keyPointAcross) - self.rotateEventAreaSize * 2
+                if dis > availableDis:
+                    #防越界处理
+                    dis = int(availableDis*0.9)
+                _keyPointNext = self.calcOptionalPointFromEndPoints(
+                    keyPointNext,
+                    keyPointAcross,
+                    dis
+                )
+            keyPointNext.setX(_keyPointNext.x())
+            keyPointNext.setY(_keyPointNext.y())
+        calcNextPoints(direction, dis, keyPointAcross, keyPointNextA)
+        calcNextPoints(direction, dis, keyPointAcross, keyPointNextB)
+
+        self.mCenterPoint = self.calcCenterPoint(keyPointNextA, keyPointNextB)
+        _keyPointMoving = self.calcOptionalPointFromEndPoints(
+            keyPointAcross,
+            self.mCenterPoint,
+            2 * self.calcDisBetweenPoints(keyPointAcross, self.mCenterPoint)
+        )
+        keyPointMoving.setX(_keyPointMoving.x())
+        keyPointMoving.setY(_keyPointMoving.y())
+        self.initPolygons()
+        self.scene().update()
+
+    def rotateHandler(self, rotateAngle):
+        keyPoints = [
+            self.keyPointBottomLeft, self.keyPointBottomRight, self.keyPointTopLeft, self.keyPointTopRight
+        ]
+        cX,cY = self.mCenterPoint.x(), self.mCenterPoint.y()
+        for point in keyPoints:
+            _point = QPointF(
+                (point.x() - cX)*cos(rotateAngle) - (point.y() - cY)*sin(rotateAngle) + cX,
+                (point.x() - cX)*sin(rotateAngle) + (point.y() - cY)*cos(rotateAngle) + cY
+            )
+            point.setX(_point.x())
+            point.setY(_point.y())
+        self.initPolygons()
+        self.scene().update()
+
+    def moveRectHandler(self, pos):
+        pf = pos - self.mStartPos
+        self.moveBy(pf.x(), pf.y())
+        self.initPolygons()
+        self.scene().update()
 
     def mouseReleaseEvent(self, event:QGraphicsSceneMouseEvent):
-        print("graphicRect release")
+        print("release pos ", event.pos())
         self.setCursor(Qt.ArrowCursor)
         if self.mStateFlag == STATE_FLAG.MOV_RECT:
             self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
         else:
             super().mouseReleaseEvent(event)
 
-    def setRotate(self, rotateAngle, ptCenter = QPointF(-999,-999)):
-        self.isRotate = True
-        if ptCenter.x == -999 and ptCenter.y() == -999:
-            self.mRotateCenter = QPointF(
-                    (self.mOldRect.x() + self.mOldRect.width()/2),
-                    (self.mOldRect.y() + self.mOldRect.height()/2)
-            )
-        else:
-            self.mRotateCenter = ptCenter
-        self.mRotateAngle = rotateAngle
-        self.update()
+    def paint(self, QPainter, QStyleOptionGraphicsItem, widget=None):
+        #绘制旋转的圆形标识
+        pf = self.mCenterPoint
+        rect = QRectF(pf.x()-self.rotateEventAreaSize,pf.y()-self.rotateEventAreaSize,2*self.rotateEventAreaSize,2*self.rotateEventAreaSize)
+        mBrush = QBrush(QColor(0,0,0,1))
+        QPainter.setBrush(mBrush)
+        QPainter.fillRect(rect, mBrush)
+        mPen = QPen(Qt.green)
+        mPen.setWidth(2)
+        QPainter.setPen(mPen)
+        QPainter.drawEllipse(pf, self.rotateEventAreaSize, self.rotateEventAreaSize)
+        QPainter.drawPoint(pf)
 
-    def getRotatePoint(self, ptCenter, ptIn: QPointF, angle):
-        dx,dy = ptCenter.x(),ptCenter.y()
-        x,y = ptIn.x(),ptIn.y()
-        xx = (x-dx)*cos(angle*pi/180) - (y-dy)*sin(angle*pi/180) + dx
-        yy = (x-dx)*sin(angle*pi/180) + (y-dy)*cos(angle*pi/180) + dy
-        return QPointF(xx,yy)
+        #在四个顶点处绘制字符标识
+        QPainter.drawText(self.keyPointTopLeft,"TL")
+        QPainter.drawText(self.keyPointTopRight,"TR")
+        QPainter.drawText(self.keyPointBottomLeft,"BL")
+        QPainter.drawText(self.keyPointBottomRight,"BR")
 
-    def getRotatePoints(self, ptCenter, ptIns: list, angle):
-        lstPt = []
-        for i in range(len(ptIns)):
-            lstPt.append(self.getRotatePoint(ptCenter,ptIns[i],angle))
-        return lstPt
-
-    def getRotatePolygonFromRect(self, ptCenter, rectIn:QRectF, angle):
-        pts = []
-        pts.append(self.getRotatePoint(ptCenter,rectIn.topLeft(),angle))
-        pts.append(self.getRotatePoint(ptCenter,rectIn.topRight(),angle))
-        pts.append(self.getRotatePoint(ptCenter,rectIn.bottomRight(),angle))
-        pts.append(self.getRotatePoint(ptCenter,rectIn.bottomLeft(),angle))
-        return QPolygonF(pts)
-
-    def getCrtPosRectToScreen(self):
-        return QRectF(
-            self.mOldRect.x() + self.pos().x(),
-            self.mOldRect.y() + self.pos().y(),
-            self.mOldRect.width(),
-            self.mOldRect.height()
-        )
-
-    def getSmallRotateRect(self, ptA: QPointF, ptB: QPointF):
-        pt = self.getSmallRotateRectCenter(ptA, ptB)
-        return QRectF(pt.x() - 10, pt.y() - 10, 20, 20)
-
-    def getSmallRotateRectCenter(self, ptA: QPointF, ptB: QPointF):
-        ptCenter = QPointF((ptA.x() + ptB.x())/2, (ptA.y() + ptB.y())/2)
-        x,y = 0,0
-        if abs(ptB.y() - ptA.y())<0.1:
-            x = ptCenter.x()
-            if ptA.x() < ptB.x():
-                y = ptCenter.y() - 20
-            else:
-                y = ptCenter.y() + 20
-
-        else:
-            k = (ptA.x() - ptB.x()) / (ptB.y() - ptA.y())
-            b = (ptA.y() + ptB.y())/2 - k * (ptA.x() + ptB.x())/2
-            if ptB.y() > ptA.y():
-                x = 20*cos(atan(k)) + ptCenter.x()
-            elif ptB.y() < ptA.y():
-                x = -20*cos(atan(k)) + ptCenter.x()
-            y = k * x + b
-        return QPointF(x,y)
+        #绘制边框
+        mPen.setColor(Qt.yellow)
+        QPainter.setPen(mPen)
+        QPainter.drawPolygon(self.mBorderPolygon)
