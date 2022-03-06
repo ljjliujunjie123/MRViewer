@@ -5,7 +5,7 @@ from ui.SingleImageShownContainer import SingleImageShownContainer
 import numpy as np
 import sympy as sp
 from utils.util import checkSameSeries,checkSameStudy
-
+from utils.InteractiveType import InteractiveType
 
 class DicomCoordinateHelper():
     """
@@ -31,7 +31,7 @@ class DicomCoordinateHelper():
         vectorOtoP = np.array(point) - pos
         x = np.dot(vectorOtoP,vectorX) / spaceX
         y = np.dot(vectorOtoP,vectorY) / spaceY
-        return (x,y)
+        return QPoint(x,y)
 
     def calcLinePlaneCrossPoint(self, point, vectorLine, planePoint, nVectorPlane):
          """
@@ -65,12 +65,33 @@ class InteractiveCrossBoxController(QObject):
     """
     Interactive Cross Box 简写 ICrossBox
     """
-    def __init__(self, imageShownContainerLayout: CustomDecoratedLayout):
+    updateICrossBoxSignal = pyqtSignal(SingleImageShownContainer)
+    interactiveSignal = pyqtSignal(InteractiveType, SingleImageShownContainer)
+
+    def __init__(self,
+                 imageShownContainerLayout: CustomDecoratedLayout,
+        ):
         QObject.__init__(self)
         self.imageShownContainerLayout = imageShownContainerLayout
         self.RTContainer = None
         self.dicomCoordinateHelper = DicomCoordinateHelper()
-        pass
+        self.updateICrossBoxSignal.connect(self.updateICrossBoxSignalHandler)
+        self.interactiveSignal.connect(self.interactiveSignalDispatcher)
+        self.imageShownContainerLayout.mapWidgetsFunc(
+                lambda container:self.setContainerSignals(container)
+        )
+
+    def setContainerSignals(self, container):
+        container.setICrossBoxSignal(self.updateICrossBoxSignal)
+        container.setInteractiveSignal(self.interactiveSignal)
+
+    def interactiveSignalDispatcher(self, interactiveType, container):
+        if interactiveType is InteractiveType.TRANSLATE:
+            self.translateSignalHandler(container)
+        elif interactiveType is InteractiveType.ROTATE:
+            self.rotateSignalHandler(container)
+        elif interactiveType is InteractiveType.ZOOM:
+            self.rotateSignalHandler(container)
 
     def updateICrossBoxSignalHandler(self, emitContainer):
         """
@@ -78,7 +99,6 @@ class InteractiveCrossBoxController(QObject):
         """
         self.RTContainer = emitContainer
         self.imageShownContainerLayout.mapWidgetsFunc(self.updateICrossBoxSignalSCHandler)
-        pass
 
     def updateICrossBoxSignalSCHandler(self, handleContainer: SingleImageShownContainer):
         if handleContainer is self.RTContainer\
@@ -104,10 +124,11 @@ class InteractiveCrossBoxController(QObject):
         D = -1 * sum([normalvector1[i] * ImagePosition1[i] for i in range(len(normalvector1))])
 
         #定义Projection面的四个三维空间点
+        #顺序为顺时针
         point1 = ImagePosition2
         point2 = ImagePosition2 + ImageOrientationX2 * Rows2 * PixelSpacing2[0]
-        point3 = ImagePosition2 + ImageOrientationY2 * Cols2 * PixelSpacing2[1]
-        point4 = ImagePosition2 + ImageOrientationX2 * Rows2 * PixelSpacing2[0] + ImageOrientationY2 * Cols2 * PixelSpacing2[1]
+        point3 = ImagePosition2 + ImageOrientationY2 * Cols2 * PixelSpacing2[1] + ImageOrientationX2 * Rows2 * PixelSpacing2[0]
+        point4 = ImagePosition2 + ImageOrientationY2 * Cols2 * PixelSpacing2[1]
 
         points = [point1, point2, point3, point4]
 
@@ -119,7 +140,20 @@ class InteractiveCrossBoxController(QObject):
             self.dicomCoordinateHelper.calcPoint3DTo2D(point, ImagePosition1, ImageOrientationX1, ImageOrientationY1, PixelSpacing1[0], PixelSpacing1[1])
             for point in points_p
         ]
-        pass
+
+        #计算投影点的屏幕坐标
+        imageDisPos,imageDisWidth,imageDisHeight = handleContainer.mImageShownWidget.getImageDisplayPos()
+        kImgToDisW,kImgToDisH = imageDisHeight/Rows1,imageDisWidth/Cols1
+        resDis = [QPoint(int(point.x() * kImgToDisW),int(point.y()*kImgToDisH)) + imageDisPos for point in points_2d]
+
+        #将绝对坐标转为相对ImageContainer的比例值
+        size = handleContainer.mImageShownWidget.size()
+        ratioDis = [(point.x() / size.width(),point.y() / size.height()) for point in resDis]
+
+        #将投影点输入m2D进行渲染
+        handleContainer.mImage2DShownData.showCrossFlag = True
+        handleContainer.mImage2DShownData.crossViewRatios = ratioDis
+        handleContainer.tryUpdateCrossBoxWidget()
 
     def updateICrossBoxModeSignalHandler(self):
         """
@@ -210,7 +244,7 @@ class InteractiveCrossBoxController(QObject):
         ]
 
         #求出新的Rows和Cols
-        rows,cols = (originPoints2D[1][0] - originPoints2D[0][0])//PixelSpacing2[0], (originPoints2D[1][1] - originPoints2D[0][1])//PixelSpacing2[1]
+        rows,cols = (originPoints2D[1].x() - originPoints2D[0].x())//PixelSpacing2[0], (originPoints2D[1].y() - originPoints2D[0].y())//PixelSpacing2[1]
         pass
 
     def requestDicomSource(self):

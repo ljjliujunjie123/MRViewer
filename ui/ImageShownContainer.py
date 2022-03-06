@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import *
-
 from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from controller.ImageShownLayoutController import ImageShownLayoutController

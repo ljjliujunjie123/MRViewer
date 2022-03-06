@@ -5,6 +5,7 @@ from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from ui.CustomInteractiveCrossBoxWidget import CustomInteractiveCrossBoxWidget
+from ui.mGraphicRectItem import mGraphicParallelogramParams
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from ui.CustomDicomTagsWindow import CustomDicomTagsWindow
 import vtkmodules.all as vtk
@@ -13,12 +14,14 @@ from utils.BaseImageData import Location
 from utils.cycleSyncThread import CycleSyncThread
 from utils.status import Status
 from utils.util import numpy2VTK
+from utils.InteractiveType import InteractiveType
 
 class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     sigWheelChanged = pyqtSignal(object)
     update2DImageShownSignal = pyqtSignal()
     updateCrossViewSubSignal = pyqtSignal()
+    interactiveSubSignal = pyqtSignal(InteractiveType)
 
     def __init__(self):
         QFrame.__init__(self)
@@ -59,7 +62,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         # self.crossBoxWidget.show()
 
         # interactive crossView
-        self.iCrossBoxWidget = CustomInteractiveCrossBoxWidget()
+        self.iCrossBoxWidget = CustomInteractiveCrossBoxWidget(self.interactiveSubSignal)
         self.iCrossBoxWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.iCrossBoxWidget.show()
         self.timerThread = None
@@ -173,6 +176,30 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             self.qvtkWidget.GetRenderWindow().RemoveRenderer(self.renText)
             self.renderVtkWindow(layerCount=1)
 
+    def getImageDisplayPos(self):
+        """ 目前该函数只支持缩放中心点在视图正中央的情况，如果image被拖动到其他位置，计算错误"""
+        bounds = self.imageViewer.GetImageActor().GetBounds()
+        #图像右下角
+        colBound,rowBound = bounds[1],bounds[3]
+        z = self.renImage.GetZ(int(colBound),int(rowBound))
+        self.renImage.SetWorldPoint(colBound,rowBound,z,0)
+        self.renImage.WorldToDisplay()
+        imageBoundPoint = self.renImage.GetDisplayPoint()
+        #图像左上角
+        colBound2,rowBound2 = bounds[0],bounds[2]
+        z = self.renImage.GetZ(int(colBound2),int(rowBound2))
+        self.renImage.SetWorldPoint(colBound2,rowBound2,z,0)
+        self.renImage.WorldToDisplay()
+        imageBoundPoint2 = self.renImage.GetDisplayPoint()
+
+        # print("bounds: ",imageBoundPoint,imageBoundPoint2)
+        imageBoundPoint = np.array(imageBoundPoint[:2])
+        imageBoundPoint2 = np.array(imageBoundPoint2[:2])
+        width,height = tuple(imageBoundPoint - imageBoundPoint2)
+        pos = QPoint(imageBoundPoint2[0],imageBoundPoint2[1])
+        # print("左上角坐标：", pos,width,height)
+        return pos,width,height
+
     def tryHideCrossBoxWidget(self):
         if self.imageShownData.showCrossFlag:
             # self.crossBoxWidget.hide()
@@ -181,7 +208,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             # self.crossBoxWidget.isShowContent = False
 
     def updateCrossBoxWidget(self):
-        pass
+        # pass
         # self.updateCrossBoxWidgetGeometry()
         # self.updateCrossBoxWidgetContent()
         self.updateInteractiveCrossBoxContent()
@@ -189,7 +216,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.iCrossBoxWidget.show()
 
     def updateInteractiveCrossBoxGeometry(self):
-        pos = self.mapToGlobal(QPoint(0,0))
+        pos = self.parent().mapToGlobal(QPoint(0,0))
         x,y = pos.x(),pos.y()
         width,height = self.width(),self.height()
         print("update ic View Geometry ", x,y,width,height)
@@ -198,7 +225,18 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         print("update res ", self.iCrossBoxWidget.geometry())
 
     def updateInteractiveCrossBoxContent(self):
-        pass
+        points = [
+            QPointF(rationXY[0] * self.width(), rationXY[1] * self.height())
+            for rationXY in self.imageShownData.crossViewRatios
+        ]
+        crossBoxSceneCenter = QPointF(self.width()/2, self.height()/2)
+        pointsToSceneCenter = [point - crossBoxSceneCenter for point in points]
+        params = mGraphicParallelogramParams()
+        params.setTopLeftPoint(pointsToSceneCenter[0])
+        params.setTopRightPoint(pointsToSceneCenter[1])
+        params.setBottomRightPoint(pointsToSceneCenter[2])
+        params.setBottomLeftPoint(pointsToSceneCenter[3])
+        self.iCrossBoxWidget.updateCrossBoxItem(params)
 
     def updateCrossBoxWidgetGeometry(self):
         pos = self.mapToGlobal(QPoint(0,0))
@@ -253,6 +291,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         super().resizeEvent(QResizeEvent)
         self.qvtkWidget.setFixedSize(self.size())
         self.showImageExtraInfoVtkView()
+        if self.imageShownData.showCrossFlag:
+            self.updateCrossBoxWidget()
 
     #滚轮调用sigWheelChanged
     def wheelEvent(self, ev):
@@ -310,10 +350,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def clearViews(self):
         self.qvtkWidget.Finalize()
-
-    def showEvent(self, *args, **kwargs):
-        if self.imageShownData.showCrossFlag:
-            self.updateCrossBoxWidget()
+    #
+    # def showEvent(self, *args, **kwargs):
+    #     # if self.imageShownData.showCrossFlag:
+    #     self.updateCrossBoxWidget()
 
     def hideEvent(self, *args, **kwargs):
         if self.imageShownData.showCrossFlag:

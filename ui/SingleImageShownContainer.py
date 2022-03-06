@@ -12,6 +12,7 @@ from utils.mImage2DShownData import mImage2DShownData
 from Model.ImagesDataModel import imageDataModel
 from utils.status import Status
 import numpy as np
+from utils.InteractiveType import InteractiveType
 
 class SingleImageShownContainer(QFrame):
 
@@ -22,6 +23,8 @@ class SingleImageShownContainer(QFrame):
     #这个signal负责SC之外的处理
     selectImageShownContainerSignal = None
     updateCrossViewSignal = None
+    updateICrossBoxSignal = None
+    interactiveSignal = None
     #这个signal负责SC本身的处理
     selectSignal = pyqtSignal(bool)
 
@@ -80,6 +83,12 @@ class SingleImageShownContainer(QFrame):
         self.vBoxLayout.addWidget(self.title)
         self.vBoxLayout.addWidget(self.imageContainer)
 
+    def setICrossBoxSignal(self, signal):
+        self.updateICrossBoxSignal = signal
+
+    def setInteractiveSignal(self, signal):
+        self.interactiveSignal = signal
+
     def selectSignalHandler(self, isSelected):
         if isSelected:
             self.title.setStyleSheet("background-color:#eb9076;")
@@ -125,6 +134,7 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget = m2DImageShownWidget()
             self.mImageShownWidget.imageShownData = self.mImage2DShownData
             self.mImageShownWidget.updateCrossViewSubSignal.connect(self.tryUpdateCrossViewSignalEmit)
+            self.mImageShownWidget.interactiveSubSignal.connect(self.tryInteractiveSignalEmit)
         elif mode == self.m3DMode:
             print("m3DMode")
             self.mImageShownWidget = m3DImageShownWidget()
@@ -173,7 +183,11 @@ class SingleImageShownContainer(QFrame):
     def tryUpdateCrossViewSignalEmit(self):
         if self.isSelected:
             self.updateCrossViewSignal.emit(self)
+            self.updateICrossBoxSignal.emit(self)
             self.mImageShownWidget.tryHideCrossBoxWidget()
+
+    def tryInteractiveSignalEmit(self, interactiveType: InteractiveType):
+        self.interactiveSignal.emit(interactiveType, self)
 
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)

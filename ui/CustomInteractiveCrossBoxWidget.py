@@ -5,7 +5,10 @@ from ui.mGraphicRectItem import mGraphicParallelogramItem, mGraphicParallelogram
 
 class CustomInteractiveCrossBoxWidget(QGraphicsView):
 
-    def __init__(self, parent = None):
+    def __init__(self,
+        interactiveSubSignal,
+        parent = None
+    ):
         QGraphicsView.__init__(self, parent)
         self.setMouseTracking(True)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
@@ -21,12 +24,12 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
 
         #将border View和CrossView组装入scene
         params = mGraphicParallelogramParams()
-        params.setCenterPoint((100, 100))
-        params.setTopLeftPoint((0,0))
-        params.setTopRightPoint((200,0))
-        params.setBottomLeftPoint((0,200))
-        params.setBottomRightPoint((200,200))
-        self.scene.addItem(mGraphicParallelogramItem(params))
+        params.setTopLeftPoint((-239,-137))
+        params.setTopRightPoint((290,89))
+        params.setBottomLeftPoint((-120,230))
+        params.setBottomRightPoint((400,220))
+        self.crossBoxItem = mGraphicParallelogramItem(params, interactiveSubSignal)
+        self.scene.addItem(self.crossBoxItem)
         self.borderItem = QGraphicsRectItem(sceneRect)
         pen = QPen()
         pen.setColor(Qt.white)
@@ -37,6 +40,9 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
     def calcSceneRect(self):
         width,height = self.width(),self.height()
         return QRectF(-1*width/2,-1*height/2,width,height)
+
+    def updateCrossBoxItem(self, params: mGraphicParallelogramParams):
+        self.crossBoxItem.updateWithParams(params)
 
     def resizeEvent(self, QResizeEvent):
         self.scene.setSceneRect(self.calcSceneRect())

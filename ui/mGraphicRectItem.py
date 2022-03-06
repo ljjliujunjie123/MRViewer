@@ -4,6 +4,7 @@ from PyQt5.QtGui import QPen,QPolygonF,QBrush,QColor
 from math import atan,atan2,sin,cos,pi,sqrt
 from enum import Enum
 from functools import singledispatch
+from utils.InteractiveType import InteractiveType
 
 class STATE_FLAG(Enum):
     DEFAULT_FLAG=0
@@ -27,8 +28,6 @@ class mGraphicParallelogramParams():
         self.keyPointTopRight = self.UnDefined
         self.keyPointBottomLeft= self.UnDefined
         self.keyPointBottomRight = self.UnDefined
-        #定义平行四边形的中心点
-        self.mCenterPoint = self.UnDefined
 
     def setTopLeftPoint(self, obj):
         @singledispatch
@@ -94,22 +93,6 @@ class mGraphicParallelogramParams():
 
         setPoint(obj)
 
-    def setCenterPoint(self, obj):
-        @singledispatch
-        def setPoint(obj):
-            return NotImplemented
-
-        @setPoint.register(tuple)
-        def _(obj):
-            x,y = obj
-            self.mCenterPoint = QPointF(x,y)
-
-        @setPoint.register(QPointF)
-        def _(obj):
-            self.mCenterPoint = obj
-
-        setPoint(obj)
-
 class mGraphicParallelogramItem(QGraphicsItem):
 
     borderEventAreaSize = 10.0
@@ -117,7 +100,9 @@ class mGraphicParallelogramItem(QGraphicsItem):
 
     transformScale = 0.8
 
-    def __init__(self, params:mGraphicParallelogramParams,parent = None):
+    interactiveSubSignal = None
+
+    def __init__(self, params:mGraphicParallelogramParams, interactiveSubSignal, parent = None):
         super(QGraphicsItem, self).__init__(parent)
 
         self.keyPointsList = []
@@ -154,6 +139,7 @@ class mGraphicParallelogramItem(QGraphicsItem):
         self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
         self.mStartPos = QPointF()
         self.mRotateAngle = 0
+        self.interactiveSubSignal = interactiveSubSignal
 
         #初始化位置
         self.setPos(-1*self.mCenterPoint.x(),-1*self.mCenterPoint.y())
@@ -164,6 +150,18 @@ class mGraphicParallelogramItem(QGraphicsItem):
 
     def boundingRect(self):
         return self.mBorderPolygon.boundingRect()
+
+    def resetConfigs(self):
+        self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
+        self.mStartPos = QPointF()
+        self.mRotateAngle = 0
+
+    def updateWithParams(self, params:mGraphicParallelogramParams):
+        self.initKeyPoints(params)
+        self.initPolygons()
+        self.resetConfigs()
+        self.scene().update()
+        self.show()
 
     def initKeyPoints(self, params: mGraphicParallelogramParams):
         """
@@ -390,7 +388,7 @@ class mGraphicParallelogramItem(QGraphicsItem):
         self.mCenterPoint = self.calcCenterPoint(self.keyPointTopLeft, self.keyPointBottomRight)
         self.initPolygons()
         self.scene().update()
-        pass
+        self.interactiveSubSignal.emit(InteractiveType.ZOOM)
 
     def moveKeyPointHandler(self, direction, dis, keyPointMoving, keyPointAcross, keyPointNextA, keyPointNextB):
         """
@@ -429,6 +427,7 @@ class mGraphicParallelogramItem(QGraphicsItem):
         keyPointMoving.setY(_keyPointMoving.y())
         self.initPolygons()
         self.scene().update()
+        self.interactiveSubSignal.emit(InteractiveType.ZOOM)
 
     def rotateHandler(self, rotateAngle):
         keyPoints = [
@@ -444,12 +443,14 @@ class mGraphicParallelogramItem(QGraphicsItem):
             point.setY(_point.y())
         self.initPolygons()
         self.scene().update()
+        self.interactiveSubSignal.emit(InteractiveType.ROTATE)
 
     def moveRectHandler(self, pos):
         pf = pos - self.mStartPos
         self.moveBy(pf.x(), pf.y())
         self.initPolygons()
         self.scene().update()
+        self.interactiveSubSignal.emit(InteractiveType.TRANSLATE)
 
     def mouseReleaseEvent(self, event:QGraphicsSceneMouseEvent):
         print("release pos ", event.pos())

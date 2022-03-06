@@ -46,4 +46,7 @@ class CustomDecoratedLayout():
 
     def mapWidgetsFunc(self, func, *args):
         for i in range(self.layout.count()):
-            func(self.layout.itemAt(i).widget(),args)
+            if len(args) > 0:
+                func(self.layout.itemAt(i).widget(),args)
+            else:
+                func(self.layout.itemAt(i).widget())
