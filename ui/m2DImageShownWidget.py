@@ -64,7 +64,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         # interactive crossView
         self.iCrossBoxWidget = CustomInteractiveCrossBoxWidget(self.interactiveSubSignal)
         self.iCrossBoxWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.iCrossBoxWidget.show()
+        # self.iCrossBoxWidget.show()
         self.timerThread = None
 
         self.sigWheelChanged.connect(self.wheelChangeEvent)
@@ -214,6 +214,15 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.updateInteractiveCrossBoxContent()
         self.updateInteractiveCrossBoxGeometry()
         self.iCrossBoxWidget.show()
+
+    def getCrossBoxKeyPointsDisplayPos(self):
+        params = self.iCrossBoxWidget.getCustomICrossBoxParams()
+        points = [
+            params.keyPointTopLeft, params.keyPointTopRight, params.keyPointBottomRight, params.keyPointBottomLeft
+        ]
+        crossBoxSceneCenter = QPointF(self.width()/2, self.height()/2)
+        pointsToScreen = [point + crossBoxSceneCenter for point in points]
+        return pointsToScreen
 
     def updateInteractiveCrossBoxGeometry(self):
         pos = self.parent().mapToGlobal(QPoint(0,0))

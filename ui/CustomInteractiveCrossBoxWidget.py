@@ -41,6 +41,9 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         width,height = self.width(),self.height()
         return QRectF(-1*width/2,-1*height/2,width,height)
 
+    def getCustomICrossBoxParams(self):
+        return self.crossBoxItem.getGraphicParallelogramParams()
+
     def updateCrossBoxItem(self, params: mGraphicParallelogramParams):
         self.crossBoxItem.updateWithParams(params)
 

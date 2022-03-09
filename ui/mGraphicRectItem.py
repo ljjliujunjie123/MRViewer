@@ -115,7 +115,8 @@ class mGraphicParallelogramItem(QGraphicsItem):
         self.mCenterPoint = QPointF()
 
         #初始化所有keyPoint
-        self.initKeyPoints(params)
+        self.params = params
+        self.initKeyPoints(self.params)
 
         #定义平行四边形的边框polygon
         self.mBorderPolygon = QPolygonF()
@@ -162,6 +163,13 @@ class mGraphicParallelogramItem(QGraphicsItem):
         self.resetConfigs()
         self.scene().update()
         self.show()
+
+    def getGraphicParallelogramParams(self):
+        self.params.keyPointTopLeft = self.keyPointTopLeft
+        self.params.keyPointTopRight = self.keyPointTopRight
+        self.params.keyPointBottomRight = self.keyPointBottomRight
+        self.params.keyPointBottomLeft = self.keyPointBottomLeft
+        return self.params
 
     def initKeyPoints(self, params: mGraphicParallelogramParams):
         """
@@ -291,7 +299,7 @@ class mGraphicParallelogramItem(QGraphicsItem):
 
     def mouseMoveEvent(self, event:QGraphicsSceneMouseEvent):
         pos = event.pos()
-        print("moving pos", pos, self.mStateFlag)
+        # print("moving pos", pos, self.mStateFlag)
         if self.mStateFlag == STATE_FLAG.ROTATE:
             lineBegin = QLineF(self.mCenterPoint, self.mStartPos)
             lineEnd = QLineF(self.mCenterPoint, pos)
@@ -308,6 +316,7 @@ class mGraphicParallelogramItem(QGraphicsItem):
 
         if self.mStateFlag == STATE_FLAG.MOV_RECT:
             self.moveRectHandler(pos)
+            self.mStartPos = pos
             return
 
         elif self.mStateFlag == STATE_FLAG.MOV_LEFT_LINE:
@@ -431,7 +440,7 @@ class mGraphicParallelogramItem(QGraphicsItem):
 
     def rotateHandler(self, rotateAngle):
         keyPoints = [
-            self.keyPointBottomLeft, self.keyPointBottomRight, self.keyPointTopLeft, self.keyPointTopRight
+            self.keyPointTopLeft, self.keyPointTopRight, self.keyPointBottomRight, self.keyPointBottomLeft
         ]
         cX,cY = self.mCenterPoint.x(), self.mCenterPoint.y()
         for point in keyPoints:
@@ -447,7 +456,13 @@ class mGraphicParallelogramItem(QGraphicsItem):
 
     def moveRectHandler(self, pos):
         pf = pos - self.mStartPos
-        self.moveBy(pf.x(), pf.y())
+        keyPoints = [
+            self.keyPointTopLeft, self.keyPointTopRight, self.keyPointBottomRight, self.keyPointBottomLeft
+        ]
+        for point in keyPoints:
+            point.setX(point.x() + pf.x())
+            point.setY(point.y() + pf.y())
+        self.mCenterPoint = self.calcCenterPoint(self.keyPointTopLeft, self.keyPointBottomRight)
         self.initPolygons()
         self.scene().update()
         self.interactiveSubSignal.emit(InteractiveType.TRANSLATE)

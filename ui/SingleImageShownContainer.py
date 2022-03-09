@@ -99,7 +99,7 @@ class SingleImageShownContainer(QFrame):
         self.isSelected = False
         self.selectSignal.emit(self.isSelected)
 
-    def setTileText(self, text):
+    def setTitleText(self, text):
         self.label.setText(text)
 
     def getDataFromDropEvent(self, imageExtraData):
@@ -128,7 +128,7 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget.clearViews()
             del self.mImageShownWidget
 
-        self.setTileText(self.imageData.getImageTileInfo(self.imageData.currentIndex))
+        self.setTitleText(self.imageData.getImageTileInfo(self.imageData.currentIndex))
         if mode == self.m2DMode:
             print("m2DMode")
             self.mImageShownWidget = m2DImageShownWidget()

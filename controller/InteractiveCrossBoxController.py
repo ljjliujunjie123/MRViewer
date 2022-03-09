@@ -22,35 +22,42 @@ class DicomCoordinateHelper():
         xp,yp,zp = ((B2 + C2)*x - A * (B*y + C*z + D))//sumSquare,\
                    ((A2 + C2)*y - B * (A*x + C*z + D))//sumSquare,\
                    ((A2 + B2)*z - C * (A*x + B*y + D))//sumSquare
-        return (xp,yp,zp)
+        return np.array([xp,yp,zp])
 
     def calcPoint3DTo2D(self, point, pos, vectorX, vectorY, spaceX, spaceY):
         """
         计算三维坐标的Point在一个固定面上的二维坐标
         """
-        vectorOtoP = np.array(point) - pos
-        x = np.dot(vectorOtoP,vectorX) / spaceX
-        y = np.dot(vectorOtoP,vectorY) / spaceY
+        vectorPostoP = point - pos
+        x = np.dot(vectorPostoP,vectorX) / spaceX
+        y = np.dot(vectorPostoP,vectorY) / spaceY
         return QPoint(x,y)
 
+    def calcPoint2DTo3D(self, point, pos, vectorX, vectorY, spaceX, spaceY):
+        """
+        计算一个固定面上的二维坐标转换为三维世界坐标
+        """
+        x = point[0] * spaceX
+        y = point[1] * spaceY
+        vectorPosToP = x * vectorX + y * vectorY
+        vectorOToP = pos + vectorPosToP
+        return vectorOToP
+
     def calcLinePlaneCrossPoint(self, point, vectorLine, planePoint, nVectorPlane):
-         """
-         计算三维空间一条线与一个固定面的交点三维坐标
-         """
-         x, y, z = sp.symbols('x, y, z')
-         #面方程
-         expr = nVectorPlane[0] * (x - planePoint[0]) + nVectorPlane[1] * (y - planePoint[1]) + nVectorPlane[2] * (z - planePoint[2])
-
-         #建立方程组
-         eqs = [
-             vectorLine[0] / (x - point[0])  - vectorLine[1] / (y - point[1]),
-             vectorLine[2] / (z - point[2]) - vectorLine[1] / (y - point[1]),
-             expr
-         ]
-
-         #求解交点坐标
-         res = list(sp.linsolve(eqs, [x, y, z]))
-         return res[0]
+        """
+        计算三维空间一条线与一个固定面的交点三维坐标
+        """
+        vp1, vp2, vp3 = nVectorPlane[0], nVectorPlane[1], nVectorPlane[2]
+        n1, n2, n3 = planePoint[0], planePoint[1], planePoint[2]
+        v1, v2, v3 = vectorLine[0], vectorLine[1], vectorLine[2]
+        m1, m2, m3 = point[0], point[1], point[2]
+        vpt = np.dot(nVectorPlane, vectorLine)
+        if vpt == 0:return
+        t = ((n1 - m1) * vp1 + (n2 - m2) * vp2 + (n3 - m3) * vp3) / vpt
+        x = m1 + v1 * t
+        y = m2 + v2 * t
+        z = m3 + v3 * t
+        return np.array([x,y,z])
 
     def calcVectorFromPoint(self, startPoint, endPoint, unitization = False):
         """
@@ -85,15 +92,35 @@ class InteractiveCrossBoxController(QObject):
         container.setICrossBoxSignal(self.updateICrossBoxSignal)
         container.setInteractiveSignal(self.interactiveSignal)
 
-    def interactiveSignalDispatcher(self, interactiveType, container):
-        if interactiveType is InteractiveType.TRANSLATE:
-            self.translateSignalHandler(container)
-        elif interactiveType is InteractiveType.ROTATE:
-            self.rotateSignalHandler(container)
-        elif interactiveType is InteractiveType.ZOOM:
-            self.rotateSignalHandler(container)
+    def interactiveSignalDispatcher(self, interactiveType, handleContainer):
+        """
+        当SC中的ICrossBox发生交互事件时，计算屏幕坐标到DICOM空间坐标，并分发该事件
+        """
+        #建立世界坐标系
+        index1,index2 = handleContainer.imageData.currentIndex, self.RTContainer.imageData.currentIndex
+        img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
+        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
+        img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
+        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.RTContainer.imageData.getBasePosInfo(index2)
+        #计算逆投影
+        pointsScreen = handleContainer.mImageShownWidget.getCrossBoxKeyPointsDisplayPos()
+        imageDisPos,imageDisWidth,imageDisHeight = handleContainer.mImageShownWidget.getImageDisplayPos()
+        kImgToDisW,kImgToDisH = imageDisHeight/Rows1,imageDisWidth/Cols1
+        pointsImage = [point - imageDisPos for point in pointsScreen]
+        points_2d = [np.array([point.x() / kImgToDisW, point.y() / kImgToDisH]) for point in pointsImage]
+        projectionPoints = [
+            self.dicomCoordinateHelper.calcPoint2DTo3D(point, ImagePosition1, ImageOrientationX1, ImageOrientationY1, PixelSpacing1[0], PixelSpacing1[1])
+            for point in points_2d
+        ]
 
-    def updateICrossBoxSignalHandler(self, emitContainer):
+        if interactiveType is InteractiveType.TRANSLATE:
+            self.translateSignalHandler(projectionPoints, normalvector1, ImagePosition2, normalvector2)
+        elif interactiveType is InteractiveType.ROTATE:
+            self.rotateSignalHandler(projectionPoints, normalvector1, ImagePosition2, normalvector2)
+        elif interactiveType is InteractiveType.ZOOM:
+            self.zoomSignalHandler(projectionPoints, normalvector1, ImagePosition2, normalvector2, ImageOrientationX2, ImageOrientationY2, PixelSpacing2)
+
+    def updateICrossBoxSignalHandler(self, emitContainer: SingleImageShownContainer):
         """
         当RT窗口更新时，该函数控制其他SC刷新ICrossBox的位置和形状
         """
@@ -162,46 +189,29 @@ class InteractiveCrossBoxController(QObject):
         """
         pass
 
-    def translateSignalHandler(self, handleContainer: SingleImageShownContainer):
+    def translateSignalHandler(self, projectionPoints, normalvector1, ImagePosition2, normalvector2):
         """
         当SC中的ICrossBox被平移时
         该函数计算新的RT空间信息并发起request
         """
-        #建立世界坐标系
-        index1,index2 = handleContainer.imageData.currentIndex, self.RTContainer.imageData.currentIndex
-        img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
-        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
-        img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
-        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.RTContainer.imageData.getBasePosInfo(index2)
-
         #定义RT图像的Pos点为O点，其在Base面上的投影为Op
         #则经过平移后的Op定义为Op'
         #则下面要求取RT平面上新的O'点
 
         #Base面上的Op'坐标
         #to do
-        baseOriginP = ImagePosition1
+        baseOriginP = projectionPoints[0]
 
         #RT面上的O'坐标
         RTPos = self.dicomCoordinateHelper.calcLinePlaneCrossPoint(baseOriginP, normalvector1, ImagePosition2, normalvector2)
+        print(RTPos)
         pass
 
-    def rotateSignalHandler(self, handleContainer: SingleImageShownContainer):
+    def rotateSignalHandler(self, projectionPoints, normalvector1, ImagePosition2, normalvector2):
         """
         当SC中的ICrossBox被旋转时
         该函数计算新的RT空间信息并发起request
         """
-        #建立世界坐标系
-        index1,index2 = handleContainer.imageData.currentIndex, self.RTContainer.imageData.currentIndex
-        img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
-        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
-        img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
-        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.RTContainer.imageData.getBasePosInfo(index2)
-
-        #获取Base面上四个新的投影点坐标
-        #顺序为Pos, Rows方向，Cols方向，Pos对角
-        #to do
-        projectionPoints = [ImagePosition1 for i in range(4)]
 
         #求出其对应的新的RT面的四个角点坐标
         originPoints = [
@@ -210,27 +220,16 @@ class InteractiveCrossBoxController(QObject):
         ]
 
         #计算新的OrientationX,OrientationY
-        orientationX = self.dicomCoordinateHelper.calcVectorFromPoint(originPoints[0],originPoints[1])
-        orientationY = self.dicomCoordinateHelper.calcVectorFromPoint(originPoints[0],originPoints[2])
+        orientationX = self.dicomCoordinateHelper.calcVectorFromPoint(originPoints[0],originPoints[1], unitization=True)
+        orientationY = self.dicomCoordinateHelper.calcVectorFromPoint(originPoints[0],originPoints[2], unitization=True)
+        print(orientationX, orientationY)
         pass
 
-    def zoomSignalHandler(self, handleContainer: SingleImageShownContainer):
+    def zoomSignalHandler(self, projectionPoints, normalvector1, ImagePosition2, normalvector2, ImageOrientationX2, ImageOrientationY2, PixelSpacing2):
         """
         当SC中的ICrossBox被缩放时
         该函数计算新的RT空间信息并发起request
         """
-        #建立世界坐标系
-        index1,index2 = handleContainer.imageData.currentIndex, self.RTContainer.imageData.currentIndex
-        img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
-        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
-        img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
-        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.RTContainer.imageData.getBasePosInfo(index2)
-
-        #获取Base面上四个新的投影点坐标
-        #顺序为Pos, Rows方向，Cols方向，Pos对角
-        #to do
-        projectionPoints = [ImagePosition1 for i in range(4)]
-
         #求出其对应的新的RT面的四个角点坐标
         originPoints = [
             self.dicomCoordinateHelper.calcLinePlaneCrossPoint(pPoint, normalvector1, ImagePosition2, normalvector2)
@@ -239,12 +238,13 @@ class InteractiveCrossBoxController(QObject):
 
         #将三维坐标转为RT平面上的二维坐标
         originPoints2D = [
-            self.dicomCoordinateHelper.calcPoint3DTo2D(point, ImageOrientationX2, ImageOrientationY2, PixelSpacing2[0], PixelSpacing2[1])
+            self.dicomCoordinateHelper.calcPoint3DTo2D(point, ImagePosition2, ImageOrientationX2, ImageOrientationY2, PixelSpacing2[0], PixelSpacing2[1])
             for point in originPoints
         ]
 
         #求出新的Rows和Cols
-        rows,cols = (originPoints2D[1].x() - originPoints2D[0].x())//PixelSpacing2[0], (originPoints2D[1].y() - originPoints2D[0].y())//PixelSpacing2[1]
+        rows,cols = (originPoints2D[2].x() - originPoints2D[0].x())//PixelSpacing2[0], (originPoints2D[2].y() - originPoints2D[0].y())//PixelSpacing2[1]
+        print(rows, cols)
         pass
 
     def requestDicomSource(self):
