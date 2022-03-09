@@ -16,28 +16,41 @@ from utils.InteractiveType import InteractiveType
 
 class SingleImageShownContainer(QFrame):
 
+    class SignalCollectionHelper(QObject):
+        """
+        用来收敛所有和外部通信的signal，并提供简单的set,get方法
+        """
+        def __init__(self):
+            QObject.__init__(self)
+            self.selectImageShownContainerSignal = None
+            self.updateICrossBoxSignal = None
+            self.interactiveSignal = None
+
+        def setSelectImageShownContainerSignal(self, signal):
+            self.selectImageShownContainerSignal = signal
+
+        def setICrossBoxSignal(self, signal):
+            self.updateICrossBoxSignal = signal
+
+        def setInteractiveSignal(self, signal):
+            self.interactiveSignal = signal
+
     m2DMode = 0
     m3DMode = 1
     m3DFakeMode = 2
     mRTMode = 3
-    #这个signal负责SC之外的处理
-    selectImageShownContainerSignal = None
-    updateCrossViewSignal = None
-    updateICrossBoxSignal = None
-    interactiveSignal = None
     #这个signal负责SC本身的处理
     selectSignal = pyqtSignal(bool)
 
-    def __init__(self, selectImageShownContainerSignal, updateCrossViewSignal):
+    def __init__(self):
         QFrame.__init__(self)
         self.mImageShownWidget = None
         self.mImage2DShownData = mImage2DShownData()
+        self.signalCollectionHelper = self.SignalCollectionHelper()
         self.resizeFlag = False
         self.isSelected = False
         self.curMode = self.m2DMode
         self.imageData = BaseImageData()
-        self.selectImageShownContainerSignal = selectImageShownContainerSignal
-        self.updateCrossViewSignal = updateCrossViewSignal
         self.selectSignal.connect(self.selectSignalHandler)
         #初始化配置
         self.setAcceptDrops(True)
@@ -82,12 +95,6 @@ class SingleImageShownContainer(QFrame):
         #整体布局垂直
         self.vBoxLayout.addWidget(self.title)
         self.vBoxLayout.addWidget(self.imageContainer)
-
-    def setICrossBoxSignal(self, signal):
-        self.updateICrossBoxSignal = signal
-
-    def setInteractiveSignal(self, signal):
-        self.interactiveSignal = signal
 
     def selectSignalHandler(self, isSelected):
         if isSelected:
@@ -182,12 +189,11 @@ class SingleImageShownContainer(QFrame):
 
     def tryUpdateCrossViewSignalEmit(self):
         if self.isSelected:
-            self.updateCrossViewSignal.emit(self)
-            self.updateICrossBoxSignal.emit(self)
+            self.signalCollectionHelper.updateICrossBoxSignal.emit(self)
             self.mImageShownWidget.tryHideCrossBoxWidget()
 
     def tryInteractiveSignalEmit(self, interactiveType: InteractiveType):
-        self.interactiveSignal.emit(interactiveType, self)
+        self.signalCollectionHelper.interactiveSignal.emit(interactiveType, self)
 
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)
@@ -200,7 +206,7 @@ class SingleImageShownContainer(QFrame):
             print("click title")
             self.isSelected = not self.isSelected
             self.selectSignal.emit(self.isSelected)
-            self.selectImageShownContainerSignal.emit(self, self.isSelected)
+            self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
             self.tryUpdateCrossViewSignalEmit()
 
     def dragEnterEvent(self, event):
@@ -226,7 +232,7 @@ class SingleImageShownContainer(QFrame):
             self.getDataFromDropEvent(event.mimeData().getImageExtraData())
             self.isSelected = True
             self.selectSignal.emit(self.isSelected)
-            self.selectImageShownContainerSignal.emit(self, self.isSelected)
+            self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
             self.switchImageContainerMode(self.m2DMode)
         else:
             event.ignore()

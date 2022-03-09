@@ -3,6 +3,7 @@ from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from controller.ImageShownLayoutController import ImageShownLayoutController
 from controller.InteractiveCrossBoxController import InteractiveCrossBoxController
+from controller.ImageShownBaseController import ImageShownBaseController
 
 class ImageShownContainer(QFrame):
 
@@ -25,11 +26,16 @@ class ImageShownContainer(QFrame):
         self.imageShownContainerWidget.setLayout(self.imageShownContainerLayout.getLayout())
 
         #初始化controllers
+        #layoutController需要首先加载，因为它负责SC的初始化
         self.imageShownLayoutController = ImageShownLayoutController(
             self.imageShownContainerLayout
         )
         self.imageShownLayoutController.initLayoutParams()
         self.imageShownLayoutController.initWidget()
+
+        self.imageShownBaseController = ImageShownBaseController(
+            self.imageShownContainerLayout
+        )
 
         self.interactiveCrossBoxController = InteractiveCrossBoxController(
             self.imageShownContainerLayout
@@ -44,5 +50,5 @@ class ImageShownContainer(QFrame):
         self.imageShownContainerWidget.setFixedSize(self.size())
 
     def clearViews(self):
-        if self.imageShownLayoutController.selectedImageShownContainer is not None:
-            self.imageShownLayoutController.clearViews()
+        if self.imageShownBaseController.selectedImageShownContainer is not None:
+            self.imageShownBaseController.clearViews()

@@ -105,23 +105,23 @@ class LJJMainWindow(QMainWindow):
         self.actionopen_study.triggered.connect(self.openFileController.openStudyDirectory)
         self.actionopen_patient.triggered.connect(self.openFileController.openPatientDirectory)
         # self.toolsContainer.showInfoSig.connect(self.showImageShownLayoutInfo)
-        self.imageShownContainer.imageShownLayoutController.initToolsContainerStateSignal.connect(
+        self.imageShownContainer.imageShownBaseController.initToolsContainerStateSignal.connect(
             self.toolsContainer.initToolsContainerStateHandler
         )
-        self.imageShownContainer.imageShownLayoutController.updateToolsContainerStateSignal.connect(
+        self.imageShownContainer.imageShownBaseController.updateToolsContainerStateSignal.connect(
             self.toolsContainer.updateToolsContainerStateHandler
         )
         self.toolsContainer.updateImageShownLayoutSignal.connect(
             self.imageShownContainer.imageShownLayoutController.updateLayout
         )
-        self.toolsContainer.enableImageSlideshowSignal.connect(
-            self.imageShownContainer.imageShownLayoutController.imageSlideshowControl
-        ) #evermg42
+        # self.toolsContainer.enableImageSlideshowSignal.connect(
+        #     self.imageShownContainer.imageShownLayoutController.imageSlideshowControl
+        # ) #evermg42
         self.toolsContainer.imageModeSelectSignal.connect(
-            self.imageShownContainer.imageShownLayoutController.imageModeSelectHandler
+            self.imageShownContainer.imageShownBaseController.imageModeSelectHandler
         )
         self.toolsContainer.enableImageExtraInfoSignal.connect(
-            self.imageShownContainer.imageShownLayoutController.imageExtraInfoStateHandler
+            self.imageShownContainer.imageShownBaseController.imageExtraInfoStateHandler
         )
         self.retranslateUi(self)
         QMetaObject.connectSlotsByName(self)
@@ -151,7 +151,7 @@ class LJJMainWindow(QMainWindow):
 
     def moveEvent(self, *args, **kwargs):
         print("moving MainWindow")
-        self.imageShownContainer.imageShownLayoutController.controlMoveEvent()
+        self.imageShownContainer.interactiveCrossBoxController.controlMoveEvent()
 
     def closeEvent(self,QCloseEvent):
         super().closeEvent(QCloseEvent)

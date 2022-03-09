@@ -51,3 +51,7 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         self.scene.setSceneRect(self.calcSceneRect())
         self.borderItem.setRect(self.calcSceneRect())
         self.scene.update()
+        print("scene rect", self.scene.sceneRect())
+        print("view geometry", self.geometry())
+        print("border rect", self.borderItem.rect())
+        print("iCrossBox rect", self.crossBoxItem.boundingRect())

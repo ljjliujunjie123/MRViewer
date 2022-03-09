@@ -89,8 +89,8 @@ class InteractiveCrossBoxController(QObject):
         )
 
     def setContainerSignals(self, container):
-        container.setICrossBoxSignal(self.updateICrossBoxSignal)
-        container.setInteractiveSignal(self.interactiveSignal)
+        container.signalCollectionHelper.setICrossBoxSignal(self.updateICrossBoxSignal)
+        container.signalCollectionHelper.setInteractiveSignal(self.interactiveSignal)
 
     def interactiveSignalDispatcher(self, interactiveType, handleContainer):
         """
@@ -260,3 +260,9 @@ class InteractiveCrossBoxController(QObject):
         控制RT窗口刷新
         """
         pass
+
+    def controlMoveEvent(self):
+        self.imageShownContainerLayout.mapWidgetsFunc(
+                lambda handleContainer,*args:handleContainer.tryUpdateCrossBoxWidget(),
+                None
+        )
