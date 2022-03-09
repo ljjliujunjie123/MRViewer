@@ -10,39 +10,67 @@ from ui.config import uiConfig
 
 class SlideshowContainer(QDialog):
 
+    Btnsize=20
+
     def __init__(self,
         slowHandler,
         playHandler,
-        fastHandler
+        fastHandler,
+        nextSliceHandler,
+        prevSliceHandler
     ):
         QDialog.__init__(self)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        hboxlayout = QHBoxLayout()
+        vboxlayout1 = QVBoxLayout()
+        vboxlayout2 = QVBoxLayout()
+        self.setLayout(hboxlayout)
 
+        prevSliceBtn = QPushButton()
+        prevSliceBtn.setIcon(QIcon("ui_source/arrow thin left.png"))
+        prevSliceBtn.setIconSize(QSize(Btnsize, Btnsize))
+        prevSliceBtn.setStyleSheet("QPushButton{border:none;background:transparent;}")
+        playBtn = QPushButton()
+        playBtn.setIcon(QIcon("ui_source/play.png"))
+        playBtn.setIconSize(QSize(Btnsize, Btnsize))
+        playBtn.setStyleSheet("QPushButton{border:none;background:transparent;}")
+        nextSliceBtn = QPushButton()
+        nextSliceBtn.setIcon(QIcon("ui_source/arrow thin right.png"))
+        nextSliceBtn.setIconSize(QSize(Btnsize, Btnsize))
+        nextSliceBtn.setStyleSheet("QPushButton{border:none;background:transparent;}")
+        slowBtn = QPushButton()
+        slowBtn.setMinimumSize(Btnsize, Btnsize/2)
+        slowBtn.setIcon(QIcon("ui_source/down.png"))
+        slowBtn.setStyleSheet("QPushButton{border:none;background:transparent;}")
+        fastBtn = QPushButton()
+        fastBtn.setMinimumSize(Btnsize, Btnsize/2)
+        fastBtn.setIcon(QIcon("ui_source/up.png"))
+        fastBtn.setStyleSheet("QPushButton{border:none;background:transparent;}")
+        # 显示FPS文本
+        showFpsText = QLineEdit()
+        showFpsText.setText("FPS")
+        showFpsText.setAlignment(Qt.AlignCenter)
+        showFpsText.setStyleSheet("background:transparent;border-width:0;border-style:outset")
+        # 显示FPS数字
+        showNumber = QLCDNumber()
+
+        hboxlayout.addWidget(prevSliceBtn)
+        hboxlayout.addWidget(playBtn)
+        hboxlayout.addWidget(nextSliceBtn)
+        vboxlayout1.addWidget(showFpsText)
+        vboxlayout1.addWidget(showNumber)
+        vboxlayout2.addWidget(fastBtn)
+        vboxlayout2.addWidget(slowBtn)
+        hboxlayout.addLayout(vboxlayout1)
+        hboxlayout.addLayout(vboxlayout1)
+        hboxlayout.addLayout(vboxlayout2)
+        hboxlayout.setSpacing(0)
+        vboxlayout1.setSpacing(0)
+        vboxlayout2.setSpacing(0)
+        # 设置窗口的属性为ApplicationModal模态，用户只有关闭弹窗后，才能关闭主界面
+        # self.setWindowModality(Qt.ApplicationModal)
         # self.setGeometry()#未设置初始位置evermg42
-        print("SlideshowContainer Geometry:")
-        print(self.geometry())
-        self.setObjectName("slideshowContainer")
-
-        self.resize(uiConfig.shownSlideShowDialogSize)
-        self.setStyleSheet("QDialog{background-color:#d1d5d9;}")
-
-        self.hBoxLayout = QHBoxLayout(self)
-        self.setLayout(self.hBoxLayout)
-
-        #放慢速度的button
-        self.slowBtn = QPushButton('-',self)
-        self.hBoxLayout.addWidget(self.slowBtn)
-        self.slowBtn.clicked.connect(slowHandler)
-        
-        #暂停播放的button
-        self.playBtn = QPushButton('播放',self)
-        self.hBoxLayout.addWidget(self.playBtn)
-        self.playBtn.clicked.connect(playHandler)
-
-        #加快速度的button
-        self.fastBtn = QPushButton('+',self)
-        self.hBoxLayout.addWidget(self.fastBtn)
-        self.fastBtn.clicked.connect(fastHandler)
-    
+        # self.setObjectName("slideshowContainer")
     def mousePressEvent(self, event):
         # 重写鼠标点击的事件
         if (event.button() == Qt.LeftButton):

@@ -41,7 +41,7 @@ class ImageShownContainer(QFrame):
         self.imageShownLayoutController.closeEvent(QCloseEvent)
 
     def resizeEvent(self, *args, **kwargs):
-        print("ImageShonwContainer ", self.rect())
+        print("ImageShownContainer ", self.rect())
         self.imageShownContainerWidget.setFixedSize(self.size())
 
     def clearViews(self):

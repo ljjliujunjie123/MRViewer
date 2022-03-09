@@ -22,9 +22,12 @@ class SingleImageShownContainer(QFrame):
     #这个signal负责SC之外的处理
     selectImageShownContainerSignal = None
     updateCrossViewSignal = None
-    shownContainerPositionSignal = pyqtSignal()
     #这个signal负责SC本身的处理
     selectSignal = pyqtSignal(bool)
+
+    dialogwidth=300
+    dialogheight=100
+    margin=20
 
     def __init__(self, selectImageShownContainerSignal, updateCrossViewSignal):
         QFrame.__init__(self)
@@ -37,7 +40,7 @@ class SingleImageShownContainer(QFrame):
         self.selectImageShownContainerSignal = selectImageShownContainerSignal
         self.updateCrossViewSignal = updateCrossViewSignal
         self.selectSignal.connect(self.selectSignalHandler)
-        self.shownContainerPositionSignal.connect(self.slideShowPlayer)
+        self.imageSlideShowPlayFlag = False
         #初始化配置
         self.setAcceptDrops(True)
         self.setFrameShape(QFrame.StyledPanel)
@@ -231,14 +234,54 @@ class SingleImageShownContainer(QFrame):
             print('vtk close')
             self.mImageShownWidget.closeEvent(QCloseEvent)
 
-    def slideShowPlayer(self):
-        self.slideShowPlayer = QDialog()
-        self.slideShowPlayer.setWindowTitle("播放器")
-        self.slideShowPlayer.setWindowFlag(Qt.FramelessWindowHint)
+    def imageSlideshowControl(self, isShown):
+        if (isShown):
+            self.imageSlideshow = SlideshowContainer(
+                self.imageSlideShowSlowHandler,
+                self.imageSlideShowPlayHandler,
+                self.imageSlideShowFasterHandler,
+                self.imageNextSliceHandler,
+                self.imagePrevSliceHandler
+            )
+            # self.dialog.setWindowModality(Qt.ApplicationModal)#只有该dialog关闭，才可以关闭父界面
+            self.imageSlideshow.setWindowModality(Qt.NonModal)
+            pos = self.mapToGlobal(QPoint(0, 0))
+            x, y = pos.x(), pos.y()
+            width, height = self.width(), self.height()
+            self.slideShowPlayer.setGeometry(x+width/2-dialogwidth/2, y+height-dialogheight-margin, dialogwidth, dialogheight)
 
-        pos = self.mapToGlobal(QPoint(0,0))
-        x,y = pos.x(),pos.y()
-        width,height = self.width(),self.height()
+            self.imageSlideshow.show()
+        else:
+            self.tryQuitImageSlideShow()
+            self.imageSlideshow.close()  # 直觉如此
 
-        self.slideShowPlayer.setGeometry(x,y,width,height)
-        self.slideShowPlayer.show()
+    def checkSelectContainerCanSlideShow(self):
+        if self.curMode is not SingleImageShownContainer.m2DMode or \
+            self.mImageShownWidget is None:
+            return False
+        else:
+            return True
+
+    def imageSlideShowPlayHandler(self):
+        print("播放button")
+        if not self.checkSelectContainerCanSlideShow(): return
+        if self.mImageShownWidget.canSlideShow():
+            self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
+            print("申请控制slideShow")
+            self.mImageShownWidget.controlSlideShow(self.imageSlideShowPlayFlag)
+
+    def imageSlideShowSlowHandler(self):
+        if not self.checkSelectContainerCanSlideShow(): return
+        print("slow")
+        self.mImageShownWidget.controlSlideShowSpeed(1)
+
+    def imageSlideShowFasterHandler(self):
+        if not self.checkSelectContainerCanSlideShow(): return
+        print("fast")
+        self.mImageShownWidget.controlSlideShowSpeed(-1)
+
+    def tryQuitImageSlideShow(self):
+        # if self.imageSlideshow is not None: self.imageSlideshow.close()
+        if self.imageSlideShowPlayFlag:
+            self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
+            self.mImageShownWidget.controlSlideShow(self.imageSlideShowPlayFlag)

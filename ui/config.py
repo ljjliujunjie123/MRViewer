@@ -24,7 +24,7 @@ class UIConfig():
 
     shownSlideShowDialogSize = QSize(300,100)
     shownSlideSpeedDefault = 0.2
-    shownSlideSpeedMax = 0.05 #时间间隔
+    shownSlideSpeedMax = 1/100 #时间间隔
     shownSlideSpeedMin = 1
 
     toolsSelectRegionCol = 5

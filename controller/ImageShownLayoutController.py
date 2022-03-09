@@ -31,11 +31,11 @@ class ImageShownLayoutController(QObject):
         self.imageSlideshow = None
         self.selectImageShownContainerSignal.connect(self.selectImageShownContainerHandler)
         self.updateCrossViewSignal.connect(self.updateCrossViewSignalHandler)
-        self.imageSlideShowPlayFlag = False
+
 
     def selectImageShownContainerHandler(self, container, isInit):
         if self.selectedImageShownContainer is not None:
-            self.tryQuitImageSlideShow()
+            self.selectedImageShownContainer.tryQuitImageSlideShow()
             if self.selectedImageShownContainer is not container:
                 self.selectedImageShownContainer.resetSelectState()
                 self.selectedImageShownContainer = container
@@ -47,11 +47,6 @@ class ImageShownLayoutController(QObject):
         else:
             self.updateToolsContainerStateSignal.emit(container.curMode)
 
-    def tryQuitImageSlideShow(self):
-        # if self.imageSlideshow is not None: self.imageSlideshow.close()
-        if self.imageSlideShowPlayFlag:
-            self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
-            self.selectedImageShownContainer.mImageShownWidget.controlSlideShow(self.imageSlideShowPlayFlag)
 
     def initLayoutParams(self):
         self.imageShownContainerLayout.getLayout().setContentsMargins(uiConfig.shownContainerMargins)
@@ -223,51 +218,6 @@ class ImageShownLayoutController(QObject):
                 lambda handleContainer,*args:handleContainer.tryUpdateCrossBoxWidget(),
                 None
         )
-
-    #走马灯播放控制器(得搬到container里)evermg42
-    def imageSlideshowControl(self,isShown):
-        if(isShown):
-            
-            self.imageSlideshow=SlideshowContainer(
-                self.imageSlideShowSlowHandler,
-                self.imageSlideShowPlayHandler,
-                self.imageSlideShowFasterHandler
-            )
-
-            self.imageSlideshow.setWindowFlags(
-                Qt.FramelessWindowHint|Qt.WindowStaysOnTopHint
-            )#隐藏标题栏|在主窗口前
-            #self.dialog.setWindowModality(Qt.ApplicationModal)#只有该dialog关闭，才可以关闭父界面
-
-            self.imageSlideshow.setWindowModality(Qt.NonModal)
-            self.imageSlideshow.show()
-        else:
-            self.tryQuitImageSlideShow()
-            self.imageSlideshow.close()#直觉如此
-
-    def checkSelectContainerCanSlideShow(self):
-        if self.selectedImageShownContainer is None or\
-            self.selectedImageShownContainer.curMode is not SingleImageShownContainer.m2DMode or\
-            self.selectedImageShownContainer.mImageShownWidget is None: return False
-        else: return True
-
-    def imageSlideShowPlayHandler(self):
-        print("播放button")
-        if not self.checkSelectContainerCanSlideShow():return
-        if self.selectedImageShownContainer.mImageShownWidget.canSlideShow():
-            self.imageSlideShowPlayFlag = not self.imageSlideShowPlayFlag
-            print("申请控制slideShow")
-            self.selectedImageShownContainer.mImageShownWidget.controlSlideShow(self.imageSlideShowPlayFlag)
-
-    def imageSlideShowSlowHandler(self):
-        if not self.checkSelectContainerCanSlideShow():return
-        print("slow")
-        self.selectedImageShownContainer.mImageShownWidget.controlSlideShowSpeed(0.1)
-
-    def imageSlideShowFasterHandler(self):
-        if not self.checkSelectContainerCanSlideShow():return
-        print("fast")
-        self.selectedImageShownContainer.mImageShownWidget.controlSlideShowSpeed(-0.1)
 
     #模式切换
     def imageModeSelectHandler(self, mode):
