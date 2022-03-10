@@ -2,6 +2,7 @@ class mImage2DShownData():
 
     CROSS_VIEW_PROJECTION = 0
     CROSS_VIEW_INTERSECTION = 1
+    CROSS_VIEW_PROJECTION_ORTHONORMAL = 2
 
     def __init__(self):
         self.showExtraInfoFlag = True
@@ -14,3 +15,6 @@ class mImage2DShownData():
 
     def isCrossViewIntersection(self):
         return self.crossViewType == self.CROSS_VIEW_INTERSECTION
+
+    def isCrossViewProjectionOrthonormal(self):
+        return self.crossViewType == self.CROSS_VIEW_PROJECTION_ORTHONORMAL

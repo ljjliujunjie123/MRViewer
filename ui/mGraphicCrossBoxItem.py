@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt,QPointF,QRectF,QLineF
 from PyQt5.QtGui import QPen,QPolygonF,QBrush,QColor
-from math import atan,atan2,sin,cos,pi,sqrt
+from math import sin,cos,pi,sqrt
 from enum import Enum
 from functools import singledispatch
 from utils.InteractiveType import InteractiveType
@@ -102,8 +102,8 @@ class mGraphicParallelogramItem(QGraphicsItem):
 
     interactiveSubSignal = None
 
-    def __init__(self, params:mGraphicParallelogramParams, interactiveSubSignal, parent = None):
-        super(QGraphicsItem, self).__init__(parent)
+    def __init__(self, params:mGraphicParallelogramParams, interactiveSubSignal:InteractiveType, parent = None):
+        super(mGraphicParallelogramItem, self).__init__(parent)
 
         self.keyPointsList = []
         #定义平行四边形的四个顶点
@@ -498,3 +498,113 @@ class mGraphicParallelogramItem(QGraphicsItem):
         mPen.setColor(Qt.yellow)
         QPainter.setPen(mPen)
         QPainter.drawPolygon(self.mBorderPolygon)
+
+        #绘制提示区域
+        QPainter.drawPolygon(self.mLeftPolygon)
+        QPainter.drawPolygon(self.mRightPolygon)
+        QPainter.drawPolygon(self.mBottomPolygon)
+        QPainter.drawPolygon(self.mTopPolygon)
+        QPainter.drawPolygon(self.mTopLeftPolygon)
+        QPainter.drawPolygon(self.mTopRightPolygon)
+        QPainter.drawPolygon(self.mBottomLeftPolygon)
+        QPainter.drawPolygon(self.mBottomRightPolygon)
+
+
+class mGraphicRectItem(mGraphicParallelogramItem):
+
+    def __init__(self, params:mGraphicParallelogramParams, interactiveSubSignal, parent = None):
+        super(mGraphicRectItem, self).__init__(params, interactiveSubSignal, parent)
+
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
+        print("mouse press", event.pos())
+        if event.button() == Qt.LeftButton:
+            self.mStartPos = event.pos()
+            if self.mLeftPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
+                self.setCursor(Qt.SizeHorCursor)
+                self.mStateFlag = STATE_FLAG.MOV_LEFT_LINE
+                return
+            if self.mRightPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
+                self.setCursor(Qt.SizeHorCursor)
+                self.mStateFlag = STATE_FLAG.MOV_RIGHT_LINE
+                return
+            else:
+                self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
+                return
+        else:
+            super(QGraphicsItem).mousePressEvent(event)
+
+    def mouseMoveEvent(self, event:QGraphicsSceneMouseEvent):
+        pos = event.pos()
+        dis = self.transformScale * self.calcDisBetweenPoints(self.mStartPos, pos)
+        #移动距离过小跳过
+        posToCenterPoint = pos - self.mCenterPoint
+        startToCenterPoint = self.mStartPos - self.mCenterPoint
+        direction = 1 if posToCenterPoint.manhattanLength() > startToCenterPoint.manhattanLength() else -1
+
+        if self.mStateFlag == STATE_FLAG.MOV_LEFT_LINE:
+            #向外变大为正方向
+            self.moveLineHandler(direction, dis, self.keyPointTopLeft, self.keyPointTopRight, self.keyPointBottomLeft, self.keyPointBottomRight)
+            self.mStartPos = pos
+            return
+
+        elif self.mStateFlag == STATE_FLAG.MOV_RIGHT_LINE:
+            self.moveLineHandler(direction, dis, self.keyPointTopRight, self.keyPointTopLeft, self.keyPointBottomRight, self.keyPointBottomLeft)
+            self.mStartPos = pos
+            return
+
+        else:
+            super(QGraphicsItem).mouseMoveEvent(event)
+
+    def moveLineHandler(self, direction, dis, keyPointA, keyPointB, keyPointC, keyPointD):
+        """
+        A,C是基准点，B,D是参考点
+        direction为正在变大，此时基准点远离参考点，反之接近参考点
+        """
+        if direction < 0:
+            newKeyPointA = self.calcOptionalPointFromEndPoints(
+                keyPointA,keyPointB, dis
+            )
+            keyPointA.setX(newKeyPointA.x())
+            keyPointA.setY(newKeyPointA.y())
+
+            newKeyPointC = self.calcOptionalPointFromEndPoints(
+                keyPointC, keyPointD, dis
+            )
+            keyPointC.setX(newKeyPointC.x())
+            keyPointC.setY(newKeyPointC.y())
+        else:
+            newKeyPointA = self.calcOptionalPointFromEndPoints(
+                keyPointB,
+                keyPointA,
+                dis + self.calcDisBetweenPoints(keyPointA, keyPointB)
+            )
+            keyPointA.setX(newKeyPointA.x())
+            keyPointA.setY(newKeyPointA.y())
+            newKeyPointC = self.calcOptionalPointFromEndPoints(
+                keyPointD,
+                keyPointC,
+                dis + self.calcDisBetweenPoints(keyPointC, keyPointD)
+            )
+            keyPointC.setX(newKeyPointC.x())
+            keyPointC.setY(newKeyPointC.y())
+        self.mCenterPoint = self.calcCenterPoint(self.keyPointTopLeft, self.keyPointBottomRight)
+        self.initPolygons()
+        self.scene().update()
+        self.interactiveSubSignal.emit(InteractiveType.ADJUST_THICKNESS)
+
+    def paint(self, QPainter, QStyleOptionGraphicsItem, widget=None):
+        #在四个顶点处绘制字符标识
+        mPen = QPen(Qt.green)
+        QPainter.drawText(self.keyPointTopLeft,"TL")
+        QPainter.drawText(self.keyPointTopRight,"TR")
+        QPainter.drawText(self.keyPointBottomLeft,"BL")
+        QPainter.drawText(self.keyPointBottomRight,"BR")
+
+        #绘制边框
+        mPen.setWidth(2)
+        QPainter.setPen(mPen)
+        mPen.setColor(Qt.yellow)
+        QPainter.setPen(mPen)
+        QPainter.drawPolygon(self.mBorderPolygon)
+        QPainter.drawPolygon(self.mLeftPolygon)
+        QPainter.drawPolygon(self.mRightPolygon)

@@ -5,8 +5,7 @@ from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from ui.CustomInteractiveCrossBoxWidget import CustomInteractiveCrossBoxWidget
-from ui.mGraphicRectItem import mGraphicParallelogramParams
-from ui.CustomDecoratedLayout import CustomDecoratedLayout
+from ui.mGraphicCrossBoxItem import mGraphicParallelogramParams
 from ui.CustomDicomTagsWindow import CustomDicomTagsWindow
 import vtkmodules.all as vtk
 import numpy as np
@@ -229,7 +228,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         print("update res ", self.iCrossBoxWidget.geometry())
 
     def updateInteractiveCrossBoxContent(self):
-        if self.imageShownData.isCrossViewProjection():
+        if self.imageShownData.isCrossViewProjection() or self.imageShownData.isCrossViewProjectionOrthonormal():
             points = [
                 QPointF(rationXY[0] * self.width(), rationXY[1] * self.height())
                 for rationXY in self.imageShownData.crossViewRatios
@@ -241,7 +240,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             params.setTopRightPoint(pointsToSceneCenter[1])
             params.setBottomRightPoint(pointsToSceneCenter[2])
             params.setBottomLeftPoint(pointsToSceneCenter[3])
-            self.iCrossBoxWidget.updateProjectionCrossBoxItem(params)
+            if self.imageShownData.isCrossViewProjection():
+                self.iCrossBoxWidget.updateProjectionCrossBoxItem(params)
+            elif self.imageShownData.isCrossViewProjectionOrthonormal():
+                self.iCrossBoxWidget.updateProjectionOrthonormalCrossBoxItem(params)
         elif self.imageShownData.isCrossViewIntersection():
             points = [
                 QPointF(rationXY[0] * self.width(), rationXY[1] * self.height())

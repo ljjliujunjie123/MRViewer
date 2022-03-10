@@ -59,14 +59,14 @@ class BaseImageData():
         ImagePosition =np.array(dcmData.ImagePositionPatient,dtype=float)
         ImageOrientation=np.array(dcmData.ImageOrientationPatient,dtype = float)
         PixelSpacing =dcmData.PixelSpacing
-        # SliceThickness=RefDs.SliceThickness
+        SliceThickness=dcmData.SliceThickness
         ImageOrientationX=ImageOrientation[0:3]
         ImageOrientationY=ImageOrientation[3:6]
         Rows = dcmData.Rows
         Cols = dcmData.Columns
         #图像平面法向量(X与Y的叉积)
         normalvector = np.around(np.cross(ImageOrientationX,ImageOrientationY), decimals=2)
-        return img_array,normalvector,ImagePosition,PixelSpacing,ImageOrientationX,ImageOrientationY,Rows,Cols
+        return img_array,normalvector,ImagePosition,PixelSpacing,ImageOrientationX,ImageOrientationY,Rows,Cols,SliceThickness
 
     def getImageTileInfo(self, index):
         dcmData = self.getDcmDataByIndex(index)

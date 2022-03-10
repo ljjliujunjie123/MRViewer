@@ -33,7 +33,7 @@ class DicomCoordinateHelper():
         vectorPostoP = point - pos
         x = np.dot(vectorPostoP,vectorX) / spaceX
         y = np.dot(vectorPostoP,vectorY) / spaceY
-        return QPoint(x,y)
+        return QPointF(x,y)
 
     def calcPoint2DTo3D(self, point, pos, vectorX, vectorY, spaceX, spaceY):
         """
@@ -65,9 +65,9 @@ class DicomCoordinateHelper():
         """
         根据两个三维的点计算它们之间的向量，unitization = true则进行单位化，false反之
         """
-        vector = endPoint - startPoint
+        vector = (endPoint - startPoint).astype(float)
         if unitization:
-            vector /= np.linalg.norm(vector)
+            vector *= (1 / np.linalg.norm(vector))
         return vector
 
 class InteractiveCrossBoxController(QObject):
@@ -101,9 +101,9 @@ class InteractiveCrossBoxController(QObject):
         #建立世界坐标系
         index1,index2 = handleContainer.imageData.currentIndex, self.RTContainer.imageData.currentIndex
         img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
-        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
+        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1, _ = handleContainer.imageData.getBasePosInfo(index1)
         img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
-        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.RTContainer.imageData.getBasePosInfo(index2)
+        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2, _ = self.RTContainer.imageData.getBasePosInfo(index2)
         #计算逆投影
         pointsScreen = handleContainer.mImageShownWidget.getCrossBoxKeyPointsDisplayPos()
         imageDisPos,imageDisWidth,imageDisHeight = handleContainer.mImageShownWidget.getImageDisplayPos()
@@ -121,6 +121,8 @@ class InteractiveCrossBoxController(QObject):
             self.rotateSignalHandler(projectionPoints, normalvector1, ImagePosition2, normalvector2)
         elif interactiveType is InteractiveType.ZOOM:
             self.zoomSignalHandler(projectionPoints, normalvector1, ImagePosition2, normalvector2, ImageOrientationX2, ImageOrientationY2, PixelSpacing2)
+        elif interactiveType is InteractiveType.ADJUST_THICKNESS:
+            self.adjustThicknessHandler()
 
     def updateICrossBoxSignalHandler(self, emitContainer: SingleImageShownContainer):
         """
@@ -139,9 +141,9 @@ class InteractiveCrossBoxController(QObject):
         #建立世界坐标系
         index1,index2 = handleContainer.imageData.currentIndex, self.RTContainer.imageData.currentIndex
         img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
-        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
+        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1,_= handleContainer.imageData.getBasePosInfo(index1)
         img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
-        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = self.RTContainer.imageData.getBasePosInfo(index2)
+        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2,SliceThickness = self.RTContainer.imageData.getBasePosInfo(index2)
 
         #定义Base面的面方程, 求出 Ax + By + Cz + D = 0 中的A,B,C,D
         A,B,C = normalvector1[0],normalvector1[1],normalvector1[2]
@@ -165,6 +167,39 @@ class InteractiveCrossBoxController(QObject):
             for point in points_p
         ]
 
+        isOrthonormal = True if np.dot(normalvector1, normalvector2) < 1e-5 else False
+        if isOrthonormal:
+            #如果RT面与2D面正交，则只需要确定两个端点即可
+            def getMaxDistanceIndex(points):
+                #通过最大曼哈顿距离确定端点
+                i,j,length = 0,0,0
+                for _i in range(len(points)):
+                    for _j in range(_i, len(points)):
+                        tmpPoint = points[_i] - points[_j]
+                        tmpLength = abs(tmpPoint.manhattanLength())
+                        if tmpLength > length:
+                            length = tmpLength
+                            i,j = _i,_j
+                return i,j
+            i,j = getMaxDistanceIndex(points_2d)
+            points_2d = [points_2d[i], points_2d[j]]
+
+            #正交时，根据thickness信息重新确定投影点
+            vector_line = self.dicomCoordinateHelper.calcVectorFromPoint(
+                    np.array([points_2d[0].x(),points_2d[0].y()]),
+                    np.array([points_2d[1].x(),points_2d[1].y()]),
+                    unitization=True
+            )
+            n_vector_line = QPointF(-vector_line[1],vector_line[0])
+            points_2d_new = []
+            points_2d_new.append(points_2d[0] - 30 * SliceThickness/2 * n_vector_line)
+            points_2d_new.append(points_2d[0] + 30 * SliceThickness/2 * n_vector_line)
+            points_2d_new.append(points_2d[1] + 30 * SliceThickness/2 * n_vector_line)
+            points_2d_new.append(points_2d[1] - 30 * SliceThickness/2 * n_vector_line)
+            points_2d = points_2d_new
+            print(points_2d_new)
+            print(points_2d)
+
         #计算投影点的屏幕坐标
         imageDisPos,imageDisWidth,imageDisHeight = handleContainer.mImageShownWidget.getImageDisplayPos()
         kImgToDisW,kImgToDisH = imageDisHeight/Rows1,imageDisWidth/Cols1
@@ -177,7 +212,10 @@ class InteractiveCrossBoxController(QObject):
         #将投影点输入m2D进行渲染
         handleContainer.mImage2DShownData.showCrossFlag = True
         handleContainer.mImage2DShownData.crossViewRatios = ratioDis
-        handleContainer.mImage2DShownData.crossViewType = mImage2DShownData.CROSS_VIEW_PROJECTION
+        if isOrthonormal:
+            handleContainer.mImage2DShownData.crossViewType = mImage2DShownData.CROSS_VIEW_PROJECTION_ORTHONORMAL
+        else:
+            handleContainer.mImage2DShownData.crossViewType = mImage2DShownData.CROSS_VIEW_PROJECTION
         handleContainer.tryUpdateCrossBoxWidget()
 
     def updateICrossBoxIntersectionHandler(self, handleContainer: SingleImageShownContainer, emitContainerTuple):
@@ -186,9 +224,9 @@ class InteractiveCrossBoxController(QObject):
         # 建立世界坐标系
         index1,index2 = handleContainer.imageData.currentIndex, emitContainer.imageData.currentIndex
         img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
-        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
+        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1,_= handleContainer.imageData.getBasePosInfo(index1)
         img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
-        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = emitContainer.imageData.getBasePosInfo(index2)
+        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2,_ = emitContainer.imageData.getBasePosInfo(index2)
 
         if (normalvector1 == normalvector2).all():
             #平面平行
@@ -334,6 +372,12 @@ class InteractiveCrossBoxController(QObject):
         #求出新的Rows和Cols
         rows,cols = (originPoints2D[2].x() - originPoints2D[0].x())//PixelSpacing2[0], (originPoints2D[2].y() - originPoints2D[0].y())//PixelSpacing2[1]
         print(rows, cols)
+        pass
+
+    def adjustThicknessHandler(self):
+        """
+        当RT窗口与2D窗口正交时，此时的ICrossBox的zoom事件用于调整Thickness
+        """
         pass
 
     def requestDicomSource(self):

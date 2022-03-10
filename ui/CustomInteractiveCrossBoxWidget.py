@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPen,QPainter
 from PyQt5.QtCore import QRectF,Qt
-from ui.mGraphicRectItem import mGraphicParallelogramItem, mGraphicParallelogramParams
+from ui.mGraphicCrossBoxItem import mGraphicParallelogramItem, mGraphicParallelogramParams, mGraphicRectItem
 
 class CustomInteractiveCrossBoxWidget(QGraphicsView):
 
@@ -31,13 +31,20 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         self.crossBoxProjectionItem = mGraphicParallelogramItem(params, interactiveSubSignal)
         self.crossBoxProjectionItem.hide()
         self.scene.addItem(self.crossBoxProjectionItem)
+
+        self.crossBoxProjectionOrthonormalItem = mGraphicRectItem(params, interactiveSubSignal)
+        self.crossBoxProjectionOrthonormalItem.hide()
+        self.scene.addItem(self.crossBoxProjectionOrthonormalItem)
+
         pen = QPen()
-        pen.setColor(Qt.white)
-        pen.setWidth(10)
+        pen.setColor(Qt.yellow)
+        pen.setWidth(5)
+
         self.crossBoxIntersectionItem = QGraphicsLineItem()
         self.crossBoxIntersectionItem.setPen(pen)
         self.crossBoxIntersectionItem.hide()
         self.scene.addItem(self.crossBoxIntersectionItem)
+
         self.borderItem = QGraphicsRectItem(sceneRect)
         self.borderItem.setPen(pen)
         self.scene.addItem(self.borderItem)
@@ -52,6 +59,7 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
     def hideCrossBoxItems(self):
         self.crossBoxIntersectionItem.hide()
         self.crossBoxProjectionItem.hide()
+        self.crossBoxProjectionOrthonormalItem.hide()
 
     def updateProjectionCrossBoxItem(self, params: mGraphicParallelogramParams):
         self.hideCrossBoxItems()
@@ -62,6 +70,10 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         self.crossBoxIntersectionItem.setLine(startPoint.x(), startPoint.y(), endPoint.x(), endPoint.y())
         self.scene.update()
         self.crossBoxIntersectionItem.show()
+
+    def updateProjectionOrthonormalCrossBoxItem(self, params: mGraphicParallelogramParams):
+        self.hideCrossBoxItems()
+        self.crossBoxProjectionOrthonormalItem.updateWithParams(params)
 
     def resizeEvent(self, QResizeEvent):
         self.scene.setSceneRect(self.calcSceneRect())
