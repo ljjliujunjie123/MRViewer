@@ -202,15 +202,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def tryHideCrossBoxWidget(self):
         if self.imageShownData.showCrossFlag:
-            # self.crossBoxWidget.hide()
             self.iCrossBoxWidget.hide()
             self.imageShownData.showCrossFlag = False
-            # self.crossBoxWidget.isShowContent = False
 
     def updateCrossBoxWidget(self):
-        # pass
-        # self.updateCrossBoxWidgetGeometry()
-        # self.updateCrossBoxWidgetContent()
         self.updateInteractiveCrossBoxContent()
         self.updateInteractiveCrossBoxGeometry()
         self.iCrossBoxWidget.show()
@@ -234,37 +229,27 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         print("update res ", self.iCrossBoxWidget.geometry())
 
     def updateInteractiveCrossBoxContent(self):
-        points = [
-            QPointF(rationXY[0] * self.width(), rationXY[1] * self.height())
-            for rationXY in self.imageShownData.crossViewRatios
-        ]
-        crossBoxSceneCenter = QPointF(self.width()/2, self.height()/2)
-        pointsToSceneCenter = [point - crossBoxSceneCenter for point in points]
-        params = mGraphicParallelogramParams()
-        params.setTopLeftPoint(pointsToSceneCenter[0])
-        params.setTopRightPoint(pointsToSceneCenter[1])
-        params.setBottomRightPoint(pointsToSceneCenter[2])
-        params.setBottomLeftPoint(pointsToSceneCenter[3])
-        self.iCrossBoxWidget.updateCrossBoxItem(params)
-
-    def updateCrossBoxWidgetGeometry(self):
-        pos = self.mapToGlobal(QPoint(0,0))
-        x,y = pos.x(),pos.y()
-        width,height = self.width(),self.height()
-        print("update ic View Geometry ", x,y,width,height)
-        self.crossBoxWidget.setGeometry(x,y,width,height)
-        self.crossBoxWidget.update()
-        print("update res ", self.crossBoxWidget.geometry())
-
-    def updateCrossBoxWidgetContent(self):
-        x1,y1 = self.imageShownData.crossViewRatios[0]
-        x2,y2 = self.imageShownData.crossViewRatios[1]
-        _pos1 = QPoint(x1*self.width(),y1*self.height())
-        _pos2 = QPoint(x2*self.width(),y2*self.height())
-        self.crossBoxWidget.setPos(_pos1,_pos2)
-        self.crossBoxWidget.isShowContent = True
-        self.crossBoxWidget.update()
-        self.crossBoxWidget.show()
+        if self.imageShownData.isCrossViewProjection():
+            points = [
+                QPointF(rationXY[0] * self.width(), rationXY[1] * self.height())
+                for rationXY in self.imageShownData.crossViewRatios
+            ]
+            crossBoxSceneCenter = QPointF(self.width()/2, self.height()/2)
+            pointsToSceneCenter = [point - crossBoxSceneCenter for point in points]
+            params = mGraphicParallelogramParams()
+            params.setTopLeftPoint(pointsToSceneCenter[0])
+            params.setTopRightPoint(pointsToSceneCenter[1])
+            params.setBottomRightPoint(pointsToSceneCenter[2])
+            params.setBottomLeftPoint(pointsToSceneCenter[3])
+            self.iCrossBoxWidget.updateProjectionCrossBoxItem(params)
+        elif self.imageShownData.isCrossViewIntersection():
+            points = [
+                QPointF(rationXY[0] * self.width(), rationXY[1] * self.height())
+                for rationXY in self.imageShownData.crossViewRatios
+            ]
+            crossBoxSceneCenter = QPointF(self.width()/2, self.height()/2)
+            pointsToSceneCenter = [point - crossBoxSceneCenter for point in points]
+            self.iCrossBoxWidget.updateInterscetionCrossBoxItem(pointsToSceneCenter[0], pointsToSceneCenter[1])
 
     def renderVtkWindow(self, layerCount = 2):
         try:
@@ -359,10 +344,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def clearViews(self):
         self.qvtkWidget.Finalize()
-    #
-    # def showEvent(self, *args, **kwargs):
-    #     # if self.imageShownData.showCrossFlag:
-    #     self.updateCrossBoxWidget()
+
+    def showEvent(self, *args, **kwargs):
+        if self.imageShownData.showCrossFlag:
+            self.updateCrossBoxWidget()
 
     def hideEvent(self, *args, **kwargs):
         if self.imageShownData.showCrossFlag:

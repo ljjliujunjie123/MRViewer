@@ -6,6 +6,8 @@ import numpy as np
 import sympy as sp
 from utils.util import checkSameSeries,checkSameStudy
 from utils.InteractiveType import InteractiveType
+from utils.mImage2DShownData import mImage2DShownData
+from utils.status import Status
 
 class DicomCoordinateHelper():
     """
@@ -122,23 +124,18 @@ class InteractiveCrossBoxController(QObject):
 
     def updateICrossBoxSignalHandler(self, emitContainer: SingleImageShownContainer):
         """
-        当RT窗口更新时，该函数控制其他SC刷新ICrossBox的位置和形状
+        emitContainer有两种模态，RT模态和非RT模态
+        RT模态时，CrossBox遵循投影规则；非RT模态时，CrossBox遵循交线规则
+        当emitContainer内容更新时，该函数控制其他SC刷新ICrossBox的位置和形状
         """
-        self.RTContainer = emitContainer
-        self.imageShownContainerLayout.mapWidgetsFunc(self.updateICrossBoxSignalSCHandler)
+        if emitContainer.curMode == SingleImageShownContainer.mRTMode:
+            self.RTContainer = emitContainer
+            self.imageShownContainerLayout.mapWidgetsFunc(self.updateICrossBoxProjectionHandler)
+        elif emitContainer.curMode == SingleImageShownContainer.m2DMode:
+            self.imageShownContainerLayout.mapWidgetsFunc(self.updateICrossBoxIntersectionHandler, emitContainer)
 
-    def updateICrossBoxSignalSCHandler(self, handleContainer: SingleImageShownContainer):
-        if handleContainer is self.RTContainer\
-            or handleContainer.curMode != SingleImageShownContainer.m2DMode\
-            or len(handleContainer.imageData.curFilePath) < 1:return
-
-        df1 = handleContainer.imageData.getDcmDataByIndex(handleContainer.imageData.currentIndex)
-        df2 = self.RTContainer.imageData.getDcmDataByIndex(self.RTContainer.imageData.currentIndex)
-        isSameStudy = checkSameStudy(df1,df2)
-        isSameSeries = checkSameSeries(df1, df2)
-        if (not isSameStudy) or isSameSeries:
-            return
-
+    def updateICrossBoxProjectionHandler(self, handleContainer: SingleImageShownContainer):
+        if self.updateICrossBoxHandlerBaseFilter(handleContainer, self.RTContainer) == Status.bad: return
         #建立世界坐标系
         index1,index2 = handleContainer.imageData.currentIndex, self.RTContainer.imageData.currentIndex
         img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
@@ -180,7 +177,99 @@ class InteractiveCrossBoxController(QObject):
         #将投影点输入m2D进行渲染
         handleContainer.mImage2DShownData.showCrossFlag = True
         handleContainer.mImage2DShownData.crossViewRatios = ratioDis
+        handleContainer.mImage2DShownData.crossViewType = mImage2DShownData.CROSS_VIEW_PROJECTION
         handleContainer.tryUpdateCrossBoxWidget()
+
+    def updateICrossBoxIntersectionHandler(self, handleContainer: SingleImageShownContainer, emitContainerTuple):
+        emitContainer, = emitContainerTuple
+        if self.updateICrossBoxHandlerBaseFilter(handleContainer, emitContainer) == Status.bad: return
+        # 建立世界坐标系
+        index1,index2 = handleContainer.imageData.currentIndex, emitContainer.imageData.currentIndex
+        img_array1,normalvector1,ImagePosition1,PixelSpacing1,\
+        ImageOrientationX1,ImageOrientationY1,Rows1,Cols1= handleContainer.imageData.getBasePosInfo(index1)
+        img_array2,normalvector2,ImagePosition2,PixelSpacing2,\
+        ImageOrientationX2,ImageOrientationY2,Rows2,Cols2 = emitContainer.imageData.getBasePosInfo(index2)
+
+        if (normalvector1 == normalvector2).all():
+            #平面平行
+            return
+
+        #建立交线方程组
+        sp.init_printing(use_unicode=True)
+        x, y, z = sp.symbols('x, y, z')
+        eq=[normalvector1[0] * (x - ImagePosition1[0]) + normalvector1[1] * (y - ImagePosition1[1]) + normalvector1[2] * (z - ImagePosition1[2]),\
+            normalvector2[0] * (x - ImagePosition2[0]) + normalvector2[1] * (y - ImagePosition2[1]) + normalvector2[2] * (z - ImagePosition2[2])]
+
+        #求世界坐标系下的交线方程
+        lineExpr = list(sp.linsolve(eq, [x, y, z]))
+        if len(lineExpr) < 1:
+            #平面虽然不平行，但非常接近平行，单精度浮点下无法建立交线方程
+            return
+        #获得交线上两个定点
+        def getWorldPointOnCrossLine(lineExpr,*args):
+            x_tmp,y_tmp,z_tmp, = args
+            x, y, z = sp.symbols('x, y, z')
+            x_expr,y_expr,z_expr = lineExpr[0][0],lineExpr[0][1],lineExpr[0][2]
+            point = np.array([
+                x_expr.evalf(subs={x:x_tmp,y:y_tmp,z:z_tmp}),
+                y_expr.evalf(subs={x:x_tmp,y:y_tmp,z:z_tmp}),
+                z_expr.evalf(subs={x:x_tmp,y:y_tmp,z:z_tmp})
+            ])
+            return point
+
+        _fixPoint1,_fixPoint2 = getWorldPointOnCrossLine(lineExpr,0,0,0),getWorldPointOnCrossLine(lineExpr,10,10,10)
+
+        #获得两个定点在handleContainer图像坐标系下的坐标
+        fixPoint1 = self.dicomCoordinateHelper.calcPoint3DTo2D(
+            _fixPoint1, ImagePosition1, ImageOrientationX1, ImageOrientationY1, PixelSpacing1[0], PixelSpacing1[1]
+        )
+        fixPoint2 = self.dicomCoordinateHelper.calcPoint3DTo2D(
+            _fixPoint2, ImagePosition1, ImageOrientationX1, ImageOrientationY1, PixelSpacing1[0], PixelSpacing1[1]
+        )
+
+        #在图像坐标系下建立交线方程，并求其与图像边界的交点
+        x, y = sp.symbols('x, y')
+        crossLine = (y - fixPoint1.y()) * (fixPoint2.x() - fixPoint1.x()) - (x - fixPoint1.x()) * (fixPoint2.y() - fixPoint1.y())
+        res = []
+        for line in [x-Rows1,y-Cols1,x,y]:
+            eq = [crossLine, line]
+            point = list(sp.linsolve(eq, [x,y]))
+            if len(point) < 1:continue
+            point = point[0]
+            pointx,pointy = int(point[0]),int(point[1])
+            if pointx < 0 or pointx > Rows1 or pointy < 0 or pointy > Cols1:continue
+            res.append(QPoint(pointx,pointy))
+        if len(res) < 2:return
+        #计算交点的屏幕坐标
+        imageDisPos,imageDisWidth,imageDisHeight = handleContainer.mImageShownWidget.getImageDisplayPos()
+        kImgToDisW,kImgToDisH = imageDisHeight/Rows1,imageDisWidth/Cols1
+        resDis = [QPoint(int(point.x() * kImgToDisW),int(point.y()*kImgToDisH)) + imageDisPos for point in res]
+
+        #将绝对坐标转为相对ImageContainer的比例值
+        size = handleContainer.mImageShownWidget.size()
+        resDis = [(point.x() / size.width(),point.y() / size.height()) for point in resDis]
+
+        #将投影点输入m2D进行渲染
+        handleContainer.mImage2DShownData.showCrossFlag = True
+        handleContainer.mImage2DShownData.crossViewType = mImage2DShownData.CROSS_VIEW_INTERSECTION
+        handleContainer.mImage2DShownData.crossViewRatios = resDis
+        handleContainer.tryUpdateCrossBoxWidget()
+
+    def updateICrossBoxHandlerBaseFilter(self, handleContainer, emitContainer):
+        if handleContainer is emitContainer or handleContainer.curMode != SingleImageShownContainer.m2DMode or len(handleContainer.imageData.curFilePath) < 1:
+            return Status.bad
+        if (emitContainer.curMode != SingleImageShownContainer.m2DMode) and (emitContainer.curMode != SingleImageShownContainer.mRTMode):
+            handleContainer.mImageShownWidget.tryHideCrossBoxWidget()
+            return Status.bad
+
+        df1 = handleContainer.imageData.getDcmDataByIndex(handleContainer.imageData.currentIndex)
+        df2 = emitContainer.imageData.getDcmDataByIndex(emitContainer.imageData.currentIndex)
+        isSameStudy = checkSameStudy(df1,df2)
+        isSameSeries = checkSameSeries(df1, df2)
+        if (not isSameStudy) or isSameSeries:
+            handleContainer.mImageShownWidget.tryHideCrossBoxWidget()
+            return Status.bad
+        return Status.good
 
     def updateICrossBoxModeSignalHandler(self):
         """

@@ -28,12 +28,17 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         params.setTopRightPoint((290,89))
         params.setBottomLeftPoint((-120,230))
         params.setBottomRightPoint((400,220))
-        self.crossBoxItem = mGraphicParallelogramItem(params, interactiveSubSignal)
-        self.scene.addItem(self.crossBoxItem)
-        self.borderItem = QGraphicsRectItem(sceneRect)
+        self.crossBoxProjectionItem = mGraphicParallelogramItem(params, interactiveSubSignal)
+        self.crossBoxProjectionItem.hide()
+        self.scene.addItem(self.crossBoxProjectionItem)
         pen = QPen()
         pen.setColor(Qt.white)
         pen.setWidth(10)
+        self.crossBoxIntersectionItem = QGraphicsLineItem()
+        self.crossBoxIntersectionItem.setPen(pen)
+        self.crossBoxIntersectionItem.hide()
+        self.scene.addItem(self.crossBoxIntersectionItem)
+        self.borderItem = QGraphicsRectItem(sceneRect)
         self.borderItem.setPen(pen)
         self.scene.addItem(self.borderItem)
 
@@ -42,16 +47,23 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         return QRectF(-1*width/2,-1*height/2,width,height)
 
     def getCustomICrossBoxParams(self):
-        return self.crossBoxItem.getGraphicParallelogramParams()
+        return self.crossBoxProjectionItem.getGraphicParallelogramParams()
 
-    def updateCrossBoxItem(self, params: mGraphicParallelogramParams):
-        self.crossBoxItem.updateWithParams(params)
+    def hideCrossBoxItems(self):
+        self.crossBoxIntersectionItem.hide()
+        self.crossBoxProjectionItem.hide()
+
+    def updateProjectionCrossBoxItem(self, params: mGraphicParallelogramParams):
+        self.hideCrossBoxItems()
+        self.crossBoxProjectionItem.updateWithParams(params)
+
+    def updateInterscetionCrossBoxItem(self, startPoint, endPoint):
+        self.hideCrossBoxItems()
+        self.crossBoxIntersectionItem.setLine(startPoint.x(), startPoint.y(), endPoint.x(), endPoint.y())
+        self.scene.update()
+        self.crossBoxIntersectionItem.show()
 
     def resizeEvent(self, QResizeEvent):
         self.scene.setSceneRect(self.calcSceneRect())
         self.borderItem.setRect(self.calcSceneRect())
         self.scene.update()
-        print("scene rect", self.scene.sceneRect())
-        print("view geometry", self.geometry())
-        print("border rect", self.borderItem.rect())
-        print("iCrossBox rect", self.crossBoxItem.boundingRect())
