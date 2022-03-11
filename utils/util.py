@@ -9,7 +9,7 @@ from vtkmodules.vtkRenderingAnnotation import vtkAnnotatedCubeActor
 from vtkmodules.util.numpy_support import numpy_to_vtk
 import vtkmodules.all as vtk
 from vtkmodules.util.vtkConstants import *
-
+import string
 def checkMultiFrame(seriesDict):
     return seriesDict.isMultiFrame
 
@@ -99,3 +99,12 @@ def numpy2VTK(img):
     imageData.GetPointData().GetScalars().DeepCopy(vtk_array)
 
     return imageData
+
+def isDicom(filePath: string):
+    if filePath.endswith(".dcm"):
+        return True
+    else:
+        with open(filePath,"rb") as f:
+            f.seek(128,1)
+            strb = f.read(4)
+            return strb == b'DICM'

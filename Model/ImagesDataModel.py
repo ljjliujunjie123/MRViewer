@@ -1,10 +1,11 @@
 from cacheout import CacheManager,Cache
 import os
 import pydicom as pyd
-from utils.util import checkDirValidity
+from utils.util import checkDirValidity, isDicom
 from utils.status import Status
+from utils.isDicom import *
 from copy import deepcopy
-
+import pymysql
 class SeriesDict(dict):
 
         isMultiFrame = False
@@ -23,8 +24,36 @@ class ImagesDataModel():
 
     def __init__(self):
         print("ImagesDataModel Init.")
-        self.dataSets = CacheManager()
         self.rootPath = ""
+        self.dataBase = pymysql.connect(host='localhost',
+            user='user',
+            password='passwd',
+            database='MRViewer',
+            charset='utf8mb4')
+        
+    def initDataBase(self):
+        # 创建表
+        sql = '''CREATE TABLE `MRViewer_file` (
+        `id` INT NOT NULL AUTO_INCREMENT,
+        `path` text ,
+        `patient` INT NOT NULL ,
+        `is_multiframe` INT NOT NULL ,
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        '''
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
+        self.dataBase.commit()
+        cursor.close()
+
+    def clearDataBase(self):
+        sql = '''
+        truncate TABLE `MRViewer_file`;
+        DROP TABLE `MRViewer_file`;
+        '''
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
+        self.dataBase.commit()
+        cursor.close()
 
     def setRootPath(self, rootPath):
         self.rootPath = rootPath
@@ -33,21 +62,43 @@ class ImagesDataModel():
         return self.rootPath
 
     def addStudyItem(self, studyName):
-        self.dataSets.register(studyName, Cache())
         studyPath = os.path.join(self.rootPath,studyName)
-        for seriesName in os.listdir(studyPath):
-            seriesPath = os.path.join(studyPath, seriesName)
-            if checkDirValidity(seriesPath) is Status.bad:continue
-            try:
-                self.addSeriesItem(studyName, seriesName)
-            except self.MultiFrameExceptionError:
-                print("当前series的dcm为多帧格式dcm")
-                for dcmFileName in os.listdir(seriesPath):
-                    print(dcmFileName)
-                    self.addSeriesMultiFrameItem(studyName, seriesName, dcmFileName)
 
-        print("current ImageDataModel:")
-        print(self.dataSets.cache_names())
+        # 
+        # with self.dataBase:
+        #     with self.dataBase.cursor() as cursor:
+        #         # Create a new record
+        #         sql = "INSERT INTO `users` (`email`, `password`) VALUES (%s, %s)"
+        #         # cursor.execute(sql, ('webmaster@python.org', 'very-secret'))
+
+        #     # dataBase is not autocommit by default. So you must commit to save
+        #     # your changes.
+        #     self.dataBase.commit()
+        for root,dirs,files in os.walk(studyPath):
+            for file in files:
+                print(os.path.join(root,file))
+                if isDicom(file):
+                    try:
+                        self.addSeriesItem(studyName, seriesName)
+                    except self.MultiFrameExceptionError:
+                        print("当前series的dcm为多帧格式dcm")
+                        for dcmFileName in os.listdir(seriesPath):
+                            print(dcmFileName)
+                            self.addSeriesMultiFrameItem(studyName, seriesName, dcmFileName)
+
+        # for seriesName in os.listdir(studyPath):
+        #     seriesPath = os.path.join(studyPath, seriesName)
+        #     if checkDirValidity(seriesPath) is Status.bad:continue
+        #     try:
+        #         self.addSeriesItem(studyName, seriesName)
+        #     except self.MultiFrameExceptionError:
+        #         print("当前series的dcm为多帧格式dcm")
+        #         for dcmFileName in os.listdir(seriesPath):
+        #             print(dcmFileName)
+        #             self.addSeriesMultiFrameItem(studyName, seriesName, dcmFileName)
+
+        # print("current ImageDataModel:")
+        # print(self.dataSets.cache_names())#!
 
     def findStudyItem(self, studyName):
         return self.dataSets[studyName]
@@ -143,5 +194,60 @@ class ImagesDataModel():
         self.dataSets.clear_all()
         del self.dataSets
         self.dataSets = CacheManager()
+        self.dataBase.close()
 
 imageDataModel = ImagesDataModel()
+
+"""
+#!/usr/bin/python3
+ 
+import pymysql
+ 
+# 打开数据库连接
+db = pymysql.connect(host='localhost',
+                     user='testuser',
+                     password='test123',
+                     database='TESTDB')
+ 
+# 使用 cursor() 方法创建一个游标对象 cursor
+cursor = db.cursor()
+ 
+# 使用 execute()  方法执行 SQL 查询 
+cursor.execute("SELECT VERSION()")
+ 
+# 使用 fetchone() 方法获取单条数据.
+data = cursor.fetchone()
+ 
+print ("Database version : %s " % data) 
+# 关闭数据库连接
+db.close()
+
+
+
+
+conn = pymysql.connect(host='localhost',user='root',password='123456',charset='utf8mb4')
+# 创建游标
+cursor = conn.cursor()
+ 
+# 创建数据库的sql(如果数据库存在就不创建，防止异常)
+sql = "CREATE DATABASE IF NOT EXISTS db_name" 
+# 执行创建数据库的sql
+cursor.execute(sql)
+ 
+ 
+# 创建表
+sql_2 = '''CREATE TABLE `employee` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `topic` INT ,
+  `ptid` INT NOT NULL,
+  `level` INT NOT NULL,
+  `time` TIME,
+  `consume` INT NOT NULL,
+  `err` INT NOT NULL,
+  `points` INT NOT NULL,
+  `gid` INT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+'''
+
+"""

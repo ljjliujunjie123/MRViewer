@@ -22,6 +22,9 @@ class OpenFileController():
         self.tryClearImageShownSignal = tryClearImageShownSignal
 
     def openStudyDirectory(self):
+        """
+            读取study中的所有dicom文件
+        """
         filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
         # filePath = r"D:\respository\MRViewer_Scource\study_Test_data"
         filePath = r"E:\research\MRViewer_test\study_Test_data"
