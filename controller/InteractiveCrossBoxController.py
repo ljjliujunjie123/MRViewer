@@ -130,7 +130,7 @@ class InteractiveCrossBoxController(QObject):
         RT模态时，CrossBox遵循投影规则；非RT模态时，CrossBox遵循交线规则
         当emitContainer内容更新时，该函数控制其他SC刷新ICrossBox的位置和形状
         """
-        if emitContainer.curMode == SingleImageShownContainer.mRTMode:
+        if emitContainer.curMode == SingleImageShownContainer.m2DMode:
             self.RTContainer = emitContainer
             self.imageShownContainerLayout.mapWidgetsFunc(self.updateICrossBoxProjectionHandler)
         elif emitContainer.curMode == SingleImageShownContainer.m2DMode:

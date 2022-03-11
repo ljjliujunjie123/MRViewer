@@ -13,10 +13,11 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         self.setMouseTracking(True)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground,True)
-        self.setStyleSheet("background:transparent;")
+        self.setStyleSheet("background:transparent;padding: 0px; border: 0px;margin: 0px")
+        self.setContentsMargins(0,0,0,0)
+        self.setToolTip("this is the iC View")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.painter = QPainter(self)
 
         sceneRect = self.calcSceneRect()
         self.scene = QGraphicsScene(sceneRect)
@@ -24,15 +25,15 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
 
         #将border View和CrossView组装入scene
         params = mGraphicParallelogramParams()
-        params.setTopLeftPoint((-239,-137))
-        params.setTopRightPoint((290,89))
-        params.setBottomLeftPoint((-120,230))
-        params.setBottomRightPoint((400,220))
-        self.crossBoxProjectionItem = mGraphicParallelogramItem(params, interactiveSubSignal)
+        params.setTopLeftPoint((-100,-100))
+        params.setTopRightPoint((100,-100))
+        params.setBottomLeftPoint((-100,100))
+        params.setBottomRightPoint((100,100))
+        self.crossBoxProjectionItem = mGraphicParallelogramItem(params, interactiveSubSignal, self.calcSceneRect)
         self.crossBoxProjectionItem.hide()
         self.scene.addItem(self.crossBoxProjectionItem)
 
-        self.crossBoxProjectionOrthonormalItem = mGraphicRectItem(params, interactiveSubSignal)
+        self.crossBoxProjectionOrthonormalItem = mGraphicRectItem(params, interactiveSubSignal, self.calcSceneRect)
         self.crossBoxProjectionOrthonormalItem.hide()
         self.scene.addItem(self.crossBoxProjectionOrthonormalItem)
 
@@ -44,10 +45,6 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         self.crossBoxIntersectionItem.setPen(pen)
         self.crossBoxIntersectionItem.hide()
         self.scene.addItem(self.crossBoxIntersectionItem)
-
-        self.borderItem = QGraphicsRectItem(sceneRect)
-        self.borderItem.setPen(pen)
-        self.scene.addItem(self.borderItem)
 
     def calcSceneRect(self):
         width,height = self.width(),self.height()
@@ -69,7 +66,6 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         self.hideCrossBoxItems()
         self.crossBoxIntersectionItem.setLine(startPoint.x(), startPoint.y(), endPoint.x(), endPoint.y())
         self.scene.update()
-        self.crossBoxIntersectionItem.show()
 
     def updateProjectionOrthonormalCrossBoxItem(self, params: mGraphicParallelogramParams):
         self.hideCrossBoxItems()
@@ -77,5 +73,4 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
 
     def resizeEvent(self, QResizeEvent):
         self.scene.setSceneRect(self.calcSceneRect())
-        self.borderItem.setRect(self.calcSceneRect())
         self.scene.update()

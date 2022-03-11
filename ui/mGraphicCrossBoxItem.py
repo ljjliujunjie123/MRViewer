@@ -102,7 +102,7 @@ class mGraphicParallelogramItem(QGraphicsItem):
 
     interactiveSubSignal = None
 
-    def __init__(self, params:mGraphicParallelogramParams, interactiveSubSignal:InteractiveType, parent = None):
+    def __init__(self, params:mGraphicParallelogramParams, interactiveSubSignal:InteractiveType, calcBoundingRect, parent = None):
         super(mGraphicParallelogramItem, self).__init__(parent)
 
         self.keyPointsList = []
@@ -138,9 +138,10 @@ class mGraphicParallelogramItem(QGraphicsItem):
 
         #定义辅助变量
         self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
-        self.mStartPos = QPointF()
+        self.mStartPos = QPointF(0,0)
         self.mRotateAngle = 0
         self.interactiveSubSignal = interactiveSubSignal
+        self.calcBoundingRect = calcBoundingRect
 
         #初始化位置
         self.setPos(-1*self.mCenterPoint.x(),-1*self.mCenterPoint.y())
@@ -150,7 +151,8 @@ class mGraphicParallelogramItem(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable)
 
     def boundingRect(self):
-        return self.mBorderPolygon.boundingRect()
+        return self.calcBoundingRect()
+        # return self.mBorderPolygon.boundingRect()
 
     def resetConfigs(self):
         self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
@@ -248,7 +250,6 @@ class mGraphicParallelogramItem(QGraphicsItem):
             return dis2
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        print("mouse press", event.pos())
         if event.button() == Qt.LeftButton:
             self.mStartPos = event.pos()
             if self.mRotatePolygon.containsPoint(self.mStartPos, Qt.WindingFill):
@@ -294,12 +295,9 @@ class mGraphicParallelogramItem(QGraphicsItem):
             else:
                 self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
                 return
-        else:
-            super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event:QGraphicsSceneMouseEvent):
         pos = event.pos()
-        # print("moving pos", pos, self.mStateFlag)
         if self.mStateFlag == STATE_FLAG.ROTATE:
             lineBegin = QLineF(self.mCenterPoint, self.mStartPos)
             lineEnd = QLineF(self.mCenterPoint, pos)
@@ -358,9 +356,6 @@ class mGraphicParallelogramItem(QGraphicsItem):
             self.moveKeyPointHandler(direction, dis, self.keyPointBottomRight, self.keyPointTopLeft, self.keyPointTopRight, self.keyPointBottomLeft)
             self.mStartPos = pos
             return
-
-        else:
-            super().mouseMoveEvent(event)
 
     def moveLineHandler(self, direction, dis, keyPointA, keyPointB, keyPointC, keyPointD):
         """
@@ -468,12 +463,9 @@ class mGraphicParallelogramItem(QGraphicsItem):
         self.interactiveSubSignal.emit(InteractiveType.TRANSLATE)
 
     def mouseReleaseEvent(self, event:QGraphicsSceneMouseEvent):
-        print("release pos ", event.pos())
         self.setCursor(Qt.ArrowCursor)
         if self.mStateFlag == STATE_FLAG.MOV_RECT:
             self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
-        else:
-            super().mouseReleaseEvent(event)
 
     def paint(self, QPainter, QStyleOptionGraphicsItem, widget=None):
         #绘制旋转的圆形标识
@@ -489,10 +481,10 @@ class mGraphicParallelogramItem(QGraphicsItem):
         QPainter.drawPoint(pf)
 
         #在四个顶点处绘制字符标识
-        QPainter.drawText(self.keyPointTopLeft,"TL")
-        QPainter.drawText(self.keyPointTopRight,"TR")
-        QPainter.drawText(self.keyPointBottomLeft,"BL")
-        QPainter.drawText(self.keyPointBottomRight,"BR")
+        # QPainter.drawText(self.keyPointTopLeft,"TL")
+        # QPainter.drawText(self.keyPointTopRight,"TR")
+        # QPainter.drawText(self.keyPointBottomLeft,"BL")
+        # QPainter.drawText(self.keyPointBottomRight,"BR")
 
         #绘制边框
         mPen.setColor(Qt.yellow)
@@ -516,22 +508,19 @@ class mGraphicRectItem(mGraphicParallelogramItem):
         super(mGraphicRectItem, self).__init__(params, interactiveSubSignal, parent)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-        print("mouse press", event.pos())
         if event.button() == Qt.LeftButton:
             self.mStartPos = event.pos()
             if self.mLeftPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
-                self.setCursor(Qt.SizeHorCursor)
+                self.setCursor(Qt.ClosedHandCursor)
                 self.mStateFlag = STATE_FLAG.MOV_LEFT_LINE
                 return
             if self.mRightPolygon.containsPoint(self.mStartPos, Qt.WindingFill):
-                self.setCursor(Qt.SizeHorCursor)
+                self.setCursor(Qt.ClosedHandCursor)
                 self.mStateFlag = STATE_FLAG.MOV_RIGHT_LINE
                 return
             else:
                 self.mStateFlag = STATE_FLAG.DEFAULT_FLAG
                 return
-        else:
-            super(QGraphicsItem).mousePressEvent(event)
 
     def mouseMoveEvent(self, event:QGraphicsSceneMouseEvent):
         pos = event.pos()
@@ -551,9 +540,6 @@ class mGraphicRectItem(mGraphicParallelogramItem):
             self.moveLineHandler(direction, dis, self.keyPointTopRight, self.keyPointTopLeft, self.keyPointBottomRight, self.keyPointBottomLeft)
             self.mStartPos = pos
             return
-
-        else:
-            super(QGraphicsItem).mouseMoveEvent(event)
 
     def moveLineHandler(self, direction, dis, keyPointA, keyPointB, keyPointC, keyPointD):
         """
@@ -593,18 +579,21 @@ class mGraphicRectItem(mGraphicParallelogramItem):
         self.interactiveSubSignal.emit(InteractiveType.ADJUST_THICKNESS)
 
     def paint(self, QPainter, QStyleOptionGraphicsItem, widget=None):
-        #在四个顶点处绘制字符标识
+        #绘制旋转的圆形标识
+        pf = self.mCenterPoint
+        rect = QRectF(pf.x()-self.rotateEventAreaSize,pf.y()-self.rotateEventAreaSize,2*self.rotateEventAreaSize,2*self.rotateEventAreaSize)
+        mBrush = QBrush(QColor(0,0,0,1))
+        QPainter.setBrush(mBrush)
+        QPainter.fillRect(rect, mBrush)
         mPen = QPen(Qt.green)
-        QPainter.drawText(self.keyPointTopLeft,"TL")
-        QPainter.drawText(self.keyPointTopRight,"TR")
-        QPainter.drawText(self.keyPointBottomLeft,"BL")
-        QPainter.drawText(self.keyPointBottomRight,"BR")
-
-        #绘制边框
         mPen.setWidth(2)
         QPainter.setPen(mPen)
+
+        #绘制边框
         mPen.setColor(Qt.yellow)
         QPainter.setPen(mPen)
         QPainter.drawPolygon(self.mBorderPolygon)
+
+        #绘制提示区域
         QPainter.drawPolygon(self.mLeftPolygon)
         QPainter.drawPolygon(self.mRightPolygon)
