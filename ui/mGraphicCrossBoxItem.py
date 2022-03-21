@@ -492,14 +492,14 @@ class mGraphicParallelogramItem(QGraphicsItem):
         QPainter.drawPolygon(self.mBorderPolygon)
 
         #绘制提示区域
-        QPainter.drawPolygon(self.mLeftPolygon)
-        QPainter.drawPolygon(self.mRightPolygon)
-        QPainter.drawPolygon(self.mBottomPolygon)
-        QPainter.drawPolygon(self.mTopPolygon)
-        QPainter.drawPolygon(self.mTopLeftPolygon)
-        QPainter.drawPolygon(self.mTopRightPolygon)
-        QPainter.drawPolygon(self.mBottomLeftPolygon)
-        QPainter.drawPolygon(self.mBottomRightPolygon)
+        # QPainter.drawPolygon(self.mLeftPolygon)
+        # QPainter.drawPolygon(self.mRightPolygon)
+        # QPainter.drawPolygon(self.mBottomPolygon)
+        # QPainter.drawPolygon(self.mTopPolygon)
+        # QPainter.drawPolygon(self.mTopLeftPolygon)
+        # QPainter.drawPolygon(self.mTopRightPolygon)
+        # QPainter.drawPolygon(self.mBottomLeftPolygon)
+        # QPainter.drawPolygon(self.mBottomRightPolygon)
 
 
 class mGraphicRectItem(mGraphicParallelogramItem):
