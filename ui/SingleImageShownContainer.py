@@ -150,8 +150,11 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget = m3DFakeImageShownWidget()
         elif mode == self.mRTMode:
             print("mRTMode")
-            self.mImageShownWidget = mRealTimeImageShownWidget()
-            # self.mImageShownWidget = m2DImageShownWidget()
+            # self.mImageShownWidget = mRealTimeImageShownWidget()
+            self.mImageShownWidget = m2DImageShownWidget()
+            self.mImageShownWidget.imageShownData = self.mImage2DShownData
+            self.mImageShownWidget.updateCrossViewSubSignal.connect(self.tryUpdateCrossViewSignalEmit)
+            self.mImageShownWidget.interactiveSubSignal.connect(self.tryInteractiveSignalEmit)
         self.curMode = mode
         self.initImageShownWidget()
         self.mImageShownWidget.initBaseData(self.imageData)

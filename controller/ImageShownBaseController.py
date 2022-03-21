@@ -16,9 +16,6 @@ class ImageShownBaseController(QObject):
         self.imageShownContainerLayout = imageShownContainerLayout
         self.selectedImageShownContainer = None
         self.selectImageShownContainerSignal.connect(self.selectImageShownContainerHandler)
-        self.imageShownContainerLayout.mapWidgetsFunc(
-                lambda container:self.setContainerSignals(container)
-        )
 
     def setContainerSignals(self, container):
         container.signalCollectionHelper.setSelectImageShownContainerSignal(

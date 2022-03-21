@@ -504,6 +504,8 @@ class mGraphicParallelogramItem(QGraphicsItem):
 
 class mGraphicRectItem(mGraphicParallelogramItem):
 
+    borderEventAreaSize = 5
+
     def __init__(self, params:mGraphicParallelogramParams, interactiveSubSignal, parent = None):
         super(mGraphicRectItem, self).__init__(params, interactiveSubSignal, parent)
 
@@ -595,5 +597,5 @@ class mGraphicRectItem(mGraphicParallelogramItem):
         QPainter.drawPolygon(self.mBorderPolygon)
 
         #绘制提示区域
-        QPainter.drawPolygon(self.mLeftPolygon)
-        QPainter.drawPolygon(self.mRightPolygon)
+        # QPainter.drawPolygon(self.mLeftPolygon)
+        # QPainter.drawPolygon(self.mRightPolygon)

@@ -70,6 +70,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def initBaseData(self, imageData):
         self.imageData = imageData
+        #初始化窗位窗宽
+        level,width = self.imageData.getDicomWindowCenterAndLevel(self.imageData.currentIndex)
+        self.imageViewer.SetColorLevel(level)
+        self.imageViewer.SetColorWindow(width)
 
     def showAllViews(self):
         self.show2DImageVtkView()
@@ -91,9 +95,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         self.imageViewer.SetInputConnection(flip.GetOutputPort())
         level,width = self.imageData.getDicomWindowCenterAndLevel(self.imageData.currentIndex)
-        print("当前帧的窗位，窗宽依次是：{0} {1}".format(level,width))
-        self.imageViewer.SetColorLevel(level)
-        self.imageViewer.SetColorWindow(width)
+        print("当前帧的窗位，窗宽依次是：{0} {1}".format(self.imageViewer.GetColorLevel(),self.imageViewer.GetColorWindow()))
         self.imageViewer.SetRenderer(self.renImage)
         self.imageViewer.SetRenderWindow(self.qvtkWidget.GetRenderWindow())
         self.imageViewer.UpdateDisplayExtent()

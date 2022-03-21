@@ -86,9 +86,6 @@ class InteractiveCrossBoxController(QObject):
         self.dicomCoordinateHelper = DicomCoordinateHelper()
         self.updateICrossBoxSignal.connect(self.updateICrossBoxSignalHandler)
         self.interactiveSignal.connect(self.interactiveSignalDispatcher)
-        self.imageShownContainerLayout.mapWidgetsFunc(
-                lambda container:self.setContainerSignals(container)
-        )
 
     def setContainerSignals(self, container):
         container.signalCollectionHelper.setICrossBoxSignal(self.updateICrossBoxSignal)
@@ -129,12 +126,15 @@ class InteractiveCrossBoxController(QObject):
         emitContainer有两种模态，RT模态和非RT模态
         RT模态时，CrossBox遵循投影规则；非RT模态时，CrossBox遵循交线规则
         当emitContainer内容更新时，该函数控制其他SC刷新ICrossBox的位置和形状
+        但是目前老师改变主意，只希望使用投影规则，所以暂时写死为投影规则
         """
-        if emitContainer.curMode == SingleImageShownContainer.m2DMode:
-            self.RTContainer = emitContainer
-            self.imageShownContainerLayout.mapWidgetsFunc(self.updateICrossBoxProjectionHandler)
-        elif emitContainer.curMode == SingleImageShownContainer.m2DMode:
-            self.imageShownContainerLayout.mapWidgetsFunc(self.updateICrossBoxIntersectionHandler, emitContainer)
+        self.RTContainer = emitContainer
+        self.imageShownContainerLayout.mapWidgetsFunc(self.updateICrossBoxProjectionHandler)
+        # if emitContainer.curMode == SingleImageShownContainer.m2DMode:
+        #     self.RTContainer = emitContainer
+        #     self.imageShownContainerLayout.mapWidgetsFunc(self.updateICrossBoxProjectionHandler)
+        # elif emitContainer.curMode == SingleImageShownContainer.m2DMode:
+        #     self.imageShownContainerLayout.mapWidgetsFunc(self.updateICrossBoxIntersectionHandler, emitContainer)
 
     def updateICrossBoxProjectionHandler(self, handleContainer: SingleImageShownContainer):
         if self.updateICrossBoxHandlerBaseFilter(handleContainer, self.RTContainer) == Status.bad: return
@@ -192,10 +192,11 @@ class InteractiveCrossBoxController(QObject):
             )
             n_vector_line = QPointF(-vector_line[1],vector_line[0])
             points_2d_new = []
-            points_2d_new.append(points_2d[0] - 30 * SliceThickness/2 * n_vector_line)
-            points_2d_new.append(points_2d[0] + 30 * SliceThickness/2 * n_vector_line)
-            points_2d_new.append(points_2d[1] + 30 * SliceThickness/2 * n_vector_line)
-            points_2d_new.append(points_2d[1] - 30 * SliceThickness/2 * n_vector_line)
+            delta = max(1, SliceThickness/2)
+            points_2d_new.append(points_2d[0] - delta * n_vector_line)
+            points_2d_new.append(points_2d[0] + delta * n_vector_line)
+            points_2d_new.append(points_2d[1] + delta * n_vector_line)
+            points_2d_new.append(points_2d[1] - delta * n_vector_line)
             points_2d = points_2d_new
             print(points_2d_new)
             print(points_2d)

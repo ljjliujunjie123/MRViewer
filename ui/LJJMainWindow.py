@@ -114,9 +114,9 @@ class LJJMainWindow(QMainWindow):
         self.toolsContainer.updateImageShownLayoutSignal.connect(
             self.imageShownContainer.imageShownLayoutController.updateLayout
         )
-        # self.toolsContainer.enableImageSlideshowSignal.connect(
-        #     self.imageShownContainer.imageShownLayoutController.imageSlideshowControl
-        # ) #evermg42
+        self.toolsContainer.enableImageSlideshowSignal.connect(
+            self.imageShownContainer.imageSlideShowController.imageSlideshowHandler
+        ) #evermg42
         self.toolsContainer.imageModeSelectSignal.connect(
             self.imageShownContainer.imageShownBaseController.imageModeSelectHandler
         )

@@ -25,6 +25,10 @@ class ImageShownLayoutController(QObject):
         self.imageSlideshow = None
         self.imageSlideShowPlayFlag = False
 
+    def setAllContainerSignals(self, funcList):
+        for container in self.imageShownWidgetPool.values():
+            for func in funcList:
+                func(container)
 
     def tryQuitImageSlideShow(self):
         # if self.imageSlideshow is not None: self.imageSlideshow.close()

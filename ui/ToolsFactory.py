@@ -57,8 +57,3 @@ class ToolsFactory():
         frame.setLayout(layout)
         frame.setEnabled(True)
         return frame
-
-#     ui->toolButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-
-
-

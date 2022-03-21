@@ -4,6 +4,7 @@ from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from controller.ImageShownLayoutController import ImageShownLayoutController
 from controller.InteractiveCrossBoxController import InteractiveCrossBoxController
 from controller.ImageShownBaseController import ImageShownBaseController
+from controller.ImageSlideShowController import ImageSlideShowController
 
 class ImageShownContainer(QFrame):
 
@@ -39,6 +40,17 @@ class ImageShownContainer(QFrame):
 
         self.interactiveCrossBoxController = InteractiveCrossBoxController(
             self.imageShownContainerLayout
+        )
+
+        self.imageSlideShowController = ImageSlideShowController(
+            self.imageShownContainerLayout
+        )
+
+        self.imageShownLayoutController.setAllContainerSignals(
+            [
+                self.imageShownBaseController.setContainerSignals,
+                self.interactiveCrossBoxController.setContainerSignals
+            ]
         )
 
     def closeEvent(self, QCloseEvent):
