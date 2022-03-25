@@ -1,5 +1,6 @@
 from PyQt5.QtCore import *
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
+from ui.SingleImageShownContainer import SingleImageShownContainer
 
 class ImageSlideShowController(QObject):
     """
@@ -11,4 +12,18 @@ class ImageSlideShowController(QObject):
         self.imageShownContainerLayout = imageShownContainerLayout
 
     def imageSlideshowHandler(self, enable):
-        pass
+        self.imageShownContainerLayout.mapWidgetsFunc(self.imageSlideshowSCHandler)
+
+    def imageSlideshowSCHandler(self, handleContainer: SingleImageShownContainer):
+        def checkSelectContainerCanSlideShow(container: SingleImageShownContainer):
+            if  container is None or\
+                not container.isSelected or\
+                container.curMode is not SingleImageShownContainer.m2DMode or\
+                container.mImageShownWidget is None: return False
+            else: return True
+
+        if not checkSelectContainerCanSlideShow(handleContainer): return
+        if handleContainer.mImageShownWidget.imageSlideShow is None:
+            handleContainer.showSlideShowContainer()
+        else:
+            handleContainer.closeSlideShowContainer()

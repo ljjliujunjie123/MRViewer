@@ -1,7 +1,6 @@
 from PyQt5.QtCore import *
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from ui.SingleImageShownContainer import SingleImageShownContainer
-from utils.status import Status
 
 class ImageShownBaseController(QObject):
     """
@@ -48,7 +47,7 @@ class ImageShownBaseController(QObject):
 
     def clearViews(self):
         self.selectedImageShownContainer = None
-        self.imageShownContainerLayout.mapWidgetsFunc(lambda container,*args:container.close(),None)
+        self.imageShownContainerLayout.mapWidgetsFunc(lambda container,*args:container.close())
         self.imageShownContainerLayout.clearLayout()
         self.imageShownWidgetPool.clear()
         self.initWidget()

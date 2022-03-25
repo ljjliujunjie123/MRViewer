@@ -198,6 +198,14 @@ class SingleImageShownContainer(QFrame):
     def tryInteractiveSignalEmit(self, interactiveType: InteractiveType):
         self.signalCollectionHelper.interactiveSignal.emit(interactiveType, self)
 
+    def showSlideShowContainer(self):
+        if isinstance(self.mImageShownWidget, m2DImageShownWidget):
+            self.mImageShownWidget.showSlideShowContainer()
+
+    def closeSlideShowContainer(self):
+        if isinstance(self.mImageShownWidget, m2DImageShownWidget):
+            self.mImageShownWidget.closeSlideShowContainer()
+
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)
         point = QMouseEvent.pos()
@@ -251,3 +259,8 @@ class SingleImageShownContainer(QFrame):
         if self.mImageShownWidget is not None:
             print('vtk close')
             self.mImageShownWidget.closeEvent(QCloseEvent)
+
+    def moveEvent(self, QMoveEvent):
+        QFrame.moveEvent(self, QMoveEvent)
+        if self.mImageShownWidget is not None:
+            self.mImageShownWidget.moveEvent(QMoveEvent)

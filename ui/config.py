@@ -22,9 +22,11 @@ class UIConfig():
     shownTextInfoX = 20
     shownTextInfoY = 10
 
-    shownSlideShowDialogSize = QSize(300,100)
-    shownSlideSpeedDefault = 0.2
-    shownSlideSpeedMax = 0.05 #时间间隔
+    shownSlideShowDialogSize = QSize(240,65)
+    shownSlideShowPlayIconSize = QSize(30,30)
+    shownSlideShownSpeedIconSize = QSize(30,20)
+    shownSlideSpeedDefault = 10
+    shownSlideSpeedMax = 100 #时间间隔
     shownSlideSpeedMin = 1
 
     toolsSelectRegionCol = 5

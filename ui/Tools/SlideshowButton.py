@@ -12,9 +12,8 @@ class SlideshowButton(QFrame, ToolsInterface):
         self.slideshowBtn = QPushButton()
         self.slideshowBtn.setIcon(QIcon(imgPath))
         self.slideshowBtn.setIconSize(uiConfig.toolsIconSize)
-        self.slideshowBtn.setCheckable(True)
-        self.slideshowBtn.setChecked(False)
-        self.slideshowBtn.clicked.connect(signal) #按下状态发信
+        #down为开启，up为关闭
+        self.slideshowBtn.clicked.connect(signal)
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0,0,0,0)

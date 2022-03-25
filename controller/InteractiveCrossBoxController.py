@@ -396,7 +396,4 @@ class InteractiveCrossBoxController(QObject):
         pass
 
     def controlMoveEvent(self):
-        self.imageShownContainerLayout.mapWidgetsFunc(
-                lambda handleContainer,*args:handleContainer.tryUpdateCrossBoxWidget(),
-                None
-        )
+        self.imageShownContainerLayout.mapWidgetsFunc(lambda handleContainer,*args:handleContainer.tryUpdateCrossBoxWidget())

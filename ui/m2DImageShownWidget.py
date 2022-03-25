@@ -1,6 +1,6 @@
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QFrame,QGridLayout,QSizePolicy,QMenu,QAction
+from PyQt5.QtGui import QCursor,QMoveEvent
+from PyQt5.QtWidgets import QFrame,QSizePolicy,QMenu,QAction
 from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
@@ -14,6 +14,7 @@ from utils.cycleSyncThread import CycleSyncThread
 from utils.status import Status
 from utils.util import numpy2VTK
 from utils.InteractiveType import InteractiveType
+from ui.SlideshowContainer import SlideshowContainer
 
 class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
@@ -24,6 +25,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def __init__(self):
         QFrame.__init__(self)
+        # slideShowView
+        self.imageSlideShow = None
         #初始化GUI配置
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.createRightMenu)  # 连接到菜单显示函数
@@ -64,6 +67,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.iCrossBoxWidget = CustomInteractiveCrossBoxWidget(self.interactiveSubSignal)
         self.iCrossBoxWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.iCrossBoxWidget.show()
+
         self.timerThread = None
 
         self.sigWheelChanged.connect(self.wheelChangeEvent)
@@ -291,6 +295,11 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.showImageExtraInfoVtkView()
         if self.imageShownData.showCrossFlag:
             self.updateCrossBoxWidget()
+        self.updateSlideShowGeometry()
+
+    def moveEvent(self, event:QMoveEvent):
+        QFrame.moveEvent(self, event)
+        self.updateSlideShowGeometry()
 
     #滚轮调用sigWheelChanged
     def wheelEvent(self, ev):
@@ -321,40 +330,105 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def canSlideShow(self):
         return len(self.imageData.filePaths) > 0
 
-    def controlSlideShow(self, flag):
-        if flag:
-            self.timerThread = CycleSyncThread(uiConfig.shownSlideSpeedDefault)
+    def showSlideShowContainer(self):
+        self.imageSlideShow = SlideshowContainer()
+        self.imageSlideShow.playPauseSignal.connect(
+            self.controlSlideShowPlayPause
+        )
+        self.imageSlideShow.prevSignal.connect(
+            self.controlSlideShowPrevNext
+        )
+        self.imageSlideShow.nextSignal.connect(
+            self.controlSlideShowPrevNext
+        )
+        self.imageSlideShow.fastSignal.connect(
+            self.controlSlideShowSpeed
+        )
+        self.imageSlideShow.slowSignal.connect(
+            self.controlSlideShowSpeed
+        )
+        self.updateSlideShowGeometry()
+
+    def updateSlideShowGeometry(self):
+        if self.imageSlideShow is None:return
+        m2DGlobalPos = self.mapToGlobal(QPoint(0,0))
+        #多减去10Px作为间隙
+        self.imageSlideShow.setGeometry(
+            m2DGlobalPos.x() + self.width()//2 - self.imageSlideShow.width()//2,
+            m2DGlobalPos.y() + self.height() - self.imageSlideShow.height() - 10,
+            self.imageSlideShow.width(),
+            self.imageSlideShow.height()
+        )
+
+    def closeSlideShowContainer(self):
+        if self.imageSlideShow is not None:
+            self.imageSlideShow.close()
+            self.imageSlideShow = None
+        if self.timerThread is not None:
+            self.timerThread.requestInterruption()
+            self.timerThread.quit()
+
+    def controlSlideShowPlayPause(self, isPlay: bool):
+        if isPlay is True:
+            self.timerThread = CycleSyncThread(1/self.imageSlideShow.getFPSLabelValue())
             self.timerThread.signal.connect(lambda :self.setCurrentIndex(self.imageData.currentIndex + 1))
             self.timerThread.start()
         else:
-            print("申请退出线程")
+            if self.timerThread is not None and not self.timerThread.isFinished():
+                self.timerThread.requestInterruption()
+                self.timerThread.quit()
+                self.timerThread.wait()
+
+    def controlSlideShowPrevNext(self, delta):
+        if self.timerThread is not None:
             self.timerThread.requestInterruption()
             self.timerThread.quit()
-            # self.timerThread.wait()
+        self.imageSlideShow.isPlayOrPause = False
+        self.imageSlideShow.setPlayButtonIcon()
+        self.setCurrentIndex(self.imageData.currentIndex + delta)
 
     def controlSlideShowSpeed(self, delta):
         if self.timerThread is not None:
-            newSpeed = self.timerThread.interval + delta
-            newSpeed = max(min(newSpeed,uiConfig.shownSlideSpeedMin),uiConfig.shownSlideSpeedMax)
-            self.timerThread.interval = newSpeed
+            newSpeed = round(1/self.timerThread.interval)+ delta
+            newSpeed = min(max(newSpeed,uiConfig.shownSlideSpeedMin),uiConfig.shownSlideSpeedMax)
+            self.timerThread.interval = 1 / newSpeed
+            self.imageSlideShow.setFPSLabelValue(str(newSpeed))
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
         self.qvtkWidget.Finalize()
-        if self.timerThread is not None and not self.timerThread.isFinished():
-            self.timerThread.requestInterruption()
-            self.timerThread.quit()
-            self.timerThread.wait()
+        self.closeSlideShowContainer()
 
     def clearViews(self):
         self.qvtkWidget.Finalize()
+        self.closeSlideShowContainer()
 
     def showEvent(self, *args, **kwargs):
         if self.imageShownData.showCrossFlag:
             self.updateCrossBoxWidget()
+        if self.imageSlideShow is not None:
+            self.imageSlideShow.show()
 
     def hideEvent(self, *args, **kwargs):
         if self.imageShownData.showCrossFlag:
-            # self.crossBoxWidget.hide()
-            # self.crossBoxWidget.isShowContent = True
             self.iCrossBoxWidget.hide()
+        if self.imageSlideShow is not None:
+            self.imageSlideShow.hide()
+
+    def enterEvent(self, QEvent):
+        if self.imageSlideShow is not None:
+            self.imageSlideShow.show()
+            print("show")
+        QFrame.enterEvent(self, QEvent)
+
+    def leaveEvent(self, QEvent):
+        if self.imageSlideShow is not None:
+            print(self.imageSlideShow.geometry())
+            print(QCursor.pos())
+            print(self.mapFromGlobal(QCursor.pos()))
+            print(self.mapToGlobal(QCursor.pos()))
+            # print(self.mapTo(self.imageSlideShow, QCursor.pos()))
+            if not self.imageSlideShow.geometry().contains(QCursor.pos()):
+                self.imageSlideShow.hide()
+            print("hide")
+        QFrame.leaveEvent(self, QEvent)

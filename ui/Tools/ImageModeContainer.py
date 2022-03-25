@@ -23,7 +23,7 @@ class ImageModeContainer(QFrame, ToolsInterface):
         bt3D = self.createImageModeButton(SingleImageShownContainer.m3DMode, signal)
         bt3DFake = self.createImageModeButton(SingleImageShownContainer.m3DFakeMode, signal)
         btRT = self.createImageModeButton(SingleImageShownContainer.mRTMode, signal)
-        imageVBoxLayout.addWidgets([bt2D,bt3D,bt3DFake,btRT])
+        imageVBoxLayout.addItems([bt2D,bt3D,bt3DFake,btRT])
 
         self.setLayout(imageVBoxLayout.getLayout())
         self.setEnabled(False)

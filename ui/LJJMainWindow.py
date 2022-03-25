@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon,QMoveEvent
 
 from controller.OpenFileController import OpenFileController
 from ui.config import uiConfig
@@ -171,4 +171,7 @@ class LJJMainWindow(QMainWindow):
         if Qt.LeftButton and self._move_drag:
             # 标题栏拖放窗口位置
             self.move(QMouseEvent.globalPos() - self.move_DragPosition)
+            moveEvent = QMoveEvent(QMouseEvent.globalPos(), self.move_DragPosition)
+            print(moveEvent.pos(), moveEvent.oldPos())
+            self.imageShownContainer.moveEvent(moveEvent)
             QMouseEvent.accept()

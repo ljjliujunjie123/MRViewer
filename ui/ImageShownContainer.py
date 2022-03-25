@@ -61,6 +61,12 @@ class ImageShownContainer(QFrame):
         print("ImageShonwContainer ", self.rect())
         self.imageShownContainerWidget.setFixedSize(self.size())
 
+    def moveEvent(self, QMoveEvent):
+        QFrame.moveEvent(self, QMoveEvent)
+        def moveControl(container):
+            container.moveEvent(QMoveEvent)
+        self.imageShownContainerLayout.mapWidgetsFunc(moveControl)
+
     def clearViews(self):
         if self.imageShownBaseController.selectedImageShownContainer is not None:
             self.imageShownBaseController.clearViews()

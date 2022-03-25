@@ -1,11 +1,6 @@
-from ui.CustomSelectRegionGridWidget import CustomSelectRegionGridWidget
-from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from ui.Tools.SelectRegionGridButton import SelectRegionGridButton
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
 from ui.Tools.SlideshowButton import SlideshowButton
-from ui.config import uiConfig
-
 from ui.Tools.ExtraInfoButton import ExtraInfoButton
 from ui.Tools.ImageModeContainer import ImageModeContainer
 from enum import Enum
@@ -38,7 +33,6 @@ class ToolsFactory():
             return selectRegionGridButton
 
         elif tag == ToolNum.slideShow:
-            imgPath = "ui_source/slide_show.png"
             enableSlideshow = SlideshowButton(signal)
             return enableSlideshow
 
