@@ -1,54 +1,84 @@
 #!coding=utf-8
-import sys
-import os
-import threading
-import socket
+from socket import *
 import struct
+import json
+import pickle
+import pydicom
 
-def socket_service():
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # 绑定端口为9001
-        s.bind(('127.0.0.1', 9001))
-        # 设置监听数
-        s.listen(10)
-    except socket.error as msg:
-        print (msg)
-        sys.exit(1)
-    print ('Waiting connection...')
+class TestData():
 
-    while 1:
-        # 等待请求并接受(程序会停留在这一旦收到连接请求即开启接受数据的线程)
-        conn, addr = s.accept()
-        # 接收数据
-        t = threading.Thread(target=send_data, args=(conn, addr))
-        t.start()
+    def __init__(self):
+        self.name = "abc"
+        self.des = "this is a test data"
+        self.value = 45423
 
-def send_data(conn, addr):
-    print ('Accept new connection from {0}'.format(addr))
-    print("开始传输文件...")
-    # 需要传输的文件路径
-    filepath = r'D:\respository\MRViewer_Scource\Study_vessel_test_data\LOCALIZER_0018\WANGYJ_20211104_PHANTOM.MR.ABDOMEN_CLINICAL_LIBRARIES.0018.0003.2021.11.04.13.00.19.318110.27169993.IMA'
-    # 判断是否为文件
-    if os.path.isfile(filepath):
-        # 定义定义文件信息。128s表示文件名为128bytes长，l表示一个int或log文件类型，在此为文件大小
-        fileinfo_size = struct.calcsize('128sl')
-        # 定义文件头信息，包含文件名和文件大小
-        fhead = struct.pack('128sl', os.path.basename(filepath).encode('utf-8'), os.stat(filepath).st_size)
-        # 发送文件名称与文件大小
-        conn.send(fhead)
+    def __str__(self):
+        return  "data \n data.name: {0} \n data.des: {1} \n data.value: {2}".format(self.name, self.des, self.value)
 
-        # 将传输文件以二进制的形式分多次上传至服务器
-        fp = open(filepath, 'rb')
-        while 1:
-            data = fp.read(1024)
-            if not data:
-                print ('{0} file send over...'.format(os.path.basename(filepath)))
+def server_service():
+
+    def get_host_ip():
+        """
+        查询本机ip地址
+        :return: ip
+        """
+        try:
+            s = socket(AF_INET, SOCK_DGRAM)
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+        finally:
+            s.close()
+            return ip
+
+    tcp_server = socket(AF_INET, SOCK_STREAM)
+    #如果是本机调试，改成 localhost
+    print(get_host_ip())
+    ip_port = ((get_host_ip(),9999))
+
+    tcp_server.bind(ip_port)
+    tcp_server.listen(5)
+    print("等待链接...")
+
+    while True:
+        '''
+        链接循环
+        '''
+        conn, addr = tcp_server.accept()
+        print('链接成功！')
+        print('链接来自于',addr)
+
+        while True:
+            print('正在传输数据')
+            if not conn:
+                print("客户端中断链接！")
                 break
-            conn.send(data)
-        # 关闭当期的套接字对象
-        conn.close()
+            '''
+            通信循环
+            '''
+            # test_data = TestData()
+            test_data = pydicom.dcmread(r"D:\respository\MRViewer_Scource\study_Test_data\localizer\ZYZHANG.MR.IMR-SJTU_ZSJ.0045.0002.2021.11.13.18.20.59.250882.20617477.IMA")
+            test_data_byte = pickle.dumps(test_data)
+
+            filename = str(test_data.PatientName)
+            filesize = len(test_data_byte)
+            dirc = {
+                'filename':filename,
+                'filesize':filesize
+            }
+            print(dirc)
+            head_info = json.dumps(dirc)
+            head_info_size = struct.pack('i', len(head_info))
+
+            conn.send(head_info_size)
+            conn.send(head_info.encode('utf-8'))
+            conn.sendall(test_data_byte)
+
+            print('数据传输结束')
+            break
+
+        break
+
+    tcp_server.close()
 
 if __name__ == "__main__":
-    socket_service()
+    server_service()
