@@ -25,12 +25,13 @@ class OpenFileController():
         """
             读取study中的所有dicom文件
         """
-        filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
+        # filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Study的目录",'')
         # filePath = r"D:\respository\MRViewer_Scource\study_Test_data"
-        filePath = r"E:\research\MRViewer_test\study_Test_data"
+        # filePath = r"E:\research\MRViewer_test\try"
+        filePath = r'E:\research\MRViewer_test\study_Test_data'
         if checkDirValidity(filePath) is Status.bad: return
         rootPath,studyName = os.path.split(filePath)[0], os.path.split(filePath)[-1]
-        imageDataModel.clearAll()
+        imageDataModel.clearDataBase()
         self.tryClearImageShownSignal.emit()
         imageDataModel.setRootPath(rootPath)
         imageDataModel.addStudyItem(studyName)
@@ -41,7 +42,7 @@ class OpenFileController():
         filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Patient的目录",'')
         # filePath = r"D:\respository\MRViewer_Scource\Patient_Test_data"
         if checkDirValidity(filePath) is Status.bad: return
-        imageDataModel.clearAll()
+        imageDataModel.clearDataBase()
         self.tryClearImageShownSignal.emit()
         imageDataModel.setRootPath(filePath)
         studyNames = os.listdir(filePath)

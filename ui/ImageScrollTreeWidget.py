@@ -4,7 +4,7 @@ from PyQt5.QtGui import QIcon,QDrag
 
 from ui.config import uiConfig
 from ui.ImageScrollItemDelegate import ImageScrollItemDelegate
-from utils.util import createDicomPixmap,checkMultiFrame
+from utils.util import createDicomPixmap
 from utils.ImageItemMimeData import ImageItemMimeData
 from Model.ImagesDataModel import imageDataModel
 
@@ -29,7 +29,7 @@ class ImageScrollTreeWidget(QTreeWidget):
         #这里后续要做一波美化
         # self.setStyleSheet("QTreeWidget::item{height:350px;}")
 
-    def showImageList(self):
+    def showImageList(self):#!
         self.roots = []
         for studyName in imageDataModel.dataSets.cache_names():
             studyDict = imageDataModel.findStudyItem(studyName)
@@ -49,7 +49,7 @@ class ImageScrollTreeWidget(QTreeWidget):
                     "studyName": studyName,
                     "seriesName": seriesName,
                     "seriesImageCount": seriesImageCount,
-                    "isMultiFrame": checkMultiFrame(seriesDict)
+                    "isMultiFrame": 0 #!
                 }
                 child.setData(0,3,itemExtraData)
             self.roots.append(root)

@@ -10,8 +10,6 @@ from vtkmodules.util.numpy_support import numpy_to_vtk
 import vtkmodules.all as vtk
 from vtkmodules.util.vtkConstants import *
 import string
-def checkMultiFrame(seriesDict):
-    return seriesDict.isMultiFrame
 
 def createDicomPixmap(dcmFile):
     image_2d = dcmFile.pixel_array.astype(float)
@@ -107,4 +105,6 @@ def isDicom(filePath: string):
         with open(filePath,"rb") as f:
             f.seek(128,1)
             strb = f.read(4)
+            # return strb == b'DICM'
             return strb == b'DICM'
+                

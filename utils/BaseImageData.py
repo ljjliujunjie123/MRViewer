@@ -49,8 +49,9 @@ class BaseImageData():
     def getSeriesPath(self):
         return os.path.join(imageDataModel.getRootPath(), self.studyName, self.seriesName)
 
-    def getDcmDataByIndex(self, index):
-        seriesDict = imageDataModel.findSeriesItem(self.studyName, self.seriesName)
+    def getDcmDataByIndex(self, index):#!can be better
+        seriesDict = imageDataModel.findSeriesTotalPaths(self.studyName, self.seriesName)
+
         return seriesDict[list(seriesDict.keys())[index]]
 
     def getBasePosInfo(self, index):
@@ -68,9 +69,9 @@ class BaseImageData():
         normalvector = np.cross(ImageOrientationX,ImageOrientationY)
         return img_array,normalvector,ImagePosition,PixelSpacing,ImageOrientationX,ImageOrientationY,Rows,Cols
 
-    def getImageTileInfo(self, index):
-        dcmData = self.getDcmDataByIndex(index)
-
+    def getImageTitleInfo(self):
+        dcmData = self.getDcmDataByIndex()
+        imageDataModel.findSeriesTitleInfo()
         try:
             patientName = str(dcmData["PatientName"].value)
         except:

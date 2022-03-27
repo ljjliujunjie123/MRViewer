@@ -5,10 +5,9 @@ from utils.util import checkDirValidity, isDicom
 from utils.status import Status
 from utils.isDicom import *
 from copy import deepcopy
-import pymysql
-class SeriesDict(dict):
+import sqlite3
+from enum import Enum
 
-        isMultiFrame = False
 
 class ImagesDataModel():
     """
@@ -25,34 +24,47 @@ class ImagesDataModel():
     def __init__(self):
         print("ImagesDataModel Init.")
         self.rootPath = ""
-        self.dataBase = pymysql.connect(host='localhost',
-            user='user',
-            password='passwd',
-            database='MRViewer',
-            charset='utf8mb4')
+        self.dataBase = sqlite3.connect('MRViewer.db')
+        print("数据库已打开")
         
-    def initDataBase(self):
-        # 创建表
-        sql = '''CREATE TABLE `MRViewer_file` (
-        `id` INT NOT NULL AUTO_INCREMENT,
-        `path` text ,
-        `patient` INT NOT NULL ,
-        `is_multiframe` INT NOT NULL ,
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-        '''
+        sql = """
+            DROP TABLE if exists `MRViewer_file`;
+        """
         cursor = self.dataBase.cursor()
         cursor.execute(sql)
+        print("文件表格已删除")
+
+        sql = '''
+            CREATE TABLE `MRViewer_file` (
+                `id`                  INTEGER     PRIMARY KEY,
+                `path`                TEXT        NOT NULL,
+                `study_instance_uid`  TEXT        NOT NULL,
+                `series_instance_uid` TEXT        NOT NULL,
+                `study_description`   TEXT        NOT NULL,
+                `series_description`  TEXT        ,
+                `patient_name`        TEXT        ,
+                `is_multiframe`       INTEGER     NOT NULL,
+                `instance_number`     INTEGER     NOT NULL,
+                `size`                INTEGER     NOT NULL
+            );
+        '''
+        cursor.execute(sql)
         self.dataBase.commit()
+        print("文件表格已打开")
         cursor.close()
+
+    def __del__(self):
+        print("end")
+        self.clearAll()
 
     def clearDataBase(self):
         sql = '''
-        truncate TABLE `MRViewer_file`;
-        DROP TABLE `MRViewer_file`;
+        DELETE from `MRViewer_file`;
         '''
         cursor = self.dataBase.cursor()
         cursor.execute(sql)
         self.dataBase.commit()
+        print("数据库已清空")
         cursor.close()
 
     def setRootPath(self, rootPath):
@@ -63,78 +75,102 @@ class ImagesDataModel():
 
     def addStudyItem(self, studyName):
         studyPath = os.path.join(self.rootPath,studyName)
-
-        # 
-        # with self.dataBase:
-        #     with self.dataBase.cursor() as cursor:
-        #         # Create a new record
-        #         sql = "INSERT INTO `users` (`email`, `password`) VALUES (%s, %s)"
-        #         # cursor.execute(sql, ('webmaster@python.org', 'very-secret'))
-
-        #     # dataBase is not autocommit by default. So you must commit to save
-        #     # your changes.
-        #     self.dataBase.commit()
+        print(studyPath)
+        cursor = self.dataBase.cursor()
+        # 遍历文件夹下所有dcm文件夹与多帧格式dcm
+        dcmFiles = []
         for root,dirs,files in os.walk(studyPath):
-            for file in files:
-                print(os.path.join(root,file))
+
+            for f in files:
+                file = os.path.join(root, f)
                 if isDicom(file):
+                    dcmFile = pyd.dcmread(file)
+                    # dcmFiles.append((file, dcmFile.PatientID, ))
+
                     try:
-                        self.addSeriesItem(studyName, seriesName)
-                    except self.MultiFrameExceptionError:
-                        print("当前series的dcm为多帧格式dcm")
-                        for dcmFileName in os.listdir(seriesPath):
-                            print(dcmFileName)
-                            self.addSeriesMultiFrameItem(studyName, seriesName, dcmFileName)
+                        _ = dcmFile.NumberOfFrames
+                    except:
+                        dcmFiles.append((file, dcmFile.StudyInstanceUID, dcmFile.SeriesInstanceUID, dcmFile.StudyDescription, dcmFile.SeriesDescription, str(dcmFile.PatientName), 0, dcmFile.InstanceNumber, os.path.getsize(file)))
+                        continue
+                    else:
+                        if _ > 1:
+                            return #!
+                            
+                        else:
+                            dcmFiles.append((file, dcmFile.StudyInstanceUID, dcmFile.SeriesInstanceUID, dcmFile.StudyDescription, dcmFile.SeriesDescription, str(dcmFile.SeriesDescription), 0, int(dcmFile.InstanceNumber), os.path.getsize(file)))
+        
+        sql = r"""
+            INSERT INTO `MRViewer_file` 
+            (`path`, 
+            `study_instance_uid`,
+            `series_instance_uid`,
+            `study_description`,
+            `series_description`,
+            `patient_name`,
+            `is_multiframe`,
+            `instance_number`,
+            `size`) 
+            VALUES (?,?,?,?,?,?,?,?,?);
+        """
+        # print(dcmFiles)
+        cursor.executemany(sql, dcmFiles)
+        self.dataBase.commit()
+        cursor.close()
 
-        # for seriesName in os.listdir(studyPath):
-        #     seriesPath = os.path.join(studyPath, seriesName)
-        #     if checkDirValidity(seriesPath) is Status.bad:continue
-        #     try:
-        #         self.addSeriesItem(studyName, seriesName)
-        #     except self.MultiFrameExceptionError:
-        #         print("当前series的dcm为多帧格式dcm")
-        #         for dcmFileName in os.listdir(seriesPath):
-        #             print(dcmFileName)
-        #             self.addSeriesMultiFrameItem(studyName, seriesName, dcmFileName)
+    def findStudyItem(self, studyName):#!
+        sql = r"""
+            SELECT * FROM `MRViewer_file`
+            WHERE `path` = ?
+        """ %(studyName)
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
 
-        # print("current ImageDataModel:")
-        # print(self.dataSets.cache_names())#!
-
-    def findStudyItem(self, studyName):
         return self.dataSets[studyName]
 
-    def findDefaultStudy(self):
-        names = self.dataSets.cache_names()
-        if len(names) == 1:
-            return names[0],self.dataSets[names[0]]
+    def findDefaultStudy(self):#!
+        # names = self.dataSets.cache_names()
+        # if len(names) == 1:
+        #     return names[0],self.dataSets[names[0]]
+        
+        sql = r'''
+        SELECT 
+        `study_description`,
+        `series_description`,
+        `is_multiframe`,
+        `instance_number`,
+        `path` FROM `MRViewer_file` t
+        where `instance_number` = (
+            select max(`instance_number`) from `MRViewer_file`
+            WHERE `study_instance_uid` = t.`study_instance_uid` AND `series_description` = t.`series_description`
+        )
+        '''
+        cursor = imageDataModel.dataBase.cursor()
+        cursor.execute(sql)
+        print("数据库已提取")
+        temp = cursor.fetchall()
+        cursor.close()
+        # print(temp)
+        return temp
 
     def removeStudyItem(self, studyName):
-        self.dataSets[studyName].clear()
+        sql = r"""
+            DELETE FROM `MRViewer_file`
+            WHERE `path` = ?
+        """ %(studyName)
+        cursor = self.dataBase.cursor()
 
     def addSeriesItem(self, studyName, seriesName):
         seriesPath = os.path.join(self.rootPath, studyName, seriesName)
-        seriesDict = SeriesDict()
         for sliceName in os.listdir(seriesPath):
             slicePath = os.path.join(seriesPath,sliceName)
             dcmFile = pyd.dcmread(slicePath)
-            try:
-                _ = dcmFile.NumberOfFrames
-            except:
-                seriesDict[sliceName] = dcmFile
-                continue
-            else:
-                if _ > 1:
-                    raise self.MultiFrameExceptionError()
-                else:
-                    seriesDict[sliceName] = dcmFile
+      
 
-        self.dataSets[studyName].add(seriesName, seriesDict)
-
-    def addSeriesMultiFrameItem(self, studyName, seriesName, dcmFileName):
+    def addSeriesMultiFrameItem(self, studyName, seriesName, dcmFileName):#!
         """
             兼容多帧DCM的特殊情况，此时的seriesName是单张dcm的文件名
         """
-        def genearte_single_frame_dicom(dcmFile,index, filename):
+        def genearte_single_frame_dicom(dcmFile, index, filename):
             #create metadata
             file_meta = pyd.Dataset()
             file_meta.ImplementationClassUID = dcmFile.file_meta.ImplementationClassUID
@@ -181,73 +217,60 @@ class ImagesDataModel():
             seriesDict[fileName] = _dcmFile
         self.dataSets[studyName].add(dcmFileName, seriesDict)
 
-    def findSeriesItem(self, studyName, seriesName):
-        return self.dataSets[studyName].get(seriesName)
+    def findSeriesTotalPaths(self, studyName, seriesName):
+        """
+            通过studyName, seriesName, 找到series的完全路径
+            输出: series中dcm文件的完全路径, 组成的升序列表
+        """
+    #  `study_description`,
+    #     `series_description`,
+    #     `is_multiframe`,
+    #     `instance_number`,
+    #     `path` FROM `MRViewer_file` t
+        sql = """
+            SELECT `path` FROM `MRViewer_file` 
+            WHERE `study_description` = \"%s\" AND `series_description` = \"%s\"
+            ORDER BY `instance_number`;
+        """%(studyName, seriesName)
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
+        paths = cursor.fetchall()
+        # print(paths)
+        for i in range(len(paths)):
+            paths[i] = paths[i][0]
+        cursor.close()
+        return paths
 
-    def removeSeriesItem(self, studyName, seriesName):
+    def findSeriesTitleInfo(self, studyName, seriesName):
+        sql = """
+            SELECT `series_description`,`patient_name` FROM `MRViewer_file` 
+            WHERE `study_description` = \"%s\" AND `series_description` = \"%s\"
+            LIMITS 1;
+        """%(studyName, seriesName)
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
+        info = cursor.fetchall()
+        # print(info)
+        for i in range(len(info)):
+            info[i] = info[i][0]
+        cursor.close()
+        return info
+
+    def removeSeriesItem(self, studyName, seriesName):#!no use now
         self.dataSets[studyName].delete(seriesName)
 
-    def findSliceItem(self, studyName, seriesName, sliceName):
-        return self.findSeriesItem(studyName,seriesName)[sliceName]
+    def findSliceItem(self, studyName, seriesName, sliceName):#!no use now
+        return self.findSeriesTotalPaths(studyName,seriesName)[sliceName]
 
     def clearAll(self):
-        self.dataSets.clear_all()
-        del self.dataSets
-        self.dataSets = CacheManager()
+        self.clearDataBase()
+
+        sql = """
+            DROP table `MRViewer_file`;
+        """
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
         self.dataBase.close()
+        print("文件表格已删除")
 
 imageDataModel = ImagesDataModel()
-
-"""
-#!/usr/bin/python3
- 
-import pymysql
- 
-# 打开数据库连接
-db = pymysql.connect(host='localhost',
-                     user='testuser',
-                     password='test123',
-                     database='TESTDB')
- 
-# 使用 cursor() 方法创建一个游标对象 cursor
-cursor = db.cursor()
- 
-# 使用 execute()  方法执行 SQL 查询 
-cursor.execute("SELECT VERSION()")
- 
-# 使用 fetchone() 方法获取单条数据.
-data = cursor.fetchone()
- 
-print ("Database version : %s " % data) 
-# 关闭数据库连接
-db.close()
-
-
-
-
-conn = pymysql.connect(host='localhost',user='root',password='123456',charset='utf8mb4')
-# 创建游标
-cursor = conn.cursor()
- 
-# 创建数据库的sql(如果数据库存在就不创建，防止异常)
-sql = "CREATE DATABASE IF NOT EXISTS db_name" 
-# 执行创建数据库的sql
-cursor.execute(sql)
- 
- 
-# 创建表
-sql_2 = '''CREATE TABLE `employee` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `topic` INT ,
-  `ptid` INT NOT NULL,
-  `level` INT NOT NULL,
-  `time` TIME,
-  `consume` INT NOT NULL,
-  `err` INT NOT NULL,
-  `points` INT NOT NULL,
-  `gid` INT NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-'''
-
-"""

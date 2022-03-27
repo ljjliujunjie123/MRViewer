@@ -90,7 +90,7 @@ class SingleImageShownContainer(QFrame):
         self.isSelected = False
         self.selectSignal.emit(self.isSelected)
 
-    def setTileText(self, text):
+    def setTitleText(self, text):
         self.label.setText(text)
 
     def getDataFromDropEvent(self, imageExtraData):
@@ -99,8 +99,8 @@ class SingleImageShownContainer(QFrame):
         self.imageData.seriesImageCount = imageExtraData["seriesImageCount"]
         self.imageData.currentIndex = 0
         self.imageData.filePaths = [
-            os.path.join(self.imageData.getSeriesPath(), fileName)
-            for fileName in imageDataModel.findSeriesItem(self.imageData.studyName, self.imageData.seriesName).keys()
+            fileTotalPath
+            for fileTotalPath in imageDataModel.findSeriesTotalPaths(self.imageData.studyName, self.imageData.seriesName)
         ]
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
 
@@ -119,7 +119,7 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget.clearViews()
             del self.mImageShownWidget
 
-        self.setTileText(self.imageData.getImageTileInfo(self.imageData.currentIndex))
+        self.setTitleText(self.imageData.getImageTitleInfo(self.imageData.currentIndex))
         if mode == self.m2DMode:
             print("m2DMode")
             self.mImageShownWidget = m2DImageShownWidget()
