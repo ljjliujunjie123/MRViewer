@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import QFrame
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 import vtkmodules.all as vtk
-from vtkmodules.vtkCommonColor import vtkNamedColors
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from utils.util import MakeAnnotatedCubeActor
+from utils.util import MakeAnnotatedCubeActor,create_color_from_hexString
+from ui.config import uiConfig
 
 class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
@@ -26,9 +26,8 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def show3DImage(self, seriesPath):
         print("show 3D Dicom Window Begin")
         ren3D = vtk.vtkRenderer()
-        colors = vtkNamedColors()
-        ren3D.SetBackground2(colors.GetColor3d('OldLace'))
-        ren3D.SetBackground(colors.GetColor3d('MistyRose'))
+        ren3D.SetBackground2(create_color_from_hexString(uiConfig.LightColor.Analogous1))
+        ren3D.SetBackground(create_color_from_hexString(uiConfig.LightColor.Complementary))
         ren3D.GradientBackgroundOn()
         renWin = self.qvtkWidget.GetRenderWindow()
         renWin.AddRenderer(ren3D)

@@ -9,6 +9,19 @@ from utils.InteractiveType import InteractiveType
 from utils.mImage2DShownData import mImage2DShownData
 from utils.status import Status
 
+class DicomMRInfoStruct():
+
+    def __init__(self):
+        self.pos = []
+        self.orientation = []
+        self.rows = 0
+        self.cols = 0
+
+    def __str__(self):
+        return "DicomMRInfoStruct Description:\n Position: {0}\n Orientation: {1}\n FOV: {2}".format(
+            self.pos, self.orientation, (self.rows, self.cols)
+        )
+
 class DicomCoordinateHelper():
     """
     用来在Dicom的三维世界坐标下，进行空间几何计算
@@ -112,14 +125,20 @@ class InteractiveCrossBoxController(QObject):
             for point in points_2d
         ]
 
+        dicomInfoStruct = DicomMRInfoStruct()
+        dicomInfoStruct.pos = ImagePosition2.tolist()
+        dicomInfoStruct.orientation = ImageOrientationX2.tolist() + ImageOrientationY2.tolist()
+        dicomInfoStruct.rows = Rows2
+        dicomInfoStruct.cols = Cols2
+
         if interactiveType is InteractiveType.TRANSLATE:
-            self.translateSignalHandler(projectionPoints, normalvector1, ImagePosition2, normalvector2)
+            self.translateSignalHandler(dicomInfoStruct, projectionPoints, normalvector1, ImagePosition2, normalvector2)
         elif interactiveType is InteractiveType.ROTATE:
-            self.rotateSignalHandler(projectionPoints, normalvector1, ImagePosition2, normalvector2)
+            self.rotateSignalHandler(dicomInfoStruct, projectionPoints, normalvector1, ImagePosition2, normalvector2)
         elif interactiveType is InteractiveType.ZOOM:
-            self.zoomSignalHandler(projectionPoints, normalvector1, ImagePosition2, normalvector2, ImageOrientationX2, ImageOrientationY2, PixelSpacing2)
+            self.zoomSignalHandler(dicomInfoStruct, projectionPoints, normalvector1, ImagePosition2, normalvector2, ImageOrientationX2, ImageOrientationY2, PixelSpacing2)
         elif interactiveType is InteractiveType.ADJUST_THICKNESS:
-            self.adjustThicknessHandler()
+            self.adjustThicknessHandler(dicomInfoStruct)
 
     def updateICrossBoxSignalHandler(self, emitContainer: SingleImageShownContainer):
         """
@@ -317,7 +336,7 @@ class InteractiveCrossBoxController(QObject):
         """
         pass
 
-    def translateSignalHandler(self, projectionPoints, normalvector1, ImagePosition2, normalvector2):
+    def translateSignalHandler(self,dicomInfoStruct, projectionPoints, normalvector1, ImagePosition2, normalvector2):
         """
         当SC中的ICrossBox被平移时
         该函数计算新的RT空间信息并发起request
@@ -333,9 +352,10 @@ class InteractiveCrossBoxController(QObject):
         #RT面上的O'坐标
         RTPos = self.dicomCoordinateHelper.calcLinePlaneCrossPoint(baseOriginP, normalvector1, ImagePosition2, normalvector2)
         print(RTPos)
-        pass
+        dicomInfoStruct.pos = RTPos.tolist()
+        self.requestDicomSource(dicomInfoStruct)
 
-    def rotateSignalHandler(self, projectionPoints, normalvector1, ImagePosition2, normalvector2):
+    def rotateSignalHandler(self,dicomInfoStruct, projectionPoints, normalvector1, ImagePosition2, normalvector2):
         """
         当SC中的ICrossBox被旋转时
         该函数计算新的RT空间信息并发起request
@@ -351,9 +371,13 @@ class InteractiveCrossBoxController(QObject):
         orientationX = self.dicomCoordinateHelper.calcVectorFromPoint(originPoints[0],originPoints[1], unitization=True)
         orientationY = self.dicomCoordinateHelper.calcVectorFromPoint(originPoints[0],originPoints[2], unitization=True)
         print(orientationX, orientationY)
+
+        dicomInfoStruct.pos = originPoints[0].tolist()
+        dicomInfoStruct.orientation = orientationX.tolist() + orientationY.tolist()
+        self.requestDicomSource(dicomInfoStruct)
         pass
 
-    def zoomSignalHandler(self, projectionPoints, normalvector1, ImagePosition2, normalvector2, ImageOrientationX2, ImageOrientationY2, PixelSpacing2):
+    def zoomSignalHandler(self, dicomInfoStruct, projectionPoints, normalvector1, ImagePosition2, normalvector2, ImageOrientationX2, ImageOrientationY2, PixelSpacing2):
         """
         当SC中的ICrossBox被缩放时
         该函数计算新的RT空间信息并发起request
@@ -372,20 +396,27 @@ class InteractiveCrossBoxController(QObject):
 
         #求出新的Rows和Cols
         rows,cols = (originPoints2D[2].x() - originPoints2D[0].x())//PixelSpacing2[0], (originPoints2D[2].y() - originPoints2D[0].y())//PixelSpacing2[1]
+        rows,cols = abs(rows),abs(cols)
         print(rows, cols)
+        dicomInfoStruct.pos = originPoints[0].tolist()
+        dicomInfoStruct.rows = rows
+        dicomInfoStruct.cols = cols
+        self.requestDicomSource(dicomInfoStruct)
         pass
 
-    def adjustThicknessHandler(self):
+    def adjustThicknessHandler(self, dicomInfoStruct):
         """
         当RT窗口与2D窗口正交时，此时的ICrossBox的zoom事件用于调整Thickness
         """
+        self.requestDicomSource(dicomInfoStruct)
         pass
 
-    def requestDicomSource(self):
+    def requestDicomSource(self, dicomInfoStruct: DicomMRInfoStruct):
         """
         根据计算出的新RT空间信息
         向MR机器发起请求
         """
+        print(str(dicomInfoStruct))
         pass
 
     def reponseDicomSourceHandler(self):

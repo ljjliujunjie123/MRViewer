@@ -47,7 +47,3 @@ class ImageShownBaseController(QObject):
 
     def clearViews(self):
         self.selectedImageShownContainer = None
-        self.imageShownContainerLayout.mapWidgetsFunc(lambda container,*args:container.close())
-        self.imageShownContainerLayout.clearLayout()
-        self.imageShownWidgetPool.clear()
-        self.initWidget()

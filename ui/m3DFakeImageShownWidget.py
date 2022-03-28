@@ -11,7 +11,8 @@ import vtkmodules.all as vtk
 from PyQt5.QtWidgets import QFrame
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from utils.util import MakeAnnotatedCubeActor,numpy2VTK
+from utils.util import MakeAnnotatedCubeActor,numpy2VTK,create_color_from_hexString
+from ui.config import uiConfig
 import numpy as np
 
 class m3DFakeImageShownWidget(QFrame, ImageShownWidgetInterface):
@@ -54,8 +55,8 @@ class m3DFakeImageShownWidget(QFrame, ImageShownWidgetInterface):
         for actor in self.MakePlanesActors(colors):
             ren.AddActor(actor)
 
-        ren.SetBackground2(colors.GetColor3d('OldLace'))
-        ren.SetBackground(colors.GetColor3d('MistyRose'))
+        ren.SetBackground2(create_color_from_hexString(uiConfig.LightColor.Analogous1))
+        ren.SetBackground(create_color_from_hexString(uiConfig.LightColor.Complementary))
         ren.GradientBackgroundOn()
         ren.ResetCamera()
         ren.GetActiveCamera().Zoom(1.6)

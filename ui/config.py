@@ -27,7 +27,7 @@ class UIConfig():
     shownSlideShowPlayIconSize = QSize(30,30)
     shownSlideShownSpeedIconSize = QSize(30,20)
     shownSlideSpeedDefault = 10
-    shownSlideSpeedMax = 100 #时间间隔
+    shownSlideSpeedMax = 30
     shownSlideSpeedMin = 1
 
     toolsSelectRegionCol = 5
@@ -55,9 +55,9 @@ class UIConfig():
     width_of = 450
 
     class LightColor():
-        Primary = "#f3fef2"
+        Primary = "#ffffff"
         Complementary = "#fbeade"
-        Analogous1 = "#f9fef2"
+        Analogous1 = "#fafef2"
         Black = "#000000"
         White = "#ffffff"
 

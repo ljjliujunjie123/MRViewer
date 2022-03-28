@@ -60,17 +60,15 @@ class SingleImageShownContainer(QFrame):
 
         #初始化GUI
         self.vBoxLayout = QVBoxLayout()
-        self.vBoxLayout.setContentsMargins(0,0,0,0)
+        self.vBoxLayout.setContentsMargins(2,2,2,2)
         self.vBoxLayout.setSpacing(0)
         self.vBoxLayout.setAlignment(Qt.AlignHCenter)
         self.setLayout(self.vBoxLayout)
 
         #顶部title
         self.title = QFrame()
-        self.title.setFrameShape(QFrame.StyledPanel)
-        self.title.setFrameShadow(QFrame.Plain)
         self.title.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
-        self.title.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Analogous1))
+        self.title.setStyleSheet("background-color:{0};border:none".format(uiConfig.LightColor.Analogous1))
         self.title.setFixedHeight(uiConfig.shownContainerTitleHeight)
         self.hBoxLayout = QHBoxLayout()
         self.hBoxLayout.setContentsMargins(5,5,5,5)
@@ -172,7 +170,7 @@ class SingleImageShownContainer(QFrame):
             nVectors = [np.cross(orientation[:3],orientation[3:]) for orientation in orientations]
             for i in range(len(nVectors) - 1):
                 for j in range(i + 1,len(nVectors)):
-                    if np.dot(nVectors[i],nVectors[j]) != 0:
+                    if np.dot(nVectors[i],nVectors[j]) > 1e-5:
                         return "localizer 必须彼此正交，请检查您的数据是否正交"
 
             return Status.good

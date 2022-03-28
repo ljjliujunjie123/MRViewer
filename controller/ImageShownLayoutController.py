@@ -53,6 +53,11 @@ class ImageShownLayoutController(QObject):
                 childWidget = self.imageShownWidgetPool[(row, col)]
                 self.addWidget(childWidget, row, col)
 
+    def clearViews(self):
+        self.imageShownContainerLayout.mapWidgetsFunc(lambda container,*args:container.close())
+        self.imageShownContainerLayout.clearLayout()
+        self.imageShownWidgetPool.clear()
+
     def closeEvent(self, QCloseEvent):
         for col in range(uiConfig.toolsSelectRegionCol):
             for row in range(uiConfig.toolsSelectRegionRow):

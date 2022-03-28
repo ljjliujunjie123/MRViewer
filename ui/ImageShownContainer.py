@@ -68,5 +68,13 @@ class ImageShownContainer(QFrame):
         self.imageShownContainerLayout.mapWidgetsFunc(moveControl)
 
     def clearViews(self):
-        if self.imageShownBaseController.selectedImageShownContainer is not None:
-            self.imageShownBaseController.clearViews()
+        self.imageShownBaseController.clearViews()
+        self.imageShownLayoutController.clearViews()
+        self.imageShownLayoutController.initWidget()
+
+        self.imageShownLayoutController.setAllContainerSignals(
+            [
+                self.imageShownBaseController.setContainerSignals,
+                self.interactiveCrossBoxController.setContainerSignals
+            ]
+        )

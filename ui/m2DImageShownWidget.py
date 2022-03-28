@@ -375,6 +375,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             self.timerThread.requestInterruption()
             self.timerThread.quit()
 
+    def closeICrossBoxWidget(self):
+        if self.iCrossBoxWidget is not None:
+            self.iCrossBoxWidget.close()
+
     def controlSlideShowPlayPause(self, isPlay: bool):
         if isPlay is True:
             self.iCrossBoxWidget.hide()
@@ -407,10 +411,12 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         super().closeEvent(QCloseEvent)
         self.qvtkWidget.Finalize()
         self.closeSlideShowContainer()
+        self.closeICrossBoxWidget()
 
     def clearViews(self):
         self.qvtkWidget.Finalize()
         self.closeSlideShowContainer()
+        self.closeICrossBoxWidget()
 
     def showEvent(self, *args, **kwargs):
         if self.imageShownData.showCrossFlag:
