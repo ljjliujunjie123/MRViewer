@@ -19,6 +19,7 @@ class ImageModeContainer(QFrame, ToolsInterface):
         super().__init__(parent=parent)
         imageVBoxLayout =  CustomDecoratedLayout(QVBoxLayout())
         imageVBoxLayout.initParamsForPlain()
+        imageVBoxLayout.setSpacing(2)
         bt2D = self.createImageModeButton(SingleImageShownContainer.m2DMode, signal)
         bt3D = self.createImageModeButton(SingleImageShownContainer.m3DMode, signal)
         bt3DFake = self.createImageModeButton(SingleImageShownContainer.m3DFakeMode, signal)

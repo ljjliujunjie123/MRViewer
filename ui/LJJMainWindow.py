@@ -60,7 +60,8 @@ class LJJMainWindow(QMainWindow):
         self.menuBar.setGeometry(QRect(0, 0, uiConfig.screenWidth, uiConfig.menuHeight))
         
         self.menuBar.setObjectName("menubar")
-        self.setStyleSheet("background: #A9A9A9")
+        style = "background: {0}".format(uiConfig.LightColor.Primary)
+        self.setStyleSheet(style)
         self.fileOpener = QMenu(self.menuBar)
         self.fileOpener.setObjectName("fileOpener")
         self.setMenuBar(self.menuBar)
@@ -133,8 +134,6 @@ class LJJMainWindow(QMainWindow):
         self.fileOpener.setTitle(_translate("MainWindow", "文件"))
         self.actionopen_study.setText(_translate("MainWindow", "打开Study"))
         self.actionopen_patient.setText(_translate("MainWindow", "打开Patient"))
-
-        self.toolsContainer.retranslateUi()
 
     def tryClearImageShownHandler(self):
         self.imageShownContainer.clearViews()

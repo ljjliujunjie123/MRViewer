@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import *
 from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
@@ -19,7 +20,8 @@ class CustomSelectRegionGridWidget(QWidget):
         self.setFixedSize(width,height)
         self.setContentsMargins(0,0,0,0)
         self.setWindowOpacity(0.7)
-
+        self.setWindowIcon(QIcon("ui_source/win_title_icon_color.png"))
+        self.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Primary))
         self.vBoxLayout = CustomDecoratedLayout(QVBoxLayout())
         self.vBoxLayout.initParamsForPlain()
         self.vBoxLayout.setLeftMargin(uiConfig.toolsSelectRegionItemSize.width()//2)
@@ -93,7 +95,7 @@ class CustomSelectRegionGridWidget(QWidget):
             point.x() > x + self.innerFrame.width() or point.y() > y + self.innerFrame.height(): return False
         return True
 
-    def eventFilter(self, object: QObject, event: QEvent) -> bool:
-        if event.type() == QEvent.WindowDeactivate:
-            a=1# self.close()
-        return super().eventFilter(object, event)
+    def leaveEvent(self, QEvent):
+        if self.isVisible():
+            self.hide()
+        super().leaveEvent(QEvent)

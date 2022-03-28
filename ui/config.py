@@ -10,15 +10,16 @@ class UIConfig():
     centralWidgetMinSize = QSize(800,600)
 
     #菜单高度
-    menuHeight = 22
+    menuHeight = 30
 
-    
     scrollContainerHintWidth = 300
-    toolsContainerHintWidth = 100
+    toolsContainerHintWidth = 120
+
+    scrollRootItemHeight = 50
 
     shownContainerMargins = QMargins(0,0,0,0)
-    shownContainerContentSpace = 4
-    shownContainerTitleHeight = 30
+    shownContainerContentSpace = 5
+    shownContainerTitleHeight = 40
     shownTextInfoX = 20
     shownTextInfoY = 10
 
@@ -39,7 +40,7 @@ class UIConfig():
     patientTag = 2
 
     itemHintSize = QSize(280,300)
-    itemSpace = 2
+    itemSpace = 5
     iconSize = QSize(280,280)
     textHeight = 40
     annotationSize = QSize(30,30)
@@ -52,6 +53,13 @@ class UIConfig():
     autocontrast_mode = 0
     inversion_mode = 0
     width_of = 450
+
+    class LightColor():
+        Primary = "#f3fef2"
+        Complementary = "#fbeade"
+        Analogous1 = "#f9fef2"
+        Black = "#000000"
+        White = "#ffffff"
 
     def __init__(self):
         print("UI Config Init.")

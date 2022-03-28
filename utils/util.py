@@ -99,3 +99,10 @@ def numpy2VTK(img):
     imageData.GetPointData().GetScalars().DeepCopy(vtk_array)
 
     return imageData
+
+def create_color_from_hexString(color):
+    if color[0] == "#":
+        # Convert hex string to RGB
+        return [int(color[i:i + 2], 16) / 255 for i in range(1, 7, 2)]
+    else:
+        return [0,0,0]

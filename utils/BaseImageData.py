@@ -13,9 +13,10 @@ class Location(Enum):
 
 normalKeyDict = {
     Location.UL:{
-        "PatientName": "",
+        "PatientName": "Patient: ",
         "StudyDescription": "Study: ",
         "SeriesDescription": "Series: ",
+        "Modality": "Modality: "
     },
     Location.UR:{
         "InstanceNumber": "Index: "

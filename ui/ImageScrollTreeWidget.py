@@ -34,7 +34,11 @@ class ImageScrollTreeWidget(QTreeWidget):
         for studyName in imageDataModel.dataSets.cache_names():
             studyDict = imageDataModel.findStudyItem(studyName)
             root = QTreeWidgetItem(self)
-            root.setText(0,studyName)
+            rootExtraData = {
+                "studyName": studyName,
+                "isRootItem" : True
+            }
+            root.setData(0,3,rootExtraData)
             for seriesName, seriesDict in studyDict.items():
                 child = QTreeWidgetItem(root)
                 child.setText(0, seriesName)

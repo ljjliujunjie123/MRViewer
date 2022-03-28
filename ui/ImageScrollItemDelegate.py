@@ -12,16 +12,34 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         itemTextData = QModelIndex.data(0)
         itemIconData = QModelIndex.data(1)
         itemExtraData = QModelIndex.data(3)
+        if itemExtraData is not None:
+            #适配多级目录时的根节点
+            try:
+                if itemExtraData["isRootItem"]:
+                    #绘制背景
+                    rect = QStyleOptionViewItem.rect
+                    print(rect)
+                    QPainter.setRenderHint(QPainter.Antialiasing, True)
+                    QPainter.setBrush(QColor(uiConfig.LightColor.Complementary))
+                    QPainter.drawRect(rect)
+
+                    #绘制study
+                    QPainter.setPen(QColor(uiConfig.LightColor.Black))
+                    font = QFont()
+                    font.setFamily("Microsoft YaHei")
+                    font.setPointSize(7)
+                    QPainter.setFont(font)
+                    QPainter.drawText(rect, Qt.AlignCenter, itemExtraData["studyName"])
+            except:
+                pass
         if itemTextData is None or itemIconData is None or itemExtraData is None:
             super().paint(QPainter, QStyleOptionViewItem, QModelIndex)
             return
 
         #绘制背景
         rect = QStyleOptionViewItem.rect
-        # palette = QStyleOptionViewItem.palette
-        # print("rect ", rect)
         QPainter.setRenderHint(QPainter.Antialiasing, True)
-        QPainter.setBrush(QColor(80, 80, 80))
+        QPainter.setBrush(QColor(uiConfig.LightColor.Analogous1))
         QPainter.drawRect(rect)
 
         #绘制缩略图
@@ -31,7 +49,7 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         ))
 
         #绘制series Name
-        QPainter.setPen(QColor("white"))
+        QPainter.setPen(QColor(uiConfig.LightColor.Black))
         font = QFont()
         font.setFamily("Microsoft YaHei")
         font.setPointSize(7)
@@ -41,6 +59,7 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         #绘制series Count
         annoRect = self.calcAnnotationTargetRect(iconRect)
         QPainter.setBrush(QColor("black"))
+        QPainter.setPen(QColor(uiConfig.LightColor.White))
         QPainter.drawRect(annoRect)
         font.setPointSize(5)
         QPainter.setFont(font)

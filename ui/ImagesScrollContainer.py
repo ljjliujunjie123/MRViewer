@@ -20,7 +20,7 @@ class ImageScrollContainer(QFrame):
         self.imageVerticalScrollLayout = CustomDecoratedLayout(QVBoxLayout())
         self.imageVerticalScrollLayout.initParamsForPlain()
         self.setLayout(self.imageVerticalScrollLayout.getLayout())
-        self.setStyleSheet("background: grey;")
+        self.setStyleSheet("background-color: {0}".format(uiConfig.LightColor.Primary))
         self.setMinimumWidth(uiConfig.scrollContainerHintWidth)
 
     def updateListHeight(self, itemCount):

@@ -70,7 +70,7 @@ class SingleImageShownContainer(QFrame):
         self.title.setFrameShape(QFrame.StyledPanel)
         self.title.setFrameShadow(QFrame.Plain)
         self.title.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
-        self.title.setStyleSheet("background-color:grey;")
+        self.title.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Analogous1))
         self.title.setFixedHeight(uiConfig.shownContainerTitleHeight)
         self.hBoxLayout = QHBoxLayout()
         self.hBoxLayout.setContentsMargins(5,5,5,5)
@@ -79,13 +79,14 @@ class SingleImageShownContainer(QFrame):
         self.title.setLayout(self.hBoxLayout)
         self.label = QLabel()
         self.label.setText("This is a image container")
-        self.label.setStyleSheet("color:black;")
+        self.label.setScaledContents(True)
+        self.label.setStyleSheet("color:{0};".format(uiConfig.LightColor.Black))
         self.hBoxLayout.addWidget(self.label)
 
         #底部image
         self.imageContainer = QFrame()
         self.imageContainer.setObjectName("imageContainer")
-        self.imageContainer.setStyleSheet("background-color:black;")
+        self.imageContainer.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Primary))
         self.imageContainer.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.vImageBoxLayout = CustomDecoratedLayout(QVBoxLayout())
         self.vImageBoxLayout.initParamsForPlain()
@@ -98,9 +99,9 @@ class SingleImageShownContainer(QFrame):
 
     def selectSignalHandler(self, isSelected):
         if isSelected:
-            self.title.setStyleSheet("background-color:#eb9076;")
+            self.title.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Complementary))
         else:
-            self.title.setStyleSheet("background-color:grey;")
+            self.title.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Analogous1))
 
     def resetSelectState(self):
         self.isSelected = False
@@ -207,18 +208,17 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget.closeSlideShowContainer()
 
     def mousePressEvent(self, QMouseEvent):
-        super().mousePressEvent(QMouseEvent)
-        point = QMouseEvent.pos()
-
         #空状态无法点击 or 已经被选中则无法点击
         if self.mImageShownWidget is None or self.isSelected: return
         #判断点击是否在title上
+        point = QMouseEvent.pos()
         if  self.title.y() < point.y() < self.imageContainer.y():
             print("click title")
             self.isSelected = not self.isSelected
             self.selectSignal.emit(self.isSelected)
             self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
             self.tryUpdateCrossViewSignalEmit()
+        super().mousePressEvent(QMouseEvent)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasText():

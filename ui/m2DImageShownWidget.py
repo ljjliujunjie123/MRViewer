@@ -1,6 +1,6 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QCursor,QMoveEvent
-from PyQt5.QtWidgets import QFrame,QSizePolicy,QMenu,QAction
+from PyQt5.QtWidgets import QFrame,QSizePolicy,QMenu,QAction,QApplication,QStyle
 from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
@@ -12,7 +12,7 @@ import numpy as np
 from utils.BaseImageData import Location
 from utils.cycleSyncThread import CycleSyncThread
 from utils.status import Status
-from utils.util import numpy2VTK
+from utils.util import numpy2VTK,create_color_from_hexString
 from utils.InteractiveType import InteractiveType
 from ui.SlideshowContainer import SlideshowContainer
 
@@ -46,6 +46,9 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageViewer =  vtk.vtkImageViewer2()
         self.imageViewer.SetupInteractor(self.iren)
         self.renImage = vtk.vtkRenderer()
+        self.renImage.SetBackground2(create_color_from_hexString(uiConfig.LightColor.Analogous1))
+        self.renImage.SetBackground(create_color_from_hexString(uiConfig.LightColor.Complementary))
+        self.renImage.GradientBackgroundOn()
         self.renText = vtk.vtkRenderer()
 
         #extra文本信息，依次是左上、右上、左下、右下
@@ -165,7 +168,8 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         #调整文本字体颜色，并添加到render中
         for textActor in self.textActors.values():
-            textActor.GetTextProperty().SetColor(1, 1, 1)
+            color = create_color_from_hexString(uiConfig.LightColor.Black)
+            textActor.GetTextProperty().SetColor(color)
             textActor.GetTextProperty().BoldOn()
             textActor.GetTextProperty().ShadowOn()
 
@@ -277,7 +281,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def createRightMenu(self):
         self.groupBox_menu = QMenu()
 
-        self.actionA = QAction(u'show DICOM tags')
+        self.actionA = QAction('show DICOM tags')
+        style = QApplication.style()
+        icon = style.standardIcon(QStyle.SP_FileDialogInfoView)
+        self.actionA.setIcon(icon)
         self.groupBox_menu.addAction(self.actionA)
         self.actionA.triggered.connect(self.showDicomTagsWindow)
         self.groupBox_menu.popup(QCursor.pos())
@@ -370,10 +377,12 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def controlSlideShowPlayPause(self, isPlay: bool):
         if isPlay is True:
+            self.iCrossBoxWidget.hide()
             self.timerThread = CycleSyncThread(1/self.imageSlideShow.getFPSLabelValue())
             self.timerThread.signal.connect(lambda :self.setCurrentIndex(self.imageData.currentIndex + 1))
             self.timerThread.start()
         else:
+            if self.imageShownData.showCrossFlag: self.iCrossBoxWidget.show()
             if self.timerThread is not None and not self.timerThread.isFinished():
                 self.timerThread.requestInterruption()
                 self.timerThread.quit()

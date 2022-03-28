@@ -26,8 +26,10 @@ class SlideshowContainer(QDialog):
         self.setWindowFlags(Qt.FramelessWindowHint|Qt.WindowStaysOnTopHint)#隐藏标题栏|在主窗口前
         self.setWindowModality(Qt.NonModal)
         self.setWindowTitle("SlideShow")
+        self.setWindowIcon(QIcon("ui_source/win_title_icon_color.png"))
         self.setFixedSize(uiConfig.shownSlideShowDialogSize)
         self.setGeometry(500, 500, self.width(), self.height())
+        self.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Primary))
 
         self.isPlayOrPause = False #False -> pause, True -> play
         self.mainLayout = CustomDecoratedLayout(QGridLayout())
@@ -72,7 +74,7 @@ class SlideshowContainer(QDialog):
             button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             button.setFlat(True)
             button.setStyleSheet("QPushButton{background-color:transparent;border-radius: none;}\
-                                QPushButton:hover{background-color:white; color: rgb(255,0,0);}")
+                                QPushButton:hover{background-color:#fbeade;}")
 
         self.fpsLogoLabel.setText("FPS")
         self.fpsValueLable.setText(str(uiConfig.shownSlideSpeedDefault))

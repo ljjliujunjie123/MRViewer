@@ -475,7 +475,7 @@ class mGraphicParallelogramItem(QGraphicsItem):
         QPainter.setBrush(mBrush)
         QPainter.fillRect(rect, mBrush)
         mPen = QPen(Qt.green)
-        mPen.setWidth(2)
+        mPen.setWidth(4)
         QPainter.setPen(mPen)
         QPainter.drawEllipse(pf, self.rotateEventAreaSize, self.rotateEventAreaSize)
         QPainter.drawPoint(pf)
@@ -588,7 +588,7 @@ class mGraphicRectItem(mGraphicParallelogramItem):
         QPainter.setBrush(mBrush)
         QPainter.fillRect(rect, mBrush)
         mPen = QPen(Qt.green)
-        mPen.setWidth(2)
+        mPen.setWidth(4)
         QPainter.setPen(mPen)
 
         #绘制边框

@@ -27,7 +27,7 @@ class CustomDicomTagsWindow(QDialog):
         QDialog.__init__(self,parent)
         flags = self.windowFlags()
         flags |= Qt.WindowMinMaxButtonsHint
-        self.setStyleSheet("QDialog{background-color:#A9A9A9;}")
+        self.setStyleSheet("background-color:{0};border:2px".format(uiConfig.LightColor.White))
         self.setWindowFlags(flags)
         self.table = None
         self.updataSearchSignal.connect(self.updataSearch)
@@ -60,7 +60,7 @@ class CustomDicomTagsWindow(QDialog):
         #搜索框
         searchLineEdit=QLineEdit()
         searchLineEdit.setPlaceholderText("Find text...")
-        searchLineEdit.setStyleSheet('background-color:grey')
+        searchLineEdit.setStyleSheet('background-color:white')
         searchLineEdit.textChanged.connect(self.textsearch)#输入文本后自动搜索
 
         #关闭窗口
@@ -115,8 +115,8 @@ class CustomDicomTagsWindow(QDialog):
         table.horizontalHeader().setFixedHeight(self.tableHeaderHeight)  # 表头高度
         table.horizontalHeader().setSectionResizeMode(len(self.tableHeaderDict.keys())-1, QHeaderView.Stretch)  # 设置第最后一列宽度自动调整，充满屏幕
         table.horizontalHeader().setStretchLastSection(True)  # 设置最后一列拉伸至最大列无限延伸
-        table.setStyleSheet("background-color:grey;")
-        table.horizontalHeader().setStyleSheet("QHeaderView::section{background-color:grey;}")
+        table.setStyleSheet("background-color:white;")
+        table.horizontalHeader().setStyleSheet("QHeaderView::section{background-color:white;}")
 
 
         for key in self.tableHeaderDict.keys():

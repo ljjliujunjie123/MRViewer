@@ -21,7 +21,7 @@ class ImageShownContainer(QFrame):
         self.imageShownContainerWidget = QWidget(self)
         self.imageShownContainerWidget.setFixedSize(self.size())
         self.imageShownContainerWidget.setObjectName("imageShownContainerWidget")
-        self.setStyleSheet("background: grey;")
+        self.setStyleSheet("background-color: {0}".format(uiConfig.LightColor.Primary))
 
         self.imageShownContainerLayout = CustomDecoratedLayout(QGridLayout())
         self.imageShownContainerWidget.setLayout(self.imageShownContainerLayout.getLayout())

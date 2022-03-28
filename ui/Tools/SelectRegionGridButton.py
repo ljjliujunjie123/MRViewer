@@ -12,8 +12,6 @@ class SelectRegionGridButton(QFrame, ToolsInterface):
         self.selectRegionGridBtn = QPushButton()
         self.selectRegionGridBtn.setIcon(QIcon(imgPath))
         self.selectRegionGridBtn.setIconSize(uiConfig.toolsIconSize)
-        self.selectRegionGridBtn.setCheckable(True)
-        self.selectRegionGridBtn.setChecked(False)
         self.selectRegionGridBtn.clicked.connect(self.clickHandler)
         layout = QHBoxLayout()
         layout.setContentsMargins(0,0,0,0)
@@ -33,9 +31,11 @@ class SelectRegionGridButton(QFrame, ToolsInterface):
     def clickHandler(self):
         if self.selectRegionGridWidget is None:
             self.createGridWidget(self.signal)
-        else:
+        elif self.selectRegionGridWidget.isVisible():
             self.selectRegionGridWidget.close()
             self.selectRegionGridWidget = None
+        else:
+            self.selectRegionGridWidget.show()
 
     def createGridWidget(self, signal):
         print(self.geometry)

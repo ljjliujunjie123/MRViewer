@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPen,QPainter
+from PyQt5.QtGui import QPen,QPainter,QIcon
 from PyQt5.QtCore import QRectF,Qt
 from ui.mGraphicCrossBoxItem import mGraphicParallelogramItem, mGraphicParallelogramParams, mGraphicRectItem
 
@@ -16,6 +16,8 @@ class CustomInteractiveCrossBoxWidget(QGraphicsView):
         self.setStyleSheet("background:transparent;padding: 0px; border: 0px;margin: 0px")
         self.setContentsMargins(0,0,0,0)
         self.setToolTip("this is the iC View")
+        self.setWindowIcon(QIcon("ui_source/win_title_icon_color.png"))
+        self.setWindowTitle('CrossView')
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 

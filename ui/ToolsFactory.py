@@ -20,7 +20,6 @@ class ToolsFactory():
 
     def createTool(self, tag = ToolNum.default, **kwargs):
         frame = QFrame(self.parent)
-        frame.setFrameShape(QFrame.StyledPanel)
         frame.setFrameShadow(QFrame.Plain)
         frame.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         layout = QHBoxLayout()
