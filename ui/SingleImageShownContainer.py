@@ -93,16 +93,9 @@ class SingleImageShownContainer(QFrame):
     def setTitleText(self, text):
         self.label.setText(text)
 
-    def getDataFromDropEvent(self, imageExtraData):
-        self.imageData.studyName = imageExtraData["studyName"]
-        self.imageData.seriesName = imageExtraData["seriesName"]
-        self.imageData.seriesImageCount = imageExtraData["seriesImageCount"]
-        self.imageData.currentIndex = 0
-        self.imageData.filePaths = [
-            fileTotalPath
-            for fileTotalPath in imageDataModel.findSeriesTotalPaths(self.imageData.studyName, self.imageData.seriesName)
-        ]
-        self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
+    def setDataFromDropEvent(self, imageExtraData):#!
+        self.imageData.setDcmData(imageExtraData)
+        
 
     def initImageShownWidget(self):
         self.mImageShownWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
@@ -209,7 +202,7 @@ class SingleImageShownContainer(QFrame):
             print("drop")
             event.setDropAction(Qt.CopyAction)
             event.accept()
-            self.getDataFromDropEvent(event.mimeData().getImageExtraData())
+            self.setDataFromDropEvent(event.mimeData().getImageExtraData())
             self.isSelected = True
             self.selectSignal.emit(self.isSelected)
             self.selectImageShownContainerSignal.emit(self, self.isSelected)
@@ -224,7 +217,7 @@ class SingleImageShownContainer(QFrame):
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
-        print("sc close")
+        # print("sc close")
         if self.mImageShownWidget is not None:
             print('vtk close')
             self.mImageShownWidget.closeEvent(QCloseEvent)

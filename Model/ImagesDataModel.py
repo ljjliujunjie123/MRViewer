@@ -1,13 +1,11 @@
-from cacheout import CacheManager,Cache
 import os
 import pydicom as pyd
-from utils.util import checkDirValidity, isDicom
+from utils.util import isDicom
 from utils.status import Status
 from utils.isDicom import *
 from copy import deepcopy
 import sqlite3
-from enum import Enum
-
+import queue, threading, time
 
 class ImagesDataModel():
     """
@@ -76,29 +74,19 @@ class ImagesDataModel():
     def addStudyItem(self, studyName):
         studyPath = os.path.join(self.rootPath,studyName)
         print(studyPath)
-        cursor = self.dataBase.cursor()
+
+        t1 = time.time()
         # 遍历文件夹下所有dcm文件夹与多帧格式dcm
-        dcmFiles = []
-        for root,dirs,files in os.walk(studyPath):
-
-            for f in files:
-                file = os.path.join(root, f)
-                if isDicom(file):
-                    dcmFile = pyd.dcmread(file)
-                    # dcmFiles.append((file, dcmFile.PatientID, ))
-
-                    try:
-                        _ = dcmFile.NumberOfFrames
-                    except:
-                        dcmFiles.append((file, dcmFile.StudyInstanceUID, dcmFile.SeriesInstanceUID, dcmFile.StudyDescription, dcmFile.SeriesDescription, str(dcmFile.PatientName), 0, dcmFile.InstanceNumber, os.path.getsize(file)))
-                        continue
-                    else:
-                        if _ > 1:
-                            return #!
-                            
-                        else:
-                            dcmFiles.append((file, dcmFile.StudyInstanceUID, dcmFile.SeriesInstanceUID, dcmFile.StudyDescription, dcmFile.SeriesDescription, str(dcmFile.SeriesDescription), 0, int(dcmFile.InstanceNumber), os.path.getsize(file)))
-        
+        list_manager = ListManager(queue.Queue(-1))
+        list_manager.add_job(list_dir,studyPath)
+        list_manager.complete_all()
+        print(len(list_manager.result_list))
+        print(list_manager.result_list[1:10])
+        list_manager.result_list
+        t2 = time.time()
+        print(t2-t1)
+        #存入database
+        cursor = self.dataBase.cursor()
         sql = r"""
             INSERT INTO `MRViewer_file` 
             (`path`, 
@@ -113,9 +101,12 @@ class ImagesDataModel():
             VALUES (?,?,?,?,?,?,?,?,?);
         """
         # print(dcmFiles)
-        cursor.executemany(sql, dcmFiles)
+        cursor.executemany(sql, list_manager.result_list)
         self.dataBase.commit()
         cursor.close()
+        
+        t3 = time.time()
+        print(t3-t2)
 
     def findStudyItem(self, studyName):#!
         sql = r"""
@@ -127,7 +118,7 @@ class ImagesDataModel():
 
         return self.dataSets[studyName]
 
-    def findDefaultStudy(self):#!
+    def findDefaultStudy(self):
         # names = self.dataSets.cache_names()
         # if len(names) == 1:
         #     return names[0],self.dataSets[names[0]]
@@ -165,7 +156,6 @@ class ImagesDataModel():
             slicePath = os.path.join(seriesPath,sliceName)
             dcmFile = pyd.dcmread(slicePath)
       
-
     def addSeriesMultiFrameItem(self, studyName, seriesName, dcmFileName):#!
         """
             兼容多帧DCM的特殊情况，此时的seriesName是单张dcm的文件名
@@ -222,11 +212,7 @@ class ImagesDataModel():
             通过studyName, seriesName, 找到series的完全路径
             输出: series中dcm文件的完全路径, 组成的升序列表
         """
-    #  `study_description`,
-    #     `series_description`,
-    #     `is_multiframe`,
-    #     `instance_number`,
-    #     `path` FROM `MRViewer_file` t
+
         sql = """
             SELECT `path` FROM `MRViewer_file` 
             WHERE `study_description` = \"%s\" AND `series_description` = \"%s\"
@@ -256,12 +242,6 @@ class ImagesDataModel():
         cursor.close()
         return info
 
-    def removeSeriesItem(self, studyName, seriesName):#!no use now
-        self.dataSets[studyName].delete(seriesName)
-
-    def findSliceItem(self, studyName, seriesName, sliceName):#!no use now
-        return self.findSeriesTotalPaths(studyName,seriesName)[sliceName]
-
     def clearAll(self):
         self.clearDataBase()
 
@@ -272,5 +252,77 @@ class ImagesDataModel():
         cursor.execute(sql)
         self.dataBase.close()
         print("文件表格已删除")
+
+##多线程遍历文件
+def list_dir(directory):
+    dirlist = []
+    dcmFiles = []
+    try:
+        for item in os.listdir(directory):
+            path = os.path.join(directory,item)
+            if os.path.isfile(path):
+                if isDicom(path):
+                    dcmFile = pyd.dcmread(path)
+                    try:
+                        _ = dcmFile.NumberOfFrames
+                    except:
+                        dcmFiles.append((path, dcmFile.StudyInstanceUID, dcmFile.SeriesInstanceUID, dcmFile.StudyDescription, dcmFile.SeriesDescription, str(dcmFile.PatientName), 0, int(dcmFile.InstanceNumber), os.path.getsize(path)))
+                        continue
+                    else:
+                        if _ > 1:
+                            return #!
+
+                        else:
+                            dcmFiles.append((path, dcmFile.StudyInstanceUID, dcmFile.SeriesInstanceUID, dcmFile.StudyDescription, dcmFile.SeriesDescription, str(dcmFile.SeriesDescription), 0, int(dcmFile.InstanceNumber), os.path.getsize(path)))
+            else:
+                dirlist.append(path)
+    except:
+        pass
+
+    return (dirlist,dcmFiles)
+
+
+class ListWorker(threading.Thread):
+    def __init__(self,requestQueue,resultlist):
+        threading.Thread.__init__(self)
+        self.request_queue = requestQueue
+        self.result_list = resultlist
+        self.setDaemon(True) 
+        self.start()
+
+    def run(self):
+        while True:
+            try:
+                callback,args = self.request_queue.get(block=True,timeout=0.01)
+            except queue.Empty:
+                break
+
+            dirlist,filelist = callback(args[0])
+
+            self.request_queue.task_done()#通知系统任务完成
+
+            for item in dirlist:
+                self.request_queue.put((callback,(item,)))
+            self.result_list += filelist
+
+class ListManager(object):
+    def __init__(self,request_queue,threadnum=1):
+        self.request_queue = request_queue
+        self.result_list = []
+        self.threads = []
+        self.__init_thread_pool(threadnum)
+
+    def __init_thread_pool(self,threadnum):
+        for i in range(threadnum):
+            self.threads.append(ListWorker(self.request_queue,self.result_list))
+
+    def add_job(self,callback,*args):
+        self.request_queue.put((callback,args))
+
+    def complete_all(self):
+        while len(self.threads):
+            worker = self.threads.pop()
+            worker.join()
+
 
 imageDataModel = ImagesDataModel()

@@ -39,20 +39,6 @@ def checkSameSeries(df1,df2):
     except:
         True
 
-def checkDirValidity(filePath):
-    #非文件夹检查
-    if not os.path.isdir(filePath):
-        # QMessageBox.information(None,"提示","请选择文件夹而非文件",QMessageBox.Ok)
-        print("Warning:", filePath, "should be a directory not a file!")
-        return Status.bad
-    subPaths = os.listdir(filePath)
-    #空检查
-    if len(subPaths) is 0:
-        # QMessageBox.information(None,"提示","有空文件夹！",QMessageBox.Ok)
-        print("Warning:", filePath, "is a empty directory!")
-        return Status.bad
-    return Status.good
-
 def MakeAnnotatedCubeActor(colors: vtkNamedColors):
         """
         :param colors: Used to determine the cube color.

@@ -1,8 +1,10 @@
 from Model.ImagesDataModel import imageDataModel
 import numpy as np
+import pydicom as pyd
 from enum import Enum
 import os
 from utils.status import Status
+from cacheout import Cache
 
 class Location(Enum):
     """顺序为左上、右上、左下、右下"""
@@ -43,16 +45,43 @@ class BaseImageData():
         self.curFilePath = ""
         self.studyName = ""
         self.seriesName = ""
+        self.dataSets = Cache()
+        self.seriesDict = {}
         self.seriesImageCount = 0
         self.currentIndex = 0
 
-    def getSeriesPath(self):
+    def setDcmData(self, imageExtraData):
+        self.studyName = imageExtraData["studyName"]
+        self.seriesName = imageExtraData["seriesName"]
+        self.seriesImageCount = imageExtraData["seriesImageCount"]
+        self.currentIndex = 0
+        self.filePaths = [
+            fileTotalPath 
+            for fileTotalPath in imageDataModel.findSeriesTotalPaths(self.studyName, self.seriesName)
+        ]
+        self.curFilePath = self.filePaths[self.currentIndex]
+
+        for slicePath in self.filePaths:
+            dcmFile = pyd.dcmread(slicePath)
+            try:
+                _ = dcmFile.NumberOfFrames
+            except:
+                self.seriesDict[int(dcmFile.InstanceNumber-1)] = dcmFile
+                continue
+            else:
+                if _ > 1:
+                    raise self.MultiFrameExceptionError()
+                else:
+                    self.seriesDict[int(dcmFile.InstanceNumber-1)] = dcmFile
+
+        self.dataSets.add((self.studyName,self.seriesName), self.seriesDict)
+
+
+    def getSeriesPath(self):#!
         return os.path.join(imageDataModel.getRootPath(), self.studyName, self.seriesName)
 
     def getDcmDataByIndex(self, index):#!can be better
-        seriesDict = imageDataModel.findSeriesTotalPaths(self.studyName, self.seriesName)
-
-        return seriesDict[list(seriesDict.keys())[index]]
+        return self.seriesDict[index]
 
     def getBasePosInfo(self, index):
         dcmData = self.getDcmDataByIndex(index)
@@ -69,16 +98,16 @@ class BaseImageData():
         normalvector = np.cross(ImageOrientationX,ImageOrientationY)
         return img_array,normalvector,ImagePosition,PixelSpacing,ImageOrientationX,ImageOrientationY,Rows,Cols
 
-    def getImageTitleInfo(self):
-        dcmData = self.getDcmDataByIndex()
-        imageDataModel.findSeriesTitleInfo()
-        try:
-            patientName = str(dcmData["PatientName"].value)
+    def getImageTitleInfo(self, index):
+        dcmData = self.getDcmDataByIndex(index)
+        # imageDataModel.findSeriesTitleInfo(self.studyName,self.seriesName)
+        try: 
+            patientName = str(dcmData.PatientName)
         except:
             patientName = "Unknown"
 
         try:
-            seriesDescription = str(dcmData["SeriesDescription"].value)
+            seriesDescription = str(dcmData.SeriesDescription)
         except:
             seriesDescription = "Unknown"
 
