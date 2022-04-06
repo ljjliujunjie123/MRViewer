@@ -27,7 +27,7 @@ class OpenFileController():
         # filePath = r"E:\prp\test_data\study_Test_data"
         if checkDirValidity(filePath) is Status.bad: return
         rootPath,studyName = os.path.split(filePath)[0], os.path.split(filePath)[-1]
-        imageDataModel.clearAll()
+        imageDataModel.clearDataBase()
         self.tryClearImageShownSignal.emit()
         imageDataModel.setRootPath(rootPath)
         imageDataModel.addStudyItem(studyName)
@@ -38,7 +38,7 @@ class OpenFileController():
         filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Patient的目录",'')
         # filePath = r"D:\respository\MRViewer_Scource\Patient_Test_data"
         if checkDirValidity(filePath) is Status.bad: return
-        imageDataModel.clearAll()
+        imageDataModel.clearDataBase()
         self.tryClearImageShownSignal.emit()
         imageDataModel.setRootPath(filePath)
         studyNames = os.listdir(filePath)

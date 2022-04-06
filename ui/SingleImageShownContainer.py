@@ -39,6 +39,9 @@ class SingleImageShownContainer(QFrame):
     m3DMode = 1
     m3DFakeMode = 2
     mRTMode = 3
+    #这个signal负责SC之外的处理
+    selectImageShownContainerSignal = None
+    updateCrossViewSignal = None
     #这个signal负责SC本身的处理
     selectSignal = pyqtSignal(bool)
 
@@ -108,16 +111,8 @@ class SingleImageShownContainer(QFrame):
     def setTitleText(self, text):
         self.label.setText(text)
 
-    def getDataFromDropEvent(self, imageExtraData):
-        self.imageData.studyName = imageExtraData["studyName"]
-        self.imageData.seriesName = imageExtraData["seriesName"]
-        self.imageData.seriesImageCount = imageExtraData["seriesImageCount"]
-        self.imageData.currentIndex = 0
-        self.imageData.filePaths = [
-            os.path.join(self.imageData.getSeriesPath(), fileName)
-            for fileName in imageDataModel.findSeriesItem(self.imageData.studyName, self.imageData.seriesName).keys()
-        ]
-        self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
+    def setDataFromDropEvent(self, imageExtraData):
+        self.imageData.setDcmData(imageExtraData)
 
     def initImageShownWidget(self):
         self.mImageShownWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
@@ -134,7 +129,7 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget.clearViews()
             del self.mImageShownWidget
 
-        self.setTitleText(self.imageData.getImageTileInfo(self.imageData.currentIndex))
+        self.setTitleText(self.imageData.getImageTitleInfo(self.imageData.currentIndex))
         if mode == self.m2DMode:
             print("m2DMode")
             self.mImageShownWidget = m2DImageShownWidget()
@@ -206,6 +201,9 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget.closeSlideShowContainer()
 
     def mousePressEvent(self, QMouseEvent):
+        super().mousePressEvent(QMouseEvent)
+        point = QMouseEvent.pos()
+
         #空状态无法点击 or 已经被选中则无法点击
         if self.mImageShownWidget is None or self.isSelected: return
         #判断点击是否在title上
@@ -238,7 +236,7 @@ class SingleImageShownContainer(QFrame):
             print("drop")
             event.setDropAction(Qt.CopyAction)
             event.accept()
-            self.getDataFromDropEvent(event.mimeData().getImageExtraData())
+            self.setDataFromDropEvent(event.mimeData().getImageExtraData())
             self.isSelected = True
             self.selectSignal.emit(self.isSelected)
             self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
