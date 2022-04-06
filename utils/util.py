@@ -23,9 +23,6 @@ def createDicomPixmap(dcmFile):
     pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
     return pixmap_resized
 
-def getSeriesPathFromFileName(fileName):
-    return os.path.split(fileName)[0]
-
 def getSeriesImageCountFromSeriesPath(seriesPath):
     return len(os.listdir(seriesPath))
 

@@ -33,18 +33,3 @@ class OpenFileController():
         imageDataModel.addStudyItem(studyName)
 
         self.updateImageListSignal.emit(uiConfig.studyTag)
-
-    def openPatientDirectory(self):
-        filePath = QFileDialog.getExistingDirectory(self.mainWindow, "选择一个Patient的目录",'')
-        # filePath = r"D:\respository\MRViewer_Scource\Patient_Test_data"
-        if checkDirValidity(filePath) is Status.bad: return
-        imageDataModel.clearDataBase()
-        self.tryClearImageShownSignal.emit()
-        imageDataModel.setRootPath(filePath)
-        studyNames = os.listdir(filePath)
-        for studyName in studyNames:
-            studyPath = os.path.join(filePath, studyName)
-            if checkDirValidity(studyPath) is Status.bad:continue
-            imageDataModel.addStudyItem(studyName)
-
-        self.updateImageListSignal.emit(uiConfig.patientTag)
