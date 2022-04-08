@@ -75,8 +75,8 @@ class BaseImageData():
 
 
 
-    def getSeriesPath(self):#!
-        return os.path.join(imageDataModel.getRootPath(), self.studyName, self.seriesName)
+    def getSeriesPath(self):
+        return os.path.dirname(self.filePaths[0]) #! 必须保证一组图像在一个文件夹
 
     def getDcmDataByIndex(self, index):#!can be better
         print(index)

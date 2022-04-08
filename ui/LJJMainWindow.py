@@ -80,10 +80,7 @@ class LJJMainWindow(QMainWindow):
 
         self.actionopen_study = QAction(self)
         self.actionopen_study.setObjectName("actionopen_study")
-        self.actionopen_patient = QAction(self)
-        self.actionopen_patient.setObjectName("actionopen_patient")
         self.fileOpener.addAction(self.actionopen_study)
-        self.fileOpener.addAction(self.actionopen_patient)
         self.menuBar.addAction(self.fileOpener.menuAction())
 
         #跟踪鼠标
@@ -104,7 +101,6 @@ class LJJMainWindow(QMainWindow):
         self.updateImageListSignal.connect(self.updateImageListArea)
         self.tryClearImageShownSignal.connect(self.tryClearImageShownHandler)
         self.actionopen_study.triggered.connect(self.openFileController.openStudyDirectory)
-        self.actionopen_patient.triggered.connect(self.openFileController.openPatientDirectory)
         # self.toolsContainer.showInfoSig.connect(self.showImageShownLayoutInfo)
         self.imageShownContainer.imageShownBaseController.initToolsContainerStateSignal.connect(
             self.toolsContainer.initToolsContainerStateHandler
@@ -133,7 +129,6 @@ class LJJMainWindow(QMainWindow):
         _translate = QCoreApplication.translate
         self.fileOpener.setTitle(_translate("MainWindow", "文件"))
         self.actionopen_study.setText(_translate("MainWindow", "打开Study"))
-        self.actionopen_patient.setText(_translate("MainWindow", "打开Patient"))
 
     def tryClearImageShownHandler(self):
         self.imageShownContainer.clearViews()

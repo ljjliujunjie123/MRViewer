@@ -9,7 +9,6 @@ from ui.m3DImageShownWidget import m3DImageShownWidget
 from ui.mRealTimeImageShownWidget import mRealTimeImageShownWidget
 from utils.BaseImageData import BaseImageData
 from utils.mImage2DShownData import mImage2DShownData
-from Model.ImagesDataModel import imageDataModel
 from utils.status import Status
 import numpy as np
 from utils.InteractiveType import InteractiveType

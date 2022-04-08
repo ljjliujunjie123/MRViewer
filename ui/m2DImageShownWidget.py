@@ -323,9 +323,9 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def setCurrentIndex(self, ind):
         """Set the currently displayed frame index."""
         #ind调节到可用范围
-        ind %= len(self.imageData.filePaths)
+        ind %= self.imageData.seriesImageCount
         if ind < 0:
-            ind += len(self.imageData.filePaths)
+            ind += self.imageData.seriesImageCount
         self.imageData.currentIndex = ind
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
 
@@ -335,7 +335,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.updateCrossViewSubSignal.emit()
 
     def canSlideShow(self):
-        return len(self.imageData.filePaths) > 0
+        return self.imageData.seriesImageCount > 0
 
     def showSlideShowContainer(self):
         self.imageSlideShow = SlideshowContainer()
