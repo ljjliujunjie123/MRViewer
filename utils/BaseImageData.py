@@ -1,8 +1,10 @@
 from Model.ImagesDataModel import imageDataModel
 import numpy as np
+import pydicom as pyd
 from enum import Enum
 import os
 from utils.status import Status
+from cacheout import Cache
 
 class Location(Enum):
     """顺序为左上、右上、左下、右下"""
@@ -13,10 +15,9 @@ class Location(Enum):
 
 normalKeyDict = {
     Location.UL:{
-        "PatientName": "Patient: ",
+        "PatientName": "",
         "StudyDescription": "Study: ",
         "SeriesDescription": "Series: ",
-        "Modality": "Modality: "
     },
     Location.UR:{
         "InstanceNumber": "Index: "
@@ -44,15 +45,42 @@ class BaseImageData():
         self.curFilePath = ""
         self.studyName = ""
         self.seriesName = ""
+        self.seriesDict = {}
         self.seriesImageCount = 0
         self.currentIndex = 0
 
-    def getSeriesPath(self):
+    def setDcmData(self, imageExtraData):
+        self.studyName = imageExtraData["studyName"]
+        self.seriesName = imageExtraData["seriesName"]
+        self.seriesImageCount = imageExtraData["seriesImageCount"]
+        self.currentIndex = 0
+        self.filePaths = [
+            fileTotalPath 
+            for fileTotalPath in imageDataModel.findSeriesTotalPaths(self.studyName, self.seriesName)
+        ]
+        self.curFilePath = self.filePaths[self.currentIndex]
+
+        for slicePath in self.filePaths:
+            dcmFile = pyd.dcmread(slicePath)
+            try:
+                _ = dcmFile.NumberOfFrames
+            except:
+                self.seriesDict[int(dcmFile.InstanceNumber-1)] = dcmFile
+                continue
+            else:
+                if _ > 1:
+                    raise self.MultiFrameExceptionError()
+                else:
+                    self.seriesDict[int(dcmFile.InstanceNumber-1)] = dcmFile
+
+
+
+    def getSeriesPath(self):#!
         return os.path.join(imageDataModel.getRootPath(), self.studyName, self.seriesName)
 
-    def getDcmDataByIndex(self, index):
-        seriesDict = imageDataModel.findSeriesItem(self.studyName, self.seriesName)
-        return seriesDict[list(seriesDict.keys())[index]]
+    def getDcmDataByIndex(self, index):#!can be better
+        print(index)
+        return self.seriesDict[index]
 
     def getBasePosInfo(self, index):
         dcmData = self.getDcmDataByIndex(index)
@@ -69,16 +97,16 @@ class BaseImageData():
         normalvector = np.around(np.cross(ImageOrientationX,ImageOrientationY), decimals=2)
         return img_array,normalvector,ImagePosition,PixelSpacing,ImageOrientationX,ImageOrientationY,Rows,Cols,SliceThickness
 
-    def getImageTileInfo(self, index):
+    def getImageTitleInfo(self, index):
         dcmData = self.getDcmDataByIndex(index)
-
-        try:
-            patientName = str(dcmData["PatientName"].value)
+        # imageDataModel.findSeriesTitleInfo(self.studyName,self.seriesName)
+        try: 
+            patientName = str(dcmData.PatientName)
         except:
             patientName = "Unknown"
 
         try:
-            seriesDescription = str(dcmData["SeriesDescription"].value)
+            seriesDescription = str(dcmData.SeriesDescription)
         except:
             seriesDescription = "Unknown"
 
@@ -93,7 +121,7 @@ class BaseImageData():
         try:
             center,width = dcmData.WindowCenter,dcmData.WindowWidth
         except:
-            center,width = 2048,2048
+            center,width = 5000,5000
         return center,width
 
     def getImageOrientationInfoFromDicom(self, index):
@@ -102,10 +130,12 @@ class BaseImageData():
         """
         dcmData = self.getDcmDataByIndex(index)
         try:
-            ImageOrientation=np.around(np.array(dcmData.ImageOrientationPatient,dtype = float),decimals=1)
+            ImageOrientation=np.array(dcmData.ImageOrientationPatient,dtype = float)
         except:
             return Status.bad
         xVector,yVector = ImageOrientation[:3],ImageOrientation[3:]
+        func = lambda x:round(x,1)
+        xVector,yVector = tuple(map(func,xVector)),tuple(map(func,yVector))
         print("orientation vector ", xVector, yVector)
         xInfo = self.calcImageOrientation(xVector)
         yInfo = self.calcImageOrientation(yVector)

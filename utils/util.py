@@ -106,3 +106,13 @@ def create_color_from_hexString(color):
         return [int(color[i:i + 2], 16) / 255 for i in range(1, 7, 2)]
     else:
         return [0,0,0]
+
+def isDicom(filePath):
+    if filePath.endswith(".dcm"):
+        return True
+    else:
+        with open(filePath,"rb") as f:
+            f.seek(128,1)
+            strb = f.read(4)
+            # return strb == b'DICM'
+            return strb == b'DICM'

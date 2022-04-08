@@ -1,13 +1,10 @@
-from cacheout import CacheManager,Cache
 import os
 import pydicom as pyd
-from utils.util import checkDirValidity
+from utils.util import isDicom
 from utils.status import Status
 from copy import deepcopy
-
-class SeriesDict(dict):
-
-        isMultiFrame = False
+import sqlite3
+import queue, threading, time
 
 class ImagesDataModel():
     """
@@ -23,8 +20,49 @@ class ImagesDataModel():
 
     def __init__(self):
         print("ImagesDataModel Init.")
-        self.dataSets = CacheManager()
         self.rootPath = ""
+        self.dataBase = sqlite3.connect('MRViewer.db')
+        print("数据库已打开")
+        
+        sql = """
+            DROP TABLE if exists `MRViewer_file`;
+        """
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
+        print("文件表格已删除")
+
+        sql = '''
+            CREATE TABLE `MRViewer_file` (
+                `id`                  INTEGER     PRIMARY KEY,
+                `path`                TEXT        NOT NULL,
+                `study_instance_uid`  TEXT        NOT NULL,
+                `series_instance_uid` TEXT        NOT NULL,
+                `study_description`   TEXT        NOT NULL,
+                `series_description`  TEXT        ,
+                `patient_name`        TEXT        ,
+                `is_multiframe`       INTEGER     NOT NULL,
+                `instance_number`     INTEGER     NOT NULL,
+                `size`                INTEGER     NOT NULL
+            );
+        '''
+        cursor.execute(sql)
+        self.dataBase.commit()
+        print("文件表格已打开")
+        cursor.close()
+
+    def __del__(self):
+        print("end")
+        self.clearAll()
+
+    def clearDataBase(self):
+        sql = '''
+        DELETE from `MRViewer_file`;
+        '''
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
+        self.dataBase.commit()
+        print("数据库已清空")
+        cursor.close()
 
     def setRootPath(self, rootPath):
         self.rootPath = rootPath
@@ -33,57 +71,95 @@ class ImagesDataModel():
         return self.rootPath
 
     def addStudyItem(self, studyName):
-        self.dataSets.register(studyName, Cache())
         studyPath = os.path.join(self.rootPath,studyName)
-        for seriesName in os.listdir(studyPath):
-            seriesPath = os.path.join(studyPath, seriesName)
-            if checkDirValidity(seriesPath) is Status.bad:continue
-            try:
-                self.addSeriesItem(studyName, seriesName)
-            except self.MultiFrameExceptionError:
-                print("当前series的dcm为多帧格式dcm")
-                for dcmFileName in os.listdir(seriesPath):
-                    print(dcmFileName)
-                    self.addSeriesMultiFrameItem(studyName, seriesName, dcmFileName)
+        # print(studyPath)
 
-        print("current ImageDataModel:")
-        print(self.dataSets.cache_names())
+        t1 = time.time()
+        # 遍历文件夹下所有dcm文件夹与多帧格式dcm
+        list_manager = ListManager(queue.Queue(-1))
+        list_manager.add_job(list_dir,studyPath)
+        list_manager.complete_all()
+        # print(len(list_manager.result_list))
+        # print(list_manager.result_list[1:10])
+        list_manager.result_list
+        t2 = time.time()
+        print(t2-t1)
+        #存入database
+        cursor = self.dataBase.cursor()
+        sql = r"""
+            INSERT INTO `MRViewer_file` 
+            (`path`, 
+            `study_instance_uid`,
+            `series_instance_uid`,
+            `study_description`,
+            `series_description`,
+            `patient_name`,
+            `is_multiframe`,
+            `instance_number`,
+            `size`) 
+            VALUES (?,?,?,?,?,?,?,?,?);
+        """
+        # print(dcmFiles)
+        cursor.executemany(sql, list_manager.result_list)
+        self.dataBase.commit()
+        cursor.close()
+        
+        t3 = time.time()
+        print(t3-t2)
 
-    def findStudyItem(self, studyName):
+    def findStudyItem(self, studyName):#!
+        sql = r"""
+            SELECT * FROM `MRViewer_file`
+            WHERE `path` = ?
+        """ %(studyName)
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
+
         return self.dataSets[studyName]
 
     def findDefaultStudy(self):
-        names = self.dataSets.cache_names()
-        if len(names) == 1:
-            return names[0],self.dataSets[names[0]]
+        # names = self.dataSets.cache_names()
+        # if len(names) == 1:
+        #     return names[0],self.dataSets[names[0]]
+        
+        sql = r'''
+        SELECT 
+        `study_description`,
+        `series_description`,
+        `is_multiframe`,
+        `instance_number`,
+        `path` FROM `MRViewer_file` t
+        where `instance_number` = (
+            select max(`instance_number`) from `MRViewer_file`
+            WHERE `study_instance_uid` = t.`study_instance_uid` AND `series_description` = t.`series_description`
+        )
+        '''
+        cursor = imageDataModel.dataBase.cursor()
+        cursor.execute(sql)
+        print("数据库已提取")
+        temp = cursor.fetchall()
+        cursor.close()
+        # print(temp)
+        return temp
 
     def removeStudyItem(self, studyName):
-        self.dataSets[studyName].clear()
+        sql = r"""
+            DELETE FROM `MRViewer_file`
+            WHERE `path` = ?
+        """ %(studyName)
+        cursor = self.dataBase.cursor()
 
     def addSeriesItem(self, studyName, seriesName):
         seriesPath = os.path.join(self.rootPath, studyName, seriesName)
-        seriesDict = SeriesDict()
         for sliceName in os.listdir(seriesPath):
             slicePath = os.path.join(seriesPath,sliceName)
             dcmFile = pyd.dcmread(slicePath)
-            try:
-                _ = dcmFile.NumberOfFrames
-            except:
-                seriesDict[sliceName] = dcmFile
-                continue
-            else:
-                if _ > 1:
-                    raise self.MultiFrameExceptionError()
-                else:
-                    seriesDict[sliceName] = dcmFile
-
-        self.dataSets[studyName].add(seriesName, seriesDict)
-
-    def addSeriesMultiFrameItem(self, studyName, seriesName, dcmFileName):
+      
+    def addSeriesMultiFrameItem(self, studyName, seriesName, dcmFileName):#!
         """
             兼容多帧DCM的特殊情况，此时的seriesName是单张dcm的文件名
         """
-        def genearte_single_frame_dicom(dcmFile,index, filename):
+        def genearte_single_frame_dicom(dcmFile, index, filename):
             #create metadata
             file_meta = pyd.Dataset()
             file_meta.ImplementationClassUID = dcmFile.file_meta.ImplementationClassUID
@@ -130,18 +206,122 @@ class ImagesDataModel():
             seriesDict[fileName] = _dcmFile
         self.dataSets[studyName].add(dcmFileName, seriesDict)
 
-    def findSeriesItem(self, studyName, seriesName):
-        return self.dataSets[studyName].get(seriesName)
+    def findSeriesTotalPaths(self, studyName, seriesName):
+        """
+            通过studyName, seriesName, 找到series的完全路径
+            输出: series中dcm文件的完全路径, 组成的升序列表
+        """
 
-    def removeSeriesItem(self, studyName, seriesName):
-        self.dataSets[studyName].delete(seriesName)
+        sql = """
+            SELECT `path` FROM `MRViewer_file` 
+            WHERE `study_description` = \"%s\" AND `series_description` = \"%s\"
+            ORDER BY `instance_number`;
+        """%(studyName, seriesName)
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
+        paths = cursor.fetchall()
+        # print(paths)
+        for i in range(len(paths)):
+            paths[i] = paths[i][0]
+        cursor.close()
+        return paths
 
-    def findSliceItem(self, studyName, seriesName, sliceName):
-        return self.findSeriesItem(studyName,seriesName)[sliceName]
+    def findSeriesTitleInfo(self, studyName, seriesName):
+        sql = """
+            SELECT `series_description`,`patient_name` FROM `MRViewer_file` 
+            WHERE `study_description` = \"%s\" AND `series_description` = \"%s\"
+            LIMITS 1;
+        """%(studyName, seriesName)
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
+        info = cursor.fetchall()
+        # print(info)
+        for i in range(len(info)):
+            info[i] = info[i][0]
+        cursor.close()
+        return info
 
     def clearAll(self):
-        self.dataSets.clear_all()
-        del self.dataSets
-        self.dataSets = CacheManager()
+        self.clearDataBase()
+
+        sql = """
+            DROP table `MRViewer_file`;
+        """
+        cursor = self.dataBase.cursor()
+        cursor.execute(sql)
+        self.dataBase.close()
+        print("文件表格已删除")
+
+##多线程遍历文件
+def list_dir(directory):
+    dirlist = []
+    dcmFiles = []
+    try:
+        for item in os.listdir(directory):
+            path = os.path.join(directory,item)
+            if os.path.isfile(path):
+                if isDicom(path):
+                    dcmFile = pyd.dcmread(path)
+                    try:
+                        _ = dcmFile.NumberOfFrames
+                    except:
+                        dcmFiles.append((path, dcmFile.StudyInstanceUID, dcmFile.SeriesInstanceUID, dcmFile.StudyDescription, dcmFile.SeriesDescription, str(dcmFile.PatientName), 0, int(dcmFile.InstanceNumber), os.path.getsize(path)))
+                        continue
+                    else:
+                        if _ > 1:
+                            return #!
+
+                        else:
+                            dcmFiles.append((path, dcmFile.StudyInstanceUID, dcmFile.SeriesInstanceUID, dcmFile.StudyDescription, dcmFile.SeriesDescription, str(dcmFile.SeriesDescription), 0, int(dcmFile.InstanceNumber), os.path.getsize(path)))
+            else:
+                dirlist.append(path)
+    except:
+        pass
+
+    return (dirlist,dcmFiles)
+
+
+class ListWorker(threading.Thread):
+    def __init__(self,requestQueue,resultlist):
+        threading.Thread.__init__(self)
+        self.request_queue = requestQueue
+        self.result_list = resultlist
+        self.setDaemon(True) 
+        self.start()
+
+    def run(self):
+        while True:
+            try:
+                callback,args = self.request_queue.get(block=True,timeout=0.01)
+            except queue.Empty:
+                break
+
+            dirlist,filelist = callback(args[0])
+
+            self.request_queue.task_done()#通知系统任务完成
+
+            for item in dirlist:
+                self.request_queue.put((callback,(item,)))
+            self.result_list += filelist
+
+class ListManager(object):
+    def __init__(self,request_queue,threadnum=1):
+        self.request_queue = request_queue
+        self.result_list = []
+        self.threads = []
+        self.__init_thread_pool(threadnum)
+
+    def __init_thread_pool(self,threadnum):
+        for i in range(threadnum):
+            self.threads.append(ListWorker(self.request_queue,self.result_list))
+
+    def add_job(self,callback,*args):
+        self.request_queue.put((callback,args))
+
+    def complete_all(self):
+        while len(self.threads):
+            worker = self.threads.pop()
+            worker.join()
+
 
 imageDataModel = ImagesDataModel()

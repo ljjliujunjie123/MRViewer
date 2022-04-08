@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QIcon,QDrag
 
+import pydicom as pyd
 from ui.config import uiConfig
 from ui.ImageScrollItemDelegate import ImageScrollItemDelegate
 from utils.util import createDicomPixmap,checkMultiFrame
@@ -27,9 +28,13 @@ class ImageScrollListWidget(QListWidget):
         self.setItemDelegate(ImageScrollItemDelegate(self))
 
     def showImageList(self):
-        studyName,studyDict = imageDataModel.findDefaultStudy()
-        for seriesName,seriesDict in studyDict.items():
-            dcmFile = list(seriesDict.values())[0]
+        rows = imageDataModel.findDefaultStudy()
+        for row in rows:
+            studyName = row[0]
+            seriesName = row[1]
+            isMultiFrame = row[2]
+            seriesImageCount = row[3]
+            dcmFile = pyd.dcmread(row[4])
 
             imageIcon = QIcon()
             imageIcon.addPixmap(createDicomPixmap(dcmFile))
@@ -39,12 +44,11 @@ class ImageScrollListWidget(QListWidget):
             imageItem.setText(seriesName)
             imageItem.setSizeHint(uiConfig.itemHintSize)
 
-            seriesImageCount = len(seriesDict)
             itemExtraData = {
                 "studyName": studyName,
                 "seriesName": seriesName,
                 "seriesImageCount": seriesImageCount,
-                "isMultiFrame": checkMultiFrame(seriesDict)
+                "isMultiFrame": isMultiFrame
             }
             imageItem.setData(3,itemExtraData)
             self.addItem(imageItem)
