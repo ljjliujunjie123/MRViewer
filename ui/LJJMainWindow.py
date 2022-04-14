@@ -128,7 +128,7 @@ class LJJMainWindow(QMainWindow):
     def retranslateUi(self, MainWindow):
         _translate = QCoreApplication.translate
         self.fileOpener.setTitle(_translate("MainWindow", "文件"))
-        self.actionopen_study.setText(_translate("MainWindow", "打开Study"))
+        self.actionopen_study.setText(_translate("MainWindow", "打开文件夹"))
 
     def tryClearImageShownHandler(self):
         self.imageShownContainer.clearViews()
