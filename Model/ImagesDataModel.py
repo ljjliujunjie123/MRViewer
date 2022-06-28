@@ -1,10 +1,15 @@
 import imp
 import os
 import pydicom as pyd
-# from utils.status import Status
 from copy import deepcopy
 import sqlite3
 import queue, threading, time
+from enum import Enum
+from PyQt5.QtWidgets import *
+
+class Status(Enum):
+    good = 1
+    bad = 0 
 
 def isDicom(filePath):
     if filePath.endswith(".dcm"):
@@ -14,7 +19,6 @@ def isDicom(filePath):
             f.seek(128,1)
             strb = f.read(4)
             return strb == b'DICM'
-
 
 class ImagesDataModel():
     """
@@ -28,7 +32,8 @@ class ImagesDataModel():
     class MultiFrameExceptionError(Exception):
         pass
 
-    def __init__(self):
+    def __init__(self, parent):
+        self.parent = parent
         print("ImagesDataModel Init.")
         self.rootPath = ""
         self.dataBase = sqlite3.connect('MRViewer.db')
@@ -44,15 +49,20 @@ class ImagesDataModel():
         sql = '''
             CREATE TABLE `MRViewer_file` (
                 `id`                  INTEGER     PRIMARY KEY,
-                `path`                TEXT        NOT NULL,
-                `study_instance_uid`  TEXT        NOT NULL,
-                `series_instance_uid` TEXT        NOT NULL,
-                `study_description`   TEXT        NOT NULL,
-                `series_description`  TEXT        ,
                 `patient_name`        TEXT        ,
-                `is_multiframe`       INTEGER     NOT NULL,
+                `patient_id`          TEXT        ,
+                `birth_date`          TEXT        ,
+                `sex`                 TEXT        ,
+                `study_date`          TEXT        ,
+                `study_instance_uid`  TEXT        NOT NULL,
+                `study_description`   TEXT        NOT NULL,
                 `instance_number`     INTEGER     NOT NULL,
-                `pixel_data`          INTEGER     NOT NULL
+                `series_instance_uid` TEXT        NOT NULL,
+                `series_description`  TEXT        ,
+                `modality`            TEXT        ,
+                `rows`                INTEGER     ,
+                `columns`             INTEGER     ,
+                `pixel_data`          BLOB        
             );
         '''
         cursor.execute(sql)
@@ -82,8 +92,6 @@ class ImagesDataModel():
 
     def addStudyItem(self, studyName):
         studyPath = os.path.join(self.rootPath,studyName)
-        # print(studyPath)
-
         t1 = time.time()
         # 遍历文件夹下所有dcm文件夹与多帧格式dcm
         list_manager = ListManager(queue.Queue(-1))
@@ -98,24 +106,22 @@ class ImagesDataModel():
         cursor = self.dataBase.cursor()
         sql = r"""
             INSERT INTO `MRViewer_file` 
-            (`path`, 
-            `study_instance_uid`,
-            `series_instance_uid`,
-            `study_description`,
-            `series_description`,
-            `patient_name`,
-            `is_multiframe`,
-            `instance_number`,
+            (
+            `patient_name`, `patient_id`, `birth_date`, `sex`,
+            `study_date`, `study_instance_uid`, `study_description`,
+            `instance_number`, `series_instance_uid`, `series_description`, 
+            `modality`, `rows`,`columns`,
             `pixel_data`) 
-            VALUES (?,?,?,?,?,?,?,?,?);
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         """
         # print(dcmFiles)
-        cursor.executemany(sql, list_manager.result_list)
+        print(len(list_manager.result_list))
+        cursor.execute(sql, list_manager.result_list[0])
         self.dataBase.commit()
         cursor.close()
-        
         t3 = time.time()
         print(t3-t2)
+        self.parent.ReloadData()
 
     def findStudyItem(self, studyName):#!
         sql = r"""
@@ -144,7 +150,7 @@ class ImagesDataModel():
             WHERE `study_instance_uid` = t.`study_instance_uid` AND `series_description` = t.`series_description`
         )
         '''
-        cursor = imageDataModel.dataBase.cursor()
+        cursor = self.dataBase.cursor()
         cursor.execute(sql)
         print("数据库已提取")
         temp = cursor.fetchall()
@@ -262,6 +268,27 @@ class ImagesDataModel():
         self.dataBase.close()
         print("文件表格已删除")
 
+    def readFromStudyDirectory(self):
+        filePath = QFileDialog.getExistingDirectory(None, "选择一个Study的目录",'')
+        if checkDirValidity(filePath) is Status.bad: 
+            return
+        rootPath,studyName = os.path.split(filePath)[0], os.path.split(filePath)[-1]
+        self.clearDataBase()
+        self.setRootPath(rootPath)
+        self.addStudyItem(studyName)
+
+def checkDirValidity(filePath):
+    #非文件夹检查
+    if not os.path.isdir(filePath):
+        print("Warning:", filePath, "should be a directory not a file!")
+        return Status.bad
+    subPaths = os.listdir(filePath)
+    #空检查
+    if len(subPaths) is 0:
+        print("Warning:", filePath, "is a empty directory!")
+        return Status.bad
+    return Status.good
+
 ##多线程遍历文件
 def list_dir(directory):
     dirlist = []
@@ -275,14 +302,24 @@ def list_dir(directory):
                     try:
                         _ = dcmFile.NumberOfFrames
                     except:
-                        dcmFiles.append((path, dcmFile.StudyInstanceUID, dcmFile.SeriesInstanceUID, dcmFile.StudyDescription, dcmFile.SeriesDescription, str(dcmFile.PatientName), 0, int(dcmFile.InstanceNumber),dcmFile))
+                        dcmFiles.append(
+                            (str(dcmFile.PatientName), dcmFile.PatientID, dcmFile.PatientBirthDate, dcmFile.PatientSex,
+                            dcmFile.StudyDate, dcmFile.StudyInstanceUID, dcmFile.StudyDescription,
+                            int(dcmFile.InstanceNumber), dcmFile.SeriesInstanceUID, dcmFile.SeriesDescription,
+                            dcmFile.Modality, int(dcmFile.Rows), int(dcmFile.Columns),dcmFile.PixelData)
+                        )
                         continue
                     else:
                         if _ > 1:
                             return #!
 
                         else:
-                            dcmFiles.append((path, dcmFile.StudyInstanceUID, dcmFile.SeriesInstanceUID, dcmFile.StudyDescription, dcmFile.SeriesDescription, str(dcmFile.SeriesDescription), 0, int(dcmFile.InstanceNumber), dcmFile))
+                            dcmFiles.append(
+                                (str(dcmFile.PatientName), dcmFile.PatientID, dcmFile.PatientBirthDate, dcmFile.PatientSex,
+                                dcmFile.StudyDate, dcmFile.StudyInstanceUID, dcmFile.StudyDescription,
+                                int(dcmFile.InstanceNumber), dcmFile.SeriesInstanceUID, dcmFile.SeriesDescription,
+                                dcmFile.Modality, int(dcmFile.Rows), int(dcmFile.Columns),dcmFile.PixelData)
+                            )
             else:
                 dirlist.append(path)
     except:
@@ -332,6 +369,3 @@ class ListManager(object):
         while len(self.threads):
             worker = self.threads.pop()
             worker.join()
-
-
-imageDataModel = ImagesDataModel()

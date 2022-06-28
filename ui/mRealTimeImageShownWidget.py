@@ -7,7 +7,6 @@ from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 from utils.BaseImageData import BaseImageData
 from utils.cycleSyncThread import CycleSyncThread
 import vtkmodules.all as vtk
-from utils.cycleSyncThread import CycleSyncThread
 
 class mRealTimeImageShownWidget(QFrame, ImageShownWidgetInterface):
 

@@ -10,11 +10,9 @@ from ui.CustomDicomTagsWindow import CustomDicomTagsWindow
 import vtkmodules.all as vtk
 import numpy as np
 from utils.BaseImageData import Location
-from utils.cycleSyncThread import CycleSyncThread
 from utils.status import Status
 from utils.util import numpy2VTK,create_color_from_hexString
 from utils.InteractiveType import InteractiveType
-from ui.SlideshowContainer import SlideshowContainer
 
 class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
@@ -25,8 +23,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def __init__(self):
         QFrame.__init__(self)
-        # slideShowView
-        self.imageSlideShow = None
         #初始化GUI配置
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.createRightMenu)  # 连接到菜单显示函数
@@ -302,11 +298,9 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.showImageExtraInfoVtkView()
         if self.imageShownData.showCrossFlag:
             self.updateCrossBoxWidget()
-        self.updateSlideShowGeometry()
 
     def moveEvent(self, event:QMoveEvent):
         QFrame.moveEvent(self, event)
-        self.updateSlideShowGeometry()
 
     #滚轮调用sigWheelChanged
     def wheelEvent(self, ev):
@@ -330,120 +324,32 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
 
         self.showAllViews()
-
         self.update2DImageShownSignal.emit()
         self.updateCrossViewSubSignal.emit()
-
-    def canSlideShow(self):
-        return self.imageData.seriesImageCount > 0
-
-    def showSlideShowContainer(self):
-        self.imageSlideShow = SlideshowContainer()
-        self.imageSlideShow.playPauseSignal.connect(
-            self.controlSlideShowPlayPause
-        )
-        self.imageSlideShow.prevSignal.connect(
-            self.controlSlideShowPrevNext
-        )
-        self.imageSlideShow.nextSignal.connect(
-            self.controlSlideShowPrevNext
-        )
-        self.imageSlideShow.fastSignal.connect(
-            self.controlSlideShowSpeed
-        )
-        self.imageSlideShow.slowSignal.connect(
-            self.controlSlideShowSpeed
-        )
-        self.updateSlideShowGeometry()
-
-    def updateSlideShowGeometry(self):
-        if self.imageSlideShow is None:return
-        m2DGlobalPos = self.mapToGlobal(QPoint(0,0))
-        #多减去10Px作为间隙
-        self.imageSlideShow.setGeometry(
-            m2DGlobalPos.x() + self.width()//2 - self.imageSlideShow.width()//2,
-            m2DGlobalPos.y() + self.height() - self.imageSlideShow.height() - 10,
-            self.imageSlideShow.width(),
-            self.imageSlideShow.height()
-        )
-
-    def closeSlideShowContainer(self):
-        if self.imageSlideShow is not None:
-            self.imageSlideShow.close()
-            self.imageSlideShow = None
-        if self.timerThread is not None:
-            self.timerThread.requestInterruption()
-            self.timerThread.quit()
 
     def closeICrossBoxWidget(self):
         if self.iCrossBoxWidget is not None:
             self.iCrossBoxWidget.close()
 
-    def controlSlideShowPlayPause(self, isPlay: bool):
-        if isPlay is True:
-            self.iCrossBoxWidget.hide()
-            self.timerThread = CycleSyncThread(1/self.imageSlideShow.getFPSLabelValue())
-            self.timerThread.signal.connect(lambda :self.setCurrentIndex(self.imageData.currentIndex + 1))
-            self.timerThread.start()
-        else:
-            if self.imageShownData.showCrossFlag: self.iCrossBoxWidget.show()
-            if self.timerThread is not None and not self.timerThread.isFinished():
-                self.timerThread.requestInterruption()
-                self.timerThread.quit()
-                self.timerThread.wait()
-
-    def controlSlideShowPrevNext(self, delta):
-        if self.timerThread is not None:
-            self.timerThread.requestInterruption()
-            self.timerThread.quit()
-        self.imageSlideShow.isPlayOrPause = False
-        self.imageSlideShow.setPlayButtonIcon()
-        self.setCurrentIndex(self.imageData.currentIndex + delta)
-
-    def controlSlideShowSpeed(self, delta):
-        if self.timerThread is not None:
-            newSpeed = round(1/self.timerThread.interval)+ delta
-            newSpeed = min(max(newSpeed,uiConfig.shownSlideSpeedMin),uiConfig.shownSlideSpeedMax)
-            self.timerThread.interval = 1 / newSpeed
-            self.imageSlideShow.setFPSLabelValue(str(newSpeed))
-
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
         self.qvtkWidget.Finalize()
-        self.closeSlideShowContainer()
         self.closeICrossBoxWidget()
 
     def clearViews(self):
         self.qvtkWidget.Finalize()
-        self.closeSlideShowContainer()
         self.closeICrossBoxWidget()
 
     def showEvent(self, *args, **kwargs):
         if self.imageShownData.showCrossFlag:
             self.updateCrossBoxWidget()
-        if self.imageSlideShow is not None:
-            self.imageSlideShow.show()
 
     def hideEvent(self, *args, **kwargs):
         if self.imageShownData.showCrossFlag:
             self.iCrossBoxWidget.hide()
-        if self.imageSlideShow is not None:
-            self.imageSlideShow.hide()
 
     def enterEvent(self, QEvent):
-        if self.imageSlideShow is not None:
-            self.imageSlideShow.show()
-            print("show")
         QFrame.enterEvent(self, QEvent)
 
     def leaveEvent(self, QEvent):
-        if self.imageSlideShow is not None:
-            print(self.imageSlideShow.geometry())
-            print(QCursor.pos())
-            print(self.mapFromGlobal(QCursor.pos()))
-            print(self.mapToGlobal(QCursor.pos()))
-            # print(self.mapTo(self.imageSlideShow, QCursor.pos()))
-            if not self.imageSlideShow.geometry().contains(QCursor.pos()):
-                self.imageSlideShow.hide()
-            print("hide")
         QFrame.leaveEvent(self, QEvent)

@@ -8,10 +8,13 @@ from DisplayArea import DisplayArea
 from Config import uiConfig
 
 class MainWindow(QMainWindow):
+
+    
     def __init__(self):
         super(MainWindow, self).__init__()
         self.InitializeWindow()
         
+        self.controlArea.toolsContainer.loadSignal.connect(self.displayArea.dataBaseDisplayer.imageDataModel.readFromStudyDirectory)
 
     def InitializeWindow(self):
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -38,17 +41,12 @@ class MainWindow(QMainWindow):
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         self.title_menu_dock.setWidget(self.bars)
-        
-
-    def InitializeMouse(self):
-        self.setMouseTracking(True) # 跟踪鼠标开启
-        self._move_drag = False
 
     def InitializeContent(self):
         centralWidget = QWidget(self)
         layout = QHBoxLayout()
-        self.controlArea = ControlArea(self)
-        self.displayArea = DisplayArea(self)
+        self.controlArea = ControlArea(centralWidget)
+        self.displayArea = DisplayArea(centralWidget)
         layout.addWidget(self.controlArea)
         layout.addWidget(self.displayArea)
         layout.setSpacing(0)
@@ -58,6 +56,11 @@ class MainWindow(QMainWindow):
         centralWidget.setStyleSheet('border:1px solid black')
         centralWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         
+
+    def InitializeMouse(self):
+        self.setMouseTracking(True) # 跟踪鼠标开启
+        self._move_drag = False
+
     def resizeEvent(self, *args, **kwargs):
         print("mainWindow geometry", self.geometry())
 

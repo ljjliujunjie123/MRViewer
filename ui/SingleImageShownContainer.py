@@ -52,7 +52,6 @@ class SingleImageShownContainer(QFrame):
         self.isSelected = False
         self.curMode = self.m2DMode
         self.imageData = BaseImageData()
-        self.selectSignal.connect(self.selectSignalHandler)
         #初始化配置
         self.setAcceptDrops(True)
         self.setFrameShape(QFrame.StyledPanel)
@@ -66,48 +65,23 @@ class SingleImageShownContainer(QFrame):
         self.vBoxLayout.setAlignment(Qt.AlignHCenter)
         self.setLayout(self.vBoxLayout)
 
-        #顶部title
-        self.title = QFrame()
-        self.title.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
-        self.title.setStyleSheet("background-color:{0};border:none".format(uiConfig.LightColor.Analogous1))
-        self.title.setFixedHeight(uiConfig.shownContainerTitleHeight)
-        self.hBoxLayout = QHBoxLayout()
-        self.hBoxLayout.setContentsMargins(5,5,5,5)
-        self.hBoxLayout.setSpacing(0)
-        self.hBoxLayout.setAlignment(Qt.AlignLeft)
-        self.title.setLayout(self.hBoxLayout)
-        self.label = QLabel()
-        self.label.setText("This is a image container")
-        self.label.setScaledContents(True)
-        self.label.setStyleSheet("color:{0};".format(uiConfig.LightColor.Black))
-        self.hBoxLayout.addWidget(self.label)
-
         #底部image
         self.imageContainer = QFrame()
         self.imageContainer.setObjectName("imageContainer")
         self.imageContainer.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Primary))
         self.imageContainer.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.vImageBoxLayout = QVBoxLayout()
-        self.vImageBoxLayout.initParamsForPlain()
+        #! self.vImageBoxLayout.initParamsForPlain()
         self.vImageBoxLayout.setAlignment(Qt.AlignHCenter)
         self.imageContainer.setLayout(self.vImageBoxLayout)
 
         #整体布局垂直
-        self.vBoxLayout.addWidget(self.title)
         self.vBoxLayout.addWidget(self.imageContainer)
 
-    def selectSignalHandler(self, isSelected):
-        if isSelected:
-            self.title.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Complementary))
-        else:
-            self.title.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Analogous1))
 
     def resetSelectState(self):
         self.isSelected = False
         self.selectSignal.emit(self.isSelected)
-
-    def setTitleText(self, text):
-        self.label.setText(text)
 
     def setDataFromDropEvent(self, imageExtraData):
         self.imageData.setDcmData(imageExtraData)
@@ -127,7 +101,6 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget.clearViews()
             del self.mImageShownWidget
 
-        self.setTitleText(self.imageData.getImageTitleInfo(self.imageData.currentIndex))
         if mode == self.m2DMode:
             print("m2DMode")
             self.mImageShownWidget = m2DImageShownWidget()

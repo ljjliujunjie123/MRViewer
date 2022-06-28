@@ -1,4 +1,4 @@
-from Model.ImagesDataModel import imageDataModel
+# from Model.ImagesDataModel import imageDataModel#!
 import numpy as np
 import pydicom as pyd
 from enum import Enum

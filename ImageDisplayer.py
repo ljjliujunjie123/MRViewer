@@ -11,7 +11,7 @@ class ImageDisplayer(QFrame):
     def __init__(self, parent):
         QFrame.__init__(self, parent)
 
-        self.resize(uiConfig.calcShownContainerWidth(),self.parent().height())
+        #! self.resize(uiConfig.calcShownContainerWidth(),self.parent().height())
         print("ImageDisplayer Geometry:")
         print(self.geometry())
         self.setFrameShape(QFrame.StyledPanel)
@@ -22,12 +22,17 @@ class ImageDisplayer(QFrame):
         self.hlayout = QHBoxLayout()
 
         self.mainDisplayer = SingleImageShownContainer()
+        self.axialDisplayer = SingleImageShownContainer()#横截面
+        self.coronalDisplayer = SingleImageShownContainer()#冠状面
+        self.sagittalDisplayer = SingleImageShownContainer()#矢状面
+
         self.vlayout = QVBoxLayout()
-        # self.axialDisplayer = ()
-        # self.coronalDisplayer = ()
-        # self.sagittalDisplayer = ()
+        self.vlayout.addWidget(self.axialDisplayer)
+        self.vlayout.addWidget(self.coronalDisplayer)
+        self.vlayout.addWidget(self.sagittalDisplayer)
         self.hlayout.addWidget(self.mainDisplayer)
         self.hlayout.addLayout(self.vlayout)
+        self.setLayout(self.hlayout)
     #     self.imageShownContainerWidget = QWidget(self)
     #     self.imageShownContainerWidget.setFixedSize(self.size())
     #     self.imageShownContainerWidget.setObjectName("imageShownContainerWidget")

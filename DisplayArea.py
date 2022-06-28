@@ -12,10 +12,11 @@ class DisplayArea(QFrame):
         self.stackedLayout = QStackedLayout()
         self.setLayout(self.stackedLayout)
 
-        self.dataBaseDisplayer = DataBaseDisplayer()
-        self.imageDisplayer = ImageDisplayer()
+        self.dataBaseDisplayer = DataBaseDisplayer(self)
+        self.imageDisplayer = ImageDisplayer(self)
         self.stackedLayout.addWidget(self.dataBaseDisplayer)
         self.stackedLayout.addWidget(self.imageDisplayer)
+        self.ShiftToDatabase()
 
     def ShiftToDatabase(self):
         self.stackedLayout.setCurrentIndex(0)
