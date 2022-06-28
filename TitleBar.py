@@ -38,7 +38,7 @@ class TitleBar(QWidget):
         '''
         )
         self.minBtn.setFixedSize(15,15)
-        
+        self.minBtn.clicked.connect(self.parent.showMinimized)
         # 设置最大化按钮
         self.maxBtn.setStyleSheet(
         '''
@@ -47,6 +47,7 @@ class TitleBar(QWidget):
         '''
         )
         self.maxBtn.setFixedSize(15,15)
+        self.maxBtn.clicked.connect(self.parent.showMaximized)
         
         # 设置关闭按钮
         self.closeBtn.setStyleSheet(
@@ -56,6 +57,7 @@ class TitleBar(QWidget):
         '''
         )
         self.closeBtn.setFixedSize(15,15)
+        self.closeBtn.clicked.connect(QCoreApplication.instance().quit)
 
         #标题布局
         pLayout = QHBoxLayout(self)

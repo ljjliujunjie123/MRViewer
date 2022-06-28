@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     curMonitorNum = app.desktop().primaryScreen()
     screenRect = app.desktop().screenGeometry(curMonitorNum)
-    uiConfig.setScreenSize(screenRect.width(),screenRect.height() - 60)
+    uiConfig.setScreenSize(screenRect.width(),screenRect.height())
     mainWindow = MainWindow()
     mainWindow.show()
     sys.exit(app.exec_())

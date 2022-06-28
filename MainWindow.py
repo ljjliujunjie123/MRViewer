@@ -5,7 +5,7 @@ from Config import uiConfig
 from TitleBar import TitleBar
 from ControlArea import ControlArea
 from DisplayArea import DisplayArea
-
+from Config import uiConfig
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -28,7 +28,6 @@ class MainWindow(QMainWindow):
         self.title_menu_dock.setFixedHeight(50)
         self.title_menu_dock.setTitleBarWidget(QWidget()) 
         self.addDockWidget(Qt.TopDockWidgetArea, self.title_menu_dock)
-
         # Titlebar
         self.titleBar = TitleBar(self)
         self.bars = QWidget()
@@ -42,8 +41,7 @@ class MainWindow(QMainWindow):
         
 
     def InitializeMouse(self):
-        # 跟踪鼠标
-        self.setMouseTracking(True)
+        self.setMouseTracking(True) # 跟踪鼠标开启
         self._move_drag = False
 
     def InitializeContent(self):
@@ -52,13 +50,13 @@ class MainWindow(QMainWindow):
         self.controlArea = ControlArea(self)
         self.displayArea = DisplayArea(self)
         layout.addWidget(self.controlArea)
-        # layout.addWidget(self.displayArea)
+        layout.addWidget(self.displayArea)
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
+        self.setCentralWidget(centralWidget)
         centralWidget.setLayout(layout)
         centralWidget.setStyleSheet('border:1px solid black')
         centralWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-        self.setCentralWidget(centralWidget)
         
     def resizeEvent(self, *args, **kwargs):
         print("mainWindow geometry", self.geometry())
@@ -69,8 +67,8 @@ class MainWindow(QMainWindow):
     def mousePressEvent(self, event):
         # 重写鼠标点击的事件
         if (event.button() == Qt.LeftButton):# and self.titleBar.geometry().contains(event.pos()):# 鼠标左键点击标题栏区
+            
             self.move_DragPosition = event.globalPos() - self.pos()
-            print(Qt.LeftButton)
             event.accept()
 
     def mouseMoveEvent(self, QMouseEvent):
