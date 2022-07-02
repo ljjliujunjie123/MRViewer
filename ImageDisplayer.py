@@ -32,7 +32,10 @@ class ImageDisplayer(QFrame):
         self.vlayout.addWidget(self.sagittalDisplayer)
         self.hlayout.addWidget(self.mainDisplayer)
         self.hlayout.addLayout(self.vlayout)
+        self.hlayout.setStretchFactor(self.mainDisplayer,3)
+        self.hlayout.setStretchFactor(self.vlayout,1)
         self.setLayout(self.hlayout)
+
     #     self.imageShownContainerWidget = QWidget(self)
     #     self.imageShownContainerWidget.setFixedSize(self.size())
     #     self.imageShownContainerWidget.setObjectName("imageShownContainerWidget")

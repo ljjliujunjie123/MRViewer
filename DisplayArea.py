@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QMouseEvent, QIcon
 from DataBaseDisplayer import DataBaseDisplayer
 from ImageDisplayer import ImageDisplayer
+from Model.ImagesDataModel import ImagesDataModel
     
 class DisplayArea(QFrame):
     def __init__(self, parent):
@@ -16,6 +17,8 @@ class DisplayArea(QFrame):
         self.imageDisplayer = ImageDisplayer(self)
         self.stackedLayout.addWidget(self.dataBaseDisplayer)
         self.stackedLayout.addWidget(self.imageDisplayer)
+
+
         self.ShiftToDatabase()
 
     def ShiftToDatabase(self):

@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QSizePolicy, QFrame, QHBoxLayout, QListWidget, QListWidgetItem, QWidget
+from PyQt5.QtWidgets import QSizePolicy, QFrame, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QWidget
 
-from ToolsContainer import ToolsContainer
+from ToolsContainer import ToolsContainer, ExtraToolsContainer
 
 class ControlArea(QFrame):
     def __init__(self, parent):
@@ -14,17 +14,26 @@ class ControlArea(QFrame):
         self.InitContent()
 
     def InitLayout(self):
-        self.leftFrame_HLayout = QHBoxLayout(self)
-        self.leftFrame_HLayout.setSpacing(5)  
-        self.leftFrame_HLayout.setContentsMargins(0,0,0,0) 
-        self.leftFrame_HLayout.setAlignment(QtCore.Qt.AlignCenter)  
+        self.hlayout = QHBoxLayout(self)
+        self.hlayout.setSpacing(5)  
+        self.hlayout.setContentsMargins(0,0,0,0) 
+        self.hlayout.setAlignment(QtCore.Qt.AlignCenter)  
 
     def InitContent(self):
         # 实例化两个左侧边栏的组件
         self.operationModeSelector = QListWidget(self)
-        self.leftFrame_HLayout.addWidget(self.operationModeSelector)
+        self.vlayout = QVBoxLayout(self)
         self.toolsContainer = ToolsContainer(self)
-        self.leftFrame_HLayout.addWidget(self.toolsContainer)
+        self.extraToolsContainer = ExtraToolsContainer(self)
+        self.hlayout.addWidget(self.operationModeSelector)
+        self.hlayout.addLayout(self.vlayout)
+        self.hlayout.setStretchFactor(self.operationModeSelector, 1)
+        self.hlayout.setStretchFactor(self.vlayout, 4)
+
+        self.vlayout.addWidget(self.toolsContainer)
+        self.vlayout.addWidget(self.extraToolsContainer)
+        self.vlayout.setStretchFactor(self.toolsContainer, 2)
+        self.vlayout.setStretchFactor(self.extraToolsContainer, 1)
 
         # 设置展示规则
         self.operationModeSelector.setFrameShape(QListWidget.NoFrame) # 去除边框

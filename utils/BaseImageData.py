@@ -49,7 +49,7 @@ class BaseImageData():
         self.seriesImageCount = 0
         self.currentIndex = 0
 
-    def setDcmData(self, imageExtraData):
+    def setDcmData(self, imageExtraData):# Add here
         self.studyName = imageExtraData["studyName"]
         self.seriesName = imageExtraData["seriesName"]
         self.seriesImageCount = imageExtraData["seriesImageCount"]

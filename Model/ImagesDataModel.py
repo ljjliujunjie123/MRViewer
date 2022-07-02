@@ -62,7 +62,7 @@ class ImagesDataModel():
                 `modality`            TEXT        ,
                 `rows`                INTEGER     ,
                 `columns`             INTEGER     ,
-                `pixel_data`          BLOB        
+                `pixel_array`          BLOB        
             );
         '''
         cursor.execute(sql)
@@ -111,12 +111,12 @@ class ImagesDataModel():
             `study_date`, `study_instance_uid`, `study_description`,
             `instance_number`, `series_instance_uid`, `series_description`, 
             `modality`, `rows`,`columns`,
-            `pixel_data`) 
+            `pixel_array`) 
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         """
         # print(dcmFiles)
-        print(len(list_manager.result_list))
-        cursor.execute(sql, list_manager.result_list[0])
+        # print(len(list_manager.result_list))
+        cursor.executemany(sql, list_manager.result_list)
         self.dataBase.commit()
         cursor.close()
         t3 = time.time()
@@ -137,7 +137,6 @@ class ImagesDataModel():
         # names = self.dataSets.cache_names()
         # if len(names) == 1:
         #     return names[0],self.dataSets[names[0]]
-        
         sql = r'''
         SELECT 
         `study_description`,
@@ -306,7 +305,7 @@ def list_dir(directory):
                             (str(dcmFile.PatientName), dcmFile.PatientID, dcmFile.PatientBirthDate, dcmFile.PatientSex,
                             dcmFile.StudyDate, dcmFile.StudyInstanceUID, dcmFile.StudyDescription,
                             int(dcmFile.InstanceNumber), dcmFile.SeriesInstanceUID, dcmFile.SeriesDescription,
-                            dcmFile.Modality, int(dcmFile.Rows), int(dcmFile.Columns),dcmFile.PixelData)
+                            dcmFile.Modality, int(dcmFile.Rows), int(dcmFile.Columns),dcmFile.pixel_array)
                         )
                         continue
                     else:
@@ -318,7 +317,7 @@ def list_dir(directory):
                                 (str(dcmFile.PatientName), dcmFile.PatientID, dcmFile.PatientBirthDate, dcmFile.PatientSex,
                                 dcmFile.StudyDate, dcmFile.StudyInstanceUID, dcmFile.StudyDescription,
                                 int(dcmFile.InstanceNumber), dcmFile.SeriesInstanceUID, dcmFile.SeriesDescription,
-                                dcmFile.Modality, int(dcmFile.Rows), int(dcmFile.Columns),dcmFile.PixelData)
+                                dcmFile.Modality, int(dcmFile.Rows), int(dcmFile.Columns),dcmFile.pixel_array)
                             )
             else:
                 dirlist.append(path)
@@ -326,7 +325,6 @@ def list_dir(directory):
         pass
 
     return (dirlist,dcmFiles)
-
 
 class ListWorker(threading.Thread):
     def __init__(self,requestQueue,resultlist):

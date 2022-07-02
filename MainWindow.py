@@ -13,8 +13,10 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.InitializeWindow()
-        
+
+        # 信号部分
         self.controlArea.toolsContainer.loadSignal.connect(self.displayArea.dataBaseDisplayer.imageDataModel.readFromStudyDirectory)
+        self.controlArea.toolsContainer.loadSignal.connect(self.displayArea.ShiftToDatabase)
 
     def InitializeWindow(self):
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -51,6 +53,8 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.displayArea)
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setStretchFactor(self.controlArea,1)
+        layout.setStretchFactor(self.displayArea,3)
         self.setCentralWidget(centralWidget)
         centralWidget.setLayout(layout)
         centralWidget.setStyleSheet('border:1px solid black')
@@ -64,8 +68,8 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, *args, **kwargs):
         print("mainWindow geometry", self.geometry())
 
-    def moveEvent(self, *args, **kwargs):
-        print("moving MainWindow")
+    # def moveEvent(self, *args, **kwargs):
+        # print("moving MainWindow")
 
     def mousePressEvent(self, event):
         # 重写鼠标点击的事件
@@ -80,5 +84,5 @@ class MainWindow(QMainWindow):
             # 拖放窗口位置
             self.move(QMouseEvent.globalPos() - self.move_DragPosition)
             moveEvent = QMoveEvent(QMouseEvent.globalPos(), self.move_DragPosition)
-            print(moveEvent.pos(), moveEvent.oldPos())
+            # print(moveEvent.pos(), moveEvent.oldPos())
             QMouseEvent.accept()
