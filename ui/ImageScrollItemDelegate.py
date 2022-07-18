@@ -66,11 +66,11 @@ class ImageScrollItemDelegate(QStyledItemDelegate):
         QPainter.drawText(annoRect, Qt.AlignCenter, str(itemExtraData["seriesImageCount"]))
 
         #绘制特殊格式标志
-        if itemExtraData["isMultiFrame"]:
-            specialSymbolRect = self.calcSpecialSymbolTargetRect(iconRect)
-            QPainter.drawPixmap(
-                specialSymbolRect, self.createSpecialSymbolPixmap()
-            )
+        # if itemExtraData["isMultiFrame"]:
+        #     specialSymbolRect = self.calcSpecialSymbolTargetRect(iconRect)
+        #     QPainter.drawPixmap(
+        #         specialSymbolRect, self.createSpecialSymbolPixmap()
+        #     )
 
     def calcTextTargetRect(self, itemRect):
         return QRect(

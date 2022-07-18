@@ -81,7 +81,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def showAllViews(self):
         self.show2DImageVtkView()
         if self.imageShownData.showExtraInfoFlag:
-            self.showImageExtraInfoVtkView()
+            # self.showImageExtraInfoVtkView()
             self.renderVtkWindow()
         else:
             self.renderVtkWindow(1)
@@ -295,7 +295,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def resizeEvent(self, QResizeEvent):
         super().resizeEvent(QResizeEvent)
         self.qvtkWidget.setFixedSize(self.size())
-        self.showImageExtraInfoVtkView()
+        # self.showImageExtraInfoVtkView()
         if self.imageShownData.showCrossFlag:
             self.updateCrossBoxWidget()
 

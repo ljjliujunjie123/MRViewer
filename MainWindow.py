@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
         centralWidget.addWidget(self.displayArea)
         centralWidget.addWidget(self.imageScrollContainer)
         centralWidget.setStretchFactor(0,1)
-        centralWidget.setStretchFactor(1,3)
+        centralWidget.setStretchFactor(1,2)
         self.setCentralWidget(centralWidget)
 
     def InitializeMouse(self):

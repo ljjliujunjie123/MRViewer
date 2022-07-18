@@ -1,4 +1,5 @@
-import os
+import os, json, io
+import numpy as np
 import pydicom as pyd
 from copy import deepcopy
 import sqlite3
@@ -22,6 +23,21 @@ def isDicom(filePath):
             strb = f.read(4)
             return strb == b'DICM'
 
+
+def adapt_array(arr):
+    """
+    http://stackoverflow.com/a/31312102/190597 (SoulNibbler)
+    """
+    out = io.BytesIO()
+    np.save(out, arr)
+    out.seek(0)
+    return sqlite3.Binary(out.read())
+
+def convert_array(text):
+    out = io.BytesIO(text)
+    out.seek(0)
+    return np.load(out)
+
 class ImagesDataModel():
     """
         该类负责提供医学图像的元数据
@@ -36,8 +52,12 @@ class ImagesDataModel():
 
     def __init__(self):
         print("ImagesDataModel Init.")
+        # Converts np.array to TEXT when inserting
+        sqlite3.register_adapter(np.ndarray, adapt_array)
+        # Converts TEXT to np.array when selecting
+        sqlite3.register_converter("ARRAY", convert_array)
         self.rootPath = ""
-        self.dataBase = sqlite3.connect('MRViewer.db')
+        self.dataBase = sqlite3.connect('MRViewer.db', detect_types=sqlite3.PARSE_DECLTYPES)
         print("数据库已打开")
         
         sql = """
@@ -63,7 +83,8 @@ class ImagesDataModel():
                 `modality`            TEXT        ,
                 `rows`                INTEGER     ,
                 `columns`             INTEGER     ,
-                `pixel_array`          BLOB        
+                `pixel_array`         ARRAY       ,
+                `path`                TEXT
             );
         ''' 
         cursor.execute(sql)
@@ -114,8 +135,8 @@ class ImagesDataModel():
             `patient_name`, `patient_id`, `birth_date`, `sex`,
             `study_date`, `study_instance_uid`, `study_description`,
             `instance_number`, `series_instance_uid`, `series_description`, 
-            `modality`, `rows`,`columns`,`pixel_array`) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+            `modality`, `rows`,`columns`,`pixel_array`,`path`) 
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         """
         # print(dcmFiles)
         # print(len(list_manager.result_list))
@@ -180,6 +201,7 @@ class ImagesDataModel():
         temp = cursor.fetchall()
         cursor.close()
         print(len(temp))
+        print(type(temp[0][3]))
         return temp
 
     def removeStudyItem(self, studyName):
@@ -330,7 +352,7 @@ def list_dir(directory):
                             (str(dcmFile.PatientName), dcmFile.PatientID, dcmFile.PatientBirthDate, dcmFile.PatientSex,
                             dcmFile.StudyDate, dcmFile.StudyInstanceUID, dcmFile.StudyDescription,
                             int(dcmFile.InstanceNumber), dcmFile.SeriesInstanceUID, dcmFile.SeriesDescription,
-                            dcmFile.Modality, int(dcmFile.Rows), int(dcmFile.Columns),dcmFile.pixel_array)
+                            dcmFile.Modality, int(dcmFile.Rows), int(dcmFile.Columns),dcmFile.pixel_array,path)
                         )
                         continue
                     else:
@@ -342,7 +364,7 @@ def list_dir(directory):
                                 (str(dcmFile.PatientName), dcmFile.PatientID, dcmFile.PatientBirthDate, dcmFile.PatientSex,
                                 dcmFile.StudyDate, dcmFile.StudyInstanceUID, dcmFile.StudyDescription,
                                 int(dcmFile.InstanceNumber), dcmFile.SeriesInstanceUID, dcmFile.SeriesDescription,
-                                dcmFile.Modality, int(dcmFile.Rows), int(dcmFile.Columns),dcmFile.pixel_array)
+                                dcmFile.Modality, int(dcmFile.Rows), int(dcmFile.Columns),dcmFile.pixel_array,path)
                             )
             else:
                 dirlist.append(path)

@@ -47,7 +47,7 @@ class SingleImageShownContainer(QFrame):
         QFrame.__init__(self)
         self.mImageShownWidget = None
         self.mImage2DShownData = mImage2DShownData()
-        self.signalCollectionHelper = self.SignalCollectionHelper()
+        # self.signalCollectionHelper = self.SignalCollectionHelper()
         self.resizeFlag = False
         self.isSelected = False
         self.curMode = self.m2DMode
@@ -60,7 +60,7 @@ class SingleImageShownContainer(QFrame):
 
         #初始化GUI
         self.vBoxLayout = QVBoxLayout()
-        self.vBoxLayout.setContentsMargins(2,2,2,2)
+        self.vBoxLayout.setContentsMargins(0,0,0,0)
         self.vBoxLayout.setSpacing(0)
         self.vBoxLayout.setAlignment(Qt.AlignHCenter)
         self.setLayout(self.vBoxLayout)
@@ -68,7 +68,7 @@ class SingleImageShownContainer(QFrame):
         #底部image
         self.imageContainer = QFrame()
         self.imageContainer.setObjectName("imageContainer")
-        self.imageContainer.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Primary))
+        # self.imageContainer.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Primary))
         self.imageContainer.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.vImageBoxLayout = QVBoxLayout()
         #! self.vImageBoxLayout.initParamsForPlain()
@@ -106,7 +106,7 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget = m2DImageShownWidget()
             self.mImageShownWidget.imageShownData = self.mImage2DShownData
             self.mImageShownWidget.updateCrossViewSubSignal.connect(self.tryUpdateCrossViewSignalEmit)
-            self.mImageShownWidget.interactiveSubSignal.connect(self.tryInteractiveSignalEmit)
+            # self.mImageShownWidget.interactiveSubSignal.connect(self.tryInteractiveSignalEmit)
         elif mode == self.m3DMode:
             print("m3DMode")
             self.mImageShownWidget = m3DImageShownWidget()
@@ -157,11 +157,11 @@ class SingleImageShownContainer(QFrame):
 
     def tryUpdateCrossViewSignalEmit(self):
         if self.isSelected:
-            self.signalCollectionHelper.updateICrossBoxSignal.emit(self)
+            # self.signalCollectionHelper.updateICrossBoxSignal.emit(self)
             self.mImageShownWidget.tryHideCrossBoxWidget()
 
-    def tryInteractiveSignalEmit(self, interactiveType: InteractiveType):
-        self.signalCollectionHelper.interactiveSignal.emit(interactiveType, self)
+    # def tryInteractiveSignalEmit(self, interactiveType: InteractiveType):
+        # self.signalCollectionHelper.interactiveSignal.emit(interactiveType, self)
 
     def showSlideShowContainer(self):
         if isinstance(self.mImageShownWidget, m2DImageShownWidget):
@@ -183,7 +183,7 @@ class SingleImageShownContainer(QFrame):
             print("click title")
             self.isSelected = not self.isSelected
             self.selectSignal.emit(self.isSelected)
-            self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
+            # self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
             self.tryUpdateCrossViewSignalEmit()
         super().mousePressEvent(QMouseEvent)
 
@@ -210,7 +210,7 @@ class SingleImageShownContainer(QFrame):
             self.setDataFromDropEvent(event.mimeData().getImageExtraData())
             self.isSelected = True
             self.selectSignal.emit(self.isSelected)
-            self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
+            # self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
             self.switchImageContainerMode(self.m2DMode)
         else:
             event.ignore()

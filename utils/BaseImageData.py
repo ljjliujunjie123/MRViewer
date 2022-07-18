@@ -5,6 +5,7 @@ from enum import Enum
 import os
 from utils.status import Status
 from cacheout import Cache
+from Model.ImagesDataModel import imageDataModel
 
 class Location(Enum):
     """顺序为左上、右上、左下、右下"""
