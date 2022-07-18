@@ -11,7 +11,8 @@ class TitleBar(QWidget):
         QWidget.__init__(self,parent)
         self.parent = parent
         self.setFixedHeight(30)
-         
+        self.setObjectName("TitleBar")
+        self.setContentsMargins(0,0,0,0)
         self.iconLabel = QLabel(self)
         self.titleLabel = QLabel(self)
 

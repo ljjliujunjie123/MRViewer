@@ -13,8 +13,17 @@ from vtkmodules.util.vtkConstants import *
 def checkMultiFrame(seriesDict):
     return seriesDict.isMultiFrame
 
-def createDicomPixmap(dcmFile):
-    image_2d = dcmFile.pixel_array.astype(float)
+# def createDicomPixmap(dcmFile):
+#     image_2d = dcmFile.pixel_array.astype(float)
+#     image_2d_scaled = (np.maximum(image_2d, 0) / max(image_2d.max(),1)) * 255.0
+#     image_2d_scaled = np.uint8(image_2d_scaled)#!
+#     image = Image.fromarray(image_2d_scaled)
+#     dcmImage = ImageQt(image)
+#     pix = QPixmap.fromImage(dcmImage)
+#     pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
+#     return pixmap_resized
+def createDicomPixmap(pixel_array):
+    image_2d = float(pixel_array)#.astype(float)
     image_2d_scaled = (np.maximum(image_2d, 0) / max(image_2d.max(),1)) * 255.0
     image_2d_scaled = np.uint8(image_2d_scaled)#!
     image = Image.fromarray(image_2d_scaled)

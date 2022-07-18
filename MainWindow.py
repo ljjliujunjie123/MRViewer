@@ -5,6 +5,7 @@ from Config import uiConfig
 from TitleBar import TitleBar
 from ControlArea import ControlArea
 from DisplayArea import DisplayArea
+from ui.ImageScrollListWidget import ImageScrollListWidget
 from Config import uiConfig
 
 class MainWindow(QMainWindow):
@@ -15,8 +16,9 @@ class MainWindow(QMainWindow):
         self.InitializeWindow()
 
         # 信号部分
-        self.controlArea.toolsContainer.loadSignal.connect(self.displayArea.dataBaseDisplayer.imageDataModel.readFromStudyDirectory)
+        self.controlArea.toolsContainer.loadSignal.connect(self.displayArea.dataBaseDisplayer.ReadNewDirectory)
         self.controlArea.toolsContainer.loadSignal.connect(self.displayArea.ShiftToDatabase)
+        self.displayArea.dataBaseDisplayer.selectFileSignal.connect(self.imageScrollContainer.showImageList)
 
     def InitializeWindow(self):
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -29,6 +31,7 @@ class MainWindow(QMainWindow):
     def InitializeTitleBar(self):
         # dock
         self.title_menu_dock = QDockWidget()
+        self.title_menu_dock.setContentsMargins(0,0,0,0)
         self.title_menu_dock.setAllowedAreas(Qt.TopDockWidgetArea)
         self.title_menu_dock.setFixedHeight(50)
         self.title_menu_dock.setTitleBarWidget(QWidget()) 
@@ -45,21 +48,18 @@ class MainWindow(QMainWindow):
         self.title_menu_dock.setWidget(self.bars)
 
     def InitializeContent(self):
-        centralWidget = QWidget(self)
-        layout = QHBoxLayout()
+        centralWidget = QSplitter(self)
         self.controlArea = ControlArea(centralWidget)
         self.displayArea = DisplayArea(centralWidget)
-        layout.addWidget(self.controlArea)
-        layout.addWidget(self.displayArea)
-        layout.setSpacing(0)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setStretchFactor(self.controlArea,1)
-        layout.setStretchFactor(self.displayArea,3)
+        self.imageScrollContainer=ImageScrollListWidget(centralWidget)
         self.setCentralWidget(centralWidget)
-        centralWidget.setLayout(layout)
-        centralWidget.setStyleSheet('border:1px solid black')
-        centralWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-        
+        centralWidget.setOrientation(Qt.Horizontal)
+        centralWidget.addWidget(self.controlArea)
+        centralWidget.addWidget(self.displayArea)
+        centralWidget.addWidget(self.imageScrollContainer)
+        centralWidget.setStretchFactor(0,1)
+        centralWidget.setStretchFactor(1,3)
+        self.setCentralWidget(centralWidget)
 
     def InitializeMouse(self):
         self.setMouseTracking(True) # 跟踪鼠标开启

@@ -1,15 +1,18 @@
+import os
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QModelIndex,QItemSelectionModel
+from PyQt5.QtCore import Qt, QModelIndex,QItemSelectionModel,pyqtSignal
 from PyQt5.QtGui import QCursor, QMouseEvent,QStandardItemModel
 from PyQt5.QtSql import QSqlQueryModel, QSqlDatabase
-from Model.ImagesDataModel import ImagesDataModel
+from Model.ImagesDataModel import imageDataModel, Kind
 from matplotlib.pyplot import connect
 
 class DataBaseDisplayer(QFrame):
+    selectFileSignal = pyqtSignal()
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.imageDataModel = ImagesDataModel(self)
+        self.setObjectName("DataBaseDisplayer")
+        self.imageDataModel = imageDataModel
         self.db = None
         self.db_connect()
         self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
@@ -35,6 +38,7 @@ class DataBaseDisplayer(QFrame):
         self.select1.currentRowChanged.connect(lambda:self.ReloadStudyData())
         self.table1.setSelectionModel(self.select1)
         self.TableSetting(self.table1)
+        self.table1.doubleClicked.connect(self.DoubleClick1)
 
         self.queryModel2 = QSqlQueryModel(self)
         self.queryModel2.setHeaderData(0, Qt.Horizontal, 'Study date')
@@ -48,6 +52,7 @@ class DataBaseDisplayer(QFrame):
         self.select2.currentRowChanged.connect(lambda:self.ReloadSeriesData())
         self.table2.setSelectionModel(self.select2)
         self.TableSetting(self.table2)
+        self.table2.doubleClicked.connect(self.DoubleClick2)
 
 
         self.queryModel3 = QSqlQueryModel(self)
@@ -63,10 +68,12 @@ class DataBaseDisplayer(QFrame):
         self.select3.currentRowChanged.connect(lambda:self.parent.ShiftToImage)
         self.table3.setSelectionModel(self.select3)
         self.TableSetting(self.table3)
-        self.table3.doubleClicked.connect(self.DoubleClick)
+        self.table3.doubleClicked.connect(self.DoubleClick3)
 
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
         self.setLayout(layout)
         layout.addWidget(self.table1)
         layout.addWidget(self.table2)
@@ -74,7 +81,10 @@ class DataBaseDisplayer(QFrame):
 
     def TableSetting(self,table:QTableView):
         table.verticalHeader().setHidden(True)
-        table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        table.setShowGrid(True)
+        table.setObjectName("Table")
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        table.horizontalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
         table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
 
@@ -96,6 +106,8 @@ class DataBaseDisplayer(QFrame):
             self.queryModel1.fetchMore()
         if self.queryModel1.rowCount() >= 0:
             self.table1.setCurrentIndex(self.queryModel1.index(0,1))
+        self.table1.horizontalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
+        self.table1.horizontalHeader().setStretchLastSection(True)
 
     def ReloadStudyData(self):
         index = self.queryModel1.index(self.table1.currentIndex().row(),1)
@@ -108,6 +120,8 @@ class DataBaseDisplayer(QFrame):
             ORDER BY study_date desc
             """
         self.queryModel2.setQuery(sql,self.db)
+        self.table2.horizontalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
+        self.table2.horizontalHeader().setStretchLastSection(True)
         while(self.queryModel2.canFetchMore()):
             self.queryModel2.fetchMore()
         if self.queryModel2.rowCount() >= 0:
@@ -123,12 +137,55 @@ class DataBaseDisplayer(QFrame):
             WHERE `study_instance_uid` = t.`study_instance_uid` AND `series_instance_uid` = t.`series_instance_uid` AND
             study_instance_uid = '""" + str(data) +r"""')"""
         self.queryModel3.setQuery(sql,self.db)
+        self.table3.horizontalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
+        self.table3.horizontalHeader().setStretchLastSection(True)
         while(self.queryModel3.canFetchMore()):
             self.queryModel3.fetchMore()
 
-    def DoubleClick(self):
+    def DoubleClick1(self):
         # 选中单元格的值传给ImageDisplayer
-        index = self.queryModel3.index(self.table3.currentIndex().row(),1)
-        data = self.queryModel3.data(index)
-        print(data)
+        index = self.queryModel1.index(self.table1.currentIndex().row(),1)
+        data = self.queryModel1.data(index)
+        self.imageDataModel.currentKind = Kind.patient
+        self.imageDataModel.currentId = []
+        self.imageDataModel.currentId.append(data)
+        print(self.imageDataModel.currentId)
+        self.selectFileSignal.emit()
         self.parent.ShiftToImage()
+        
+
+    def DoubleClick2(self):
+        # 选中单元格的值传给ImageDisplayer
+        index = self.queryModel1.index(self.table1.currentIndex().row(),1)
+        data = self.queryModel1.data(index)
+        index2 = self.queryModel2.index(self.table2.currentIndex().row(),1)
+        data2 = self.queryModel2.data(index2)
+        self.imageDataModel.currentKind = Kind.study
+        self.imageDataModel.currentId = []
+        self.imageDataModel.currentId.append(data)
+        self.imageDataModel.currentId.append(data2)
+        print(self.imageDataModel.currentId)
+        self.selectFileSignal.emit()
+        self.parent.ShiftToImage()
+
+
+    def DoubleClick3(self):
+        # 选中单元格的值传给ImageDisplayer
+        index = self.queryModel1.index(self.table1.currentIndex().row(),1)
+        data = self.queryModel1.data(index)
+        index2 = self.queryModel2.index(self.table2.currentIndex().row(),1)
+        data2 = self.queryModel2.data(index2)
+        index3 = self.queryModel3.index(self.table3.currentIndex().row(),0)
+        data3 = self.queryModel3.data(index3)
+        self.imageDataModel.currentKind = Kind.series
+        self.imageDataModel.currentId = []
+        self.imageDataModel.currentId.append(data)
+        self.imageDataModel.currentId.append(data2)
+        self.imageDataModel.currentId.append(data3)
+        print(self.imageDataModel.currentId)
+        self.selectFileSignal.emit()
+        self.parent.ShiftToImage()
+    
+    def ReadNewDirectory(self):
+        self.imageDataModel.readFromStudyDirectory()
+        self.ReloadData()

@@ -11,6 +11,7 @@ class LoadButton(QFrame, ToolsInterface):
         super().__init__(parent)
         self.parent = parent
         self.loadBtn = QPushButton("Load Scan")
+        self.setObjectName("LoadBtn")
         self.loadBtn.setMinimumSize(100,40)
         self.loadBtn.setEnabled(True)
 

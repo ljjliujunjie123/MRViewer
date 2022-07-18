@@ -1,4 +1,3 @@
-import imp
 import os
 import pydicom as pyd
 from copy import deepcopy
@@ -10,7 +9,10 @@ from PyQt5.QtWidgets import *
 class Status(Enum):
     good = 1
     bad = 0 
-
+class Kind(Enum):
+    patient = 1
+    study = 2
+    series = 3
 def isDicom(filePath):
     if filePath.endswith(".dcm"):
         return True
@@ -32,8 +34,7 @@ class ImagesDataModel():
     class MultiFrameExceptionError(Exception):
         pass
 
-    def __init__(self, parent):
-        self.parent = parent
+    def __init__(self):
         print("ImagesDataModel Init.")
         self.rootPath = ""
         self.dataBase = sqlite3.connect('MRViewer.db')
@@ -64,11 +65,14 @@ class ImagesDataModel():
                 `columns`             INTEGER     ,
                 `pixel_array`          BLOB        
             );
-        '''
+        ''' 
         cursor.execute(sql)
         self.dataBase.commit()
         print("文件表格已打开")
         cursor.close()
+
+        self.currentKind = 1
+        self.currentId = []
 
     def __del__(self):
         print("end")
@@ -110,8 +114,7 @@ class ImagesDataModel():
             `patient_name`, `patient_id`, `birth_date`, `sex`,
             `study_date`, `study_instance_uid`, `study_description`,
             `instance_number`, `series_instance_uid`, `series_description`, 
-            `modality`, `rows`,`columns`,
-            `pixel_array`) 
+            `modality`, `rows`,`columns`,`pixel_array`) 
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         """
         # print(dcmFiles)
@@ -121,7 +124,7 @@ class ImagesDataModel():
         cursor.close()
         t3 = time.time()
         print(t3-t2)
-        self.parent.ReloadData()
+        print(len(list_manager.result_list))
 
     def findStudyItem(self, studyName):#!
         sql = r"""
@@ -133,28 +136,50 @@ class ImagesDataModel():
 
         return self.dataSets[studyName]
 
-    def findDefaultStudy(self):
-        # names = self.dataSets.cache_names()
-        # if len(names) == 1:
-        #     return names[0],self.dataSets[names[0]]
-        sql = r'''
-        SELECT 
-        `study_description`,
-        `series_description`,
-        `is_multiframe`,
-        `instance_number`,
-        `path` FROM `MRViewer_file` t
-        where `instance_number` = (
-            select max(`instance_number`) from `MRViewer_file`
-            WHERE `study_instance_uid` = t.`study_instance_uid` AND `series_description` = t.`series_description`
-        )
-        '''
+    def selectStudyToList(self):
+        if self.currentKind == Kind.patient:
+            sql = (r'''
+            SELECT 
+            `study_description`,
+            `series_description`,
+            `instance_number`,
+            `pixel_array` FROM `MRViewer_file` t
+            where `instance_number` = (
+            select max(`instance_number`) from `MRViewer_file`'''
+            +r'WHERE `patient_id` = "'+self.currentId[0]+r'"'
+            +r'AND `study_instance_uid` = t.`study_instance_uid` '
+            +r'AND `series_instance_uid` = t.`series_instance_uid`)')
+        elif self.currentKind == Kind.study:
+            sql = (r'''
+            SELECT 
+            `study_description`,
+            `series_description`,
+            `instance_number`,
+            `pixel_array` FROM `MRViewer_file` t
+            where `instance_number` = (
+            select max(`instance_number`) from `MRViewer_file`'''
+            +r'WHERE `patient_id` = "'+self.currentId[0]+r'"'
+            +r'AND `study_instance_uid` = "'+self.currentId[1]+r'"'
+            +r'AND `series_instance_uid` = t.`series_instance_uid`)')
+        elif self.currentKind == Kind.series:
+            sql = (r'''
+            SELECT 
+            `study_description`,
+            `series_description`,
+            `instance_number`,
+            `pixel_array` FROM `MRViewer_file` t
+            where `instance_number` = (
+            select max(`instance_number`) from `MRViewer_file`'''
+            +r'WHERE `patient_id` = "'+self.currentId[0]+r'"'
+            +r'AND `study_instance_uid` = "'+self.currentId[1]+r'"'
+            +r'AND `series_instance_uid` = "'+self.currentId[2]+r'")')
+
         cursor = self.dataBase.cursor()
         cursor.execute(sql)
         print("数据库已提取")
         temp = cursor.fetchall()
         cursor.close()
-        # print(temp)
+        print(len(temp))
         return temp
 
     def removeStudyItem(self, studyName):
@@ -164,7 +189,7 @@ class ImagesDataModel():
         """ %(studyName)
         cursor = self.dataBase.cursor()
 
-    def addSeriesItem(self, studyName, seriesName):
+    def addSeriesItem(self, studyName, seriesName):#!no use
         seriesPath = os.path.join(self.rootPath, studyName, seriesName)
         for sliceName in os.listdir(seriesPath):
             slicePath = os.path.join(seriesPath,sliceName)
@@ -297,7 +322,7 @@ def list_dir(directory):
             path = os.path.join(directory,item)
             if os.path.isfile(path):
                 if isDicom(path):
-                    dcmFile = pyd.dcmread(path)
+                    dcmFile = pyd.dcmread(path)# ,None,True) 优化：可以先不读pixeldata
                     try:
                         _ = dcmFile.NumberOfFrames
                     except:
@@ -367,3 +392,5 @@ class ListManager(object):
         while len(self.threads):
             worker = self.threads.pop()
             worker.join()
+
+imageDataModel = ImagesDataModel()

@@ -12,7 +12,7 @@ class SegmentSelector(QFrame,ToolsInterface):
         QFrame.__init__(self, parent)
         self.parent = parent
         self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-        self.setStyleSheet("border: 1px solid black;")
+        self.setObjectName("SegmentSelector")
         #添加标签
         #设置字体
         titleFont=QFont()
@@ -29,13 +29,10 @@ class SegmentSelector(QFrame,ToolsInterface):
         titleLabel.setStyleSheet('border-width:0px;color:#3894c8')
         cardiacLabel=QLabel("Cardiac")
         cardiacLabel.setFont(switchFont)
-        cardiacLabel.setStyleSheet('border-width:0px;color:black')
         aortaLabel=QLabel("Aorta")
         aortaLabel.setFont(switchFont)
-        aortaLabel.setStyleSheet('border-width:0px;color:black')
         boneLabel=QLabel("Bone")
         boneLabel.setFont(switchFont)
-        boneLabel.setStyleSheet('border-width:0px;color:black')
         #添加开关
         cardiacSwitch = SwitchButton()
         aortalSwitch = SwitchButton()

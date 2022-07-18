@@ -11,7 +11,7 @@ class DisplayAdjustor(QFrame,ToolsInterface):
         QFrame.__init__(self, parent)
         self.parent = parent
         self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-        self.setStyleSheet("border: 1px solid black;")
+        self.setObjectName("DisplayAdjustor")
         #添加标签
         #设置字体
         titleFont=QFont()
@@ -28,13 +28,10 @@ class DisplayAdjustor(QFrame,ToolsInterface):
         titleLabel.setStyleSheet('border-width:0px;color:#3894c8')
         contrastLabel=QLabel("Contrast")
         contrastLabel.setFont(sliderFont)
-        contrastLabel.setStyleSheet('border-width:0px;color:black')
         opacityLabel=QLabel("Opacity")
         opacityLabel.setFont(sliderFont)
-        opacityLabel.setStyleSheet('border-width:0px;color:black')
         shiftLabel=QLabel("Shift")
         shiftLabel.setFont(sliderFont)
-        shiftLabel.setStyleSheet('border-width:0px;color:black')
         #添加开关
         contrastSlider = QSlider(Qt.Horizontal)
         opacitySlider = QSlider(Qt.Horizontal)

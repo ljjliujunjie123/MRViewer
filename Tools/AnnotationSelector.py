@@ -12,7 +12,7 @@ class AnnotationSelector(QFrame,ToolsInterface):
         QFrame.__init__(self, parent)
         self.parent = parent
         self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-        self.setStyleSheet("border: 1px solid black;")
+        self.setObjectName("AnnotationSelector")
         #添加标签
         #设置字体
         titleFont=QFont()
