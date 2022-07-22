@@ -13,16 +13,17 @@ class DataBaseDisplayer(QFrame):
         self.parent = parent
         self.setObjectName("DataBaseDisplayer")
         self.imageDataModel = imageDataModel
-        self.db = None
-        self.db_connect()
-        self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-        self.InitializeContent()
-        # itemEntered.connect(self.ShowTooltip(self.table1))
-    def db_connect(self):
+
+        # open database
         self.db = QSqlDatabase.addDatabase("QSQLITE")
         self.db.setDatabaseName("./MRViewer.db")
         if not self.db.open():
             QMessageBox.critical(self, 'Database Connection', self.db.lastError().text())
+        
+        # style settings
+        self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.InitializeContent()
+        # itemEntered.connect(self.ShowTooltip(self.table1))
 
     def InitializeContent(self):
         self.queryModel1 = QSqlQueryModel(self)
@@ -143,7 +144,7 @@ class DataBaseDisplayer(QFrame):
             self.queryModel3.fetchMore()
 
     def DoubleClick1(self):
-        # 选中单元格的值传给ImageDisplayer
+        # 选中单元格的值传给IntraImageDisplayer
         index = self.queryModel1.index(self.table1.currentIndex().row(),1)
         data = self.queryModel1.data(index)
         self.imageDataModel.currentKind = Kind.patient
@@ -155,7 +156,7 @@ class DataBaseDisplayer(QFrame):
         
 
     def DoubleClick2(self):
-        # 选中单元格的值传给ImageDisplayer
+        # 选中单元格的值传给IntraImageDisplayer
         index = self.queryModel1.index(self.table1.currentIndex().row(),1)
         data = self.queryModel1.data(index)
         index2 = self.queryModel2.index(self.table2.currentIndex().row(),1)
@@ -170,7 +171,7 @@ class DataBaseDisplayer(QFrame):
 
 
     def DoubleClick3(self):
-        # 选中单元格的值传给ImageDisplayer
+        # 选中单元格的值传给IntraImageDisplayer
         index = self.queryModel1.index(self.table1.currentIndex().row(),1)
         data = self.queryModel1.data(index)
         index2 = self.queryModel2.index(self.table2.currentIndex().row(),1)

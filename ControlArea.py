@@ -2,8 +2,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from ToolsContainer import ToolsContainer, ExtraToolsContainer
-
+from DisplayArea import ImageMode
 class ControlArea(QFrame):
+    modeSignal = pyqtSignal(int)
     def __init__(self, parent):
         QFrame.__init__(self)
         self.parent = parent
@@ -57,7 +58,7 @@ class ControlArea(QFrame):
         self.preOprBtn.setObjectName("OprBtn")
         self.preOprBtn.setFixedSize(50,50)
         self.operationModeLayout.addWidget(self.preOprBtn)
-        # self.preOprBtn.clicked.connect(signal)#down为开启，up为关闭
+        self.preOprBtn.clicked.connect(self.PreSelect)
         
         # 术中按钮
         self.intraOprBtn = QPushButton("Intra")
@@ -65,7 +66,7 @@ class ControlArea(QFrame):
         self.intraOprBtn.setObjectName("OprBtn")
         self.intraOprBtn.setFixedSize(50,50)
         self.operationModeLayout.addWidget(self.intraOprBtn)
-        # self.intraOprBtn.clicked.connect(signal)#down为开启，up为关闭
+        self.intraOprBtn.clicked.connect(self.IntraSelect)
 
         # 术后按钮
         self.postOprBtn = QPushButton("Post")
@@ -73,21 +74,15 @@ class ControlArea(QFrame):
         self.postOprBtn.setObjectName("OprBtn")
         self.postOprBtn.setFixedSize(50,50)
         self.operationModeLayout.addWidget(self.postOprBtn)
-        # self.postOprBtn.clicked.connect(signal)#down为开启，up为关闭
+        # self.postOprBtn.clicked.connect(self.PostSelect)#down为开启，up为关闭
 
-        # 为listitem添加点击事件，切换stackedwidget页面
-
-    def item_clicked(self):
-        # 获取当前选中的item
-        item = self.operationModeLayout.selectedItems()[0]
-        if item.text() == 'Pre':
-            self.switch_dataView()
-        elif item.text() == 'Intra':
-            self.switch_dataLog()
-        elif item.text() == 'Post':
-            self.switch_paramWidget()
-        else:
-            self.switch_export()
+    # 为按钮添加点击事件，切换stackedwidget页面
+    def PreSelect(self):
+        self.modeSignal.emit(ImageMode.pre)
+    def IntraSelect(self):
+        self.modeSignal.emit(ImageMode.intra)
+    # def PostSelect(self):
+    #     self.modeSignal.emit(ImageMode.post)
     def resizeEvent(self, *args, **kwargs):
         print("cur operationModeLayout Geometry ", self.operationModeLayout.geometry())
         

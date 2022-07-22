@@ -12,7 +12,7 @@ class UIConfig():
     #菜单高度
     menuHeight = 30
 
-    scrollContainerHintWidth = 300
+    scrollContainerHintWidth = 500
     toolsContainerHintWidth = 120
 
     scrollRootItemHeight = 50

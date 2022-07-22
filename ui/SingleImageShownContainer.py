@@ -47,7 +47,7 @@ class SingleImageShownContainer(QFrame):
         QFrame.__init__(self)
         self.mImageShownWidget = None
         self.mImage2DShownData = mImage2DShownData()
-        # self.signalCollectionHelper = self.SignalCollectionHelper()
+        self.signalCollectionHelper = self.SignalCollectionHelper()
         self.resizeFlag = False
         self.isSelected = False
         self.curMode = self.m2DMode
@@ -157,11 +157,11 @@ class SingleImageShownContainer(QFrame):
 
     def tryUpdateCrossViewSignalEmit(self):
         if self.isSelected:
-            # self.signalCollectionHelper.updateICrossBoxSignal.emit(self)
+            self.signalCollectionHelper.updateICrossBoxSignal.emit(self)
             self.mImageShownWidget.tryHideCrossBoxWidget()
 
-    # def tryInteractiveSignalEmit(self, interactiveType: InteractiveType):
-        # self.signalCollectionHelper.interactiveSignal.emit(interactiveType, self)
+    def tryInteractiveSignalEmit(self, interactiveType: InteractiveType):
+        self.signalCollectionHelper.interactiveSignal.emit(interactiveType, self)
 
     def showSlideShowContainer(self):
         if isinstance(self.mImageShownWidget, m2DImageShownWidget):
@@ -183,7 +183,7 @@ class SingleImageShownContainer(QFrame):
             print("click title")
             self.isSelected = not self.isSelected
             self.selectSignal.emit(self.isSelected)
-            # self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
+            self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
             self.tryUpdateCrossViewSignalEmit()
         super().mousePressEvent(QMouseEvent)
 
@@ -210,7 +210,7 @@ class SingleImageShownContainer(QFrame):
             self.setDataFromDropEvent(event.mimeData().getImageExtraData())
             self.isSelected = True
             self.selectSignal.emit(self.isSelected)
-            # self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
+            self.signalCollectionHelper.selectImageShownContainerSignal.emit(self, self.isSelected)
             self.switchImageContainerMode(self.m2DMode)
         else:
             event.ignore()

@@ -6,6 +6,7 @@ from TitleBar import TitleBar
 from ControlArea import ControlArea
 from DisplayArea import DisplayArea
 from ui.ImageScrollListWidget import ImageScrollListWidget
+# from ui.displayArea.preImageDisplayer import ImageShownContainer
 from Config import uiConfig
 
 class MainWindow(QMainWindow):
@@ -19,6 +20,33 @@ class MainWindow(QMainWindow):
         self.controlArea.toolsContainer.loadSignal.connect(self.displayArea.dataBaseDisplayer.ReadNewDirectory)
         self.controlArea.toolsContainer.loadSignal.connect(self.displayArea.ShiftToDatabase)
         self.displayArea.dataBaseDisplayer.selectFileSignal.connect(self.imageScrollContainer.showImageList)
+        self.controlArea.modeSignal.connect(self.displayArea.setCurrentMode)
+
+        
+        #旧信号绑定部分
+        # self.updateImageListSignal.connect(self.updateImageListArea)
+        # self.tryClearImageShownSignal.connect(self.tryClearImageShownHandler)
+        # self.actionopen_study.triggered.connect(self.openFileController.openStudyDirectory)
+        # self.controlArea.extraToolsContainer.showInfoSig.connect(self.showImageShownLayoutInfo)
+        self.displayArea.preImageDisplayer.imageShownBaseController.initToolsContainerStateSignal.connect(
+            self.controlArea.extraToolsContainer.initToolsContainerStateHandler
+        )
+        self.displayArea.preImageDisplayer.imageShownBaseController.updateToolsContainerStateSignal.connect(
+            self.controlArea.extraToolsContainer.updateToolsContainerStateHandler
+        )
+        self.controlArea.extraToolsContainer.updateImageShownLayoutSignal.connect(
+            self.displayArea.preImageDisplayer.imageShownLayoutController.updateLayout
+        )
+        self.controlArea.extraToolsContainer.enableImageSlideshowSignal.connect(
+            self.displayArea.preImageDisplayer.imageSlideShowController.imageSlideshowHandler
+        ) #evermg42
+        self.controlArea.extraToolsContainer.imageModeSelectSignal.connect(
+            self.displayArea.preImageDisplayer.imageShownBaseController.imageModeSelectHandler
+        )
+        self.controlArea.extraToolsContainer.enableImageExtraInfoSignal.connect(
+            self.displayArea.preImageDisplayer.imageShownBaseController.imageExtraInfoStateHandler
+        )
+
 
     def InitializeWindow(self):
         self.setWindowFlags(Qt.FramelessWindowHint)

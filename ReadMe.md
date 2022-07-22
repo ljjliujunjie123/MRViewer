@@ -21,3 +21,6 @@
 ## 2022-7-18
 1. 加入选择图像的滚动窗口，准备解决pixelarray传输问题
 2. 未解决pixelarray传输问题，改为传输path，暂无2D/3D选项
+
+## 2022-7-22
+1. PreImageDisplayer 与 IntraImageDisplayer 分离。前者沿用LJJ的ImageShownContainer结构。后者运用3-by-1布局。
