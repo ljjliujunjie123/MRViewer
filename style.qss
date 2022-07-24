@@ -57,10 +57,13 @@ background-color: rgb(200,200,200);
 border: 0.5px solid white;
 }
 
-
 QFrame#SegmentSelector *{
     color: white;
 }
 QFrame#Measure *{
     color: white;
+}
+
+QListWidget#ImageScrollListWidget{
+background-color: rgb(71,71,71);    
 }

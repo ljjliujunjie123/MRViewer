@@ -24,3 +24,6 @@
 
 ## 2022-7-22
 1. PreImageDisplayer 与 IntraImageDisplayer 分离。前者沿用LJJ的ImageShownContainer结构。后者运用3-by-1布局。
+
+## 2022-7-24
+1. 完善布局，RealTime起步阶段。

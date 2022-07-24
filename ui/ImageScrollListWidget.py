@@ -27,6 +27,7 @@ class ImageScrollListWidget(QListWidget):
         self.setSpacing(uiConfig.itemSpace)
         self.setResizeMode(QListWidget.Adjust)
         self.setItemDelegate(ImageScrollItemDelegate(self))
+        self.setFlow(QListView.LeftToRight)
 
     def showImageList(self):
         print("showImageList")

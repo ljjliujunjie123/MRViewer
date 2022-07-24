@@ -16,6 +16,7 @@ class TitleBar(QWidget):
         self.iconLabel = QLabel(self)
         self.titleLabel = QLabel(self)
 
+        self.isPressed = False
         self.fileOpener = QMenu(self)
         self.actionopen_study = QAction(self)
         self.actionopen_patient = QAction(self)
@@ -74,4 +75,17 @@ class TitleBar(QWidget):
         pLayout.setContentsMargins(5, 0, 5, 0)
         self.setLayout(pLayout)
     
-    
+    def mousePressEvent(self, QMouseEvent):
+        self.isPressed = True
+        self.startMovePos = QMouseEvent.globalPos()
+        print(self.startMovePos)
+
+    def mouseMoveEvent(self, QMouseEvent):
+        if self.isPressed:
+            movePoint = QMouseEvent.globalPos() - self.startMovePos
+            widgetPos = self.parentWidget().parentWidget().parentWidget().pos()
+            self.startMovePos = QMouseEvent.globalPos()
+            self.parentWidget().parentWidget().parentWidget().move(widgetPos.x() + movePoint.x(), widgetPos.y() + movePoint.y())
+
+    def mouseReleaseEvent(self, QMouseEvent):
+        self.isPressed = False

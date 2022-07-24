@@ -100,7 +100,7 @@ class BaseImageData():
 
     def getImageTitleInfo(self, index):
         dcmData = self.getDcmDataByIndex(index)
-        # imageDataModel.findSeriesTitleInfo(self.studyName,self.seriesName)
+        imageDataModel.findSeriesTitleInfo(self.studyName,self.seriesName)
         try: 
             patientName = str(dcmData.PatientName)
         except:

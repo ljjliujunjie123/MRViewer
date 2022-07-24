@@ -42,9 +42,9 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageViewer =  vtk.vtkImageViewer2()
         self.imageViewer.SetupInteractor(self.iren)
         self.renImage = vtk.vtkRenderer()
-        self.renImage.SetBackground2(create_color_from_hexString(uiConfig.LightColor.Analogous1))
-        self.renImage.SetBackground(create_color_from_hexString(uiConfig.LightColor.Complementary))
-        self.renImage.GradientBackgroundOn()
+        # self.renImage.SetBackground2(create_color_from_hexString(uiConfig.LightColor.Analogous1))
+        # self.renImage.SetBackground(create_color_from_hexString(uiConfig.LightColor.Complementary))
+        # self.renImage.GradientBackgroundOn()
         self.renText = vtk.vtkRenderer()
 
         #extra文本信息，依次是左上、右上、左下、右下

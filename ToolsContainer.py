@@ -156,9 +156,9 @@ class ExtraToolsContainer(QScrollArea):
         self.toolFactory = ToolsFactory(self.toolsScrollContainer)
 
         # 功能1 annotation
-        self.annotationSelector = \
-            self.toolFactory.createTool(ToolNum.annotation, signal = self.loadSignal)
-        self.toolsScrollLayout.addWidget(self.annotationSelector,0,Qt.AlignTop)
+        # self.annotationSelector = \
+        #     self.toolFactory.createTool(ToolNum.annotation, signal = self.loadSignal)
+        # self.toolsScrollLayout.addWidget(self.annotationSelector,0,Qt.AlignTop)
 
         #! 功能2
         # 按钮唤起一个可选择的表格，来调整文件渲染区的布局

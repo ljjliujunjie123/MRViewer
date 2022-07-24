@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 from Config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 from controller.ImageShownLayoutController import ImageShownLayoutController
@@ -80,33 +81,33 @@ class PreImageDisplayer(QFrame):
             ]
         )
 
-class IntraImageDisplayer(QFrame):
+class IntraImageDisplayer(QSplitter):
     def __init__(self, parent):
-        QFrame.__init__(self, parent)
+        QSplitter.__init__(self, parent)
         #! self.resize(uiConfig.calcShownContainerWidth(),self.parent().height())
         print("IntraImageDisplayer Geometry:")
         print(self.geometry())
-        self.setFrameShape(QFrame.StyledPanel)
-        self.setFrameShadow(QFrame.Plain)
+        self.setFrameShape(QSplitter.StyledPanel)
+        self.setFrameShadow(QSplitter.Plain)
         self.setObjectName("imageShownContainer")
         
         
-        self.hlayout = QHBoxLayout()
+        self.sideSplitter = QSplitter()
+        self.sideSplitter.setOrientation(Qt.Vertical)
 
         self.mainDisplayer = SingleImageShownContainer()
         self.axialDisplayer = SingleImageShownContainer()#横截面
+        
         self.coronalDisplayer = SingleImageShownContainer()#冠状面
         self.sagittalDisplayer = SingleImageShownContainer()#矢状面
-
-        self.vlayout = QVBoxLayout()
-        self.vlayout.addWidget(self.axialDisplayer)
-        self.vlayout.addWidget(self.coronalDisplayer)
-        self.vlayout.addWidget(self.sagittalDisplayer)
-        self.hlayout.addWidget(self.mainDisplayer)
-        self.hlayout.addLayout(self.vlayout)
-        self.hlayout.setStretchFactor(self.mainDisplayer,3)
-        self.hlayout.setStretchFactor(self.vlayout,1)
-        self.setLayout(self.hlayout)
+        
+        self.addWidget(self.mainDisplayer)
+        self.sideSplitter.addWidget(self.axialDisplayer)
+        self.sideSplitter.addWidget(self.coronalDisplayer)
+        self.sideSplitter.addWidget(self.sagittalDisplayer)
+        self.addWidget(self.sideSplitter)
+        self.setStretchFactor(0,3)
+        self.setStretchFactor(1,1)
 
     #     self.imageShownContainerWidget = QWidget(self)
     #     self.imageShownContainerWidget.setFixedSize(self.size())

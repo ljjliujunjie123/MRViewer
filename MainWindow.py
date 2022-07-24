@@ -77,16 +77,22 @@ class MainWindow(QMainWindow):
 
     def InitializeContent(self):
         centralWidget = QSplitter(self)
+        displayDivider = QSplitter(self)
+        displayDivider.setOrientation(Qt.Vertical)
         self.controlArea = ControlArea(centralWidget)
         self.displayArea = DisplayArea(centralWidget)
         self.imageScrollContainer=ImageScrollListWidget(centralWidget)
-        self.setCentralWidget(centralWidget)
+        # self.setCentralWidget(centralWidget)
+
+        displayDivider.addWidget(self.displayArea)
+        displayDivider.addWidget(self.imageScrollContainer)
         centralWidget.setOrientation(Qt.Horizontal)
         centralWidget.addWidget(self.controlArea)
-        centralWidget.addWidget(self.displayArea)
-        centralWidget.addWidget(self.imageScrollContainer)
+        centralWidget.addWidget(displayDivider)
+        # centralWidget.addWidget(self.displayArea)
+        # centralWidget.addWidget(self.imageScrollContainer)
         centralWidget.setStretchFactor(0,1)
-        centralWidget.setStretchFactor(1,2)
+        centralWidget.setStretchFactor(1,3)
         self.setCentralWidget(centralWidget)
 
     def InitializeMouse(self):
@@ -95,22 +101,3 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self, *args, **kwargs):
         print("mainWindow geometry", self.geometry())
-
-    # def moveEvent(self, *args, **kwargs):
-        # print("moving MainWindow")
-
-    def mousePressEvent(self, event):
-        # 重写鼠标点击的事件
-        if (event.button() == Qt.LeftButton):# and self.titleBar.geometry().contains(event.pos()):# 鼠标左键点击标题栏区
-            
-            self.move_DragPosition = event.globalPos() - self.pos()
-            event.accept()
-
-    def mouseMoveEvent(self, QMouseEvent):
-        self.setCursor(Qt.ArrowCursor)
-        if QMouseEvent.buttons() == Qt.LeftButton:
-            # 拖放窗口位置
-            self.move(QMouseEvent.globalPos() - self.move_DragPosition)
-            moveEvent = QMoveEvent(QMouseEvent.globalPos(), self.move_DragPosition)
-            # print(moveEvent.pos(), moveEvent.oldPos())
-            QMouseEvent.accept()

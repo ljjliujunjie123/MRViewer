@@ -46,7 +46,7 @@ class UIConfig():
     annotationSize = QSize(30,30)
     specialSymbolSize = QSize(40,40)
     iconTextSpace = 10
-    listHeight = 1000
+    listHeight = 300
 
     factor_bright = 1
     factor_contrast = 1
