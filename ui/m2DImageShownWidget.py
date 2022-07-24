@@ -1,37 +1,27 @@
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QCursor,QMoveEvent
-from PyQt5.QtWidgets import QFrame,QSizePolicy,QMenu,QAction,QApplication,QStyle
-from Config import uiConfig
+from PyQt5.QtWidgets import QFrame
+from ui.config import uiConfig
 from ui.CustomQVTKRenderWindowInteractor import CustomQVTKRenderWindowInteractor
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
-from ui.CustomInteractiveCrossBoxWidget import CustomInteractiveCrossBoxWidget
-from ui.mGraphicCrossBoxItem import mGraphicParallelogramParams
-from ui.CustomDicomTagsWindow import CustomDicomTagsWindow
+from ui.CustomCrossBoxWidget import CustomCrossBoxWidget
 import vtkmodules.all as vtk
-import numpy as np
-from utils.BaseImageData import Location
-from utils.status import Status
-from utils.util import numpy2VTK,create_color_from_hexString
-from utils.InteractiveType import InteractiveType
+from utils.util import getDicomWindowCenterAndLevel,getImageExtraInfoFromDicom,getImageOrientationInfoFromDicom,Location
+from utils.cycleSyncThread import CycleSyncThread
 
 class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     sigWheelChanged = pyqtSignal(object)
     update2DImageShownSignal = pyqtSignal()
     updateCrossViewSubSignal = pyqtSignal()
-    interactiveSubSignal = pyqtSignal(InteractiveType)
 
     def __init__(self):
         QFrame.__init__(self)
         #初始化GUI配置
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.createRightMenu)  # 连接到菜单显示函数
+
         #初始化数据
         self.imageData = None
         #初始化逻辑
         self.imageShownData = None
-        self.isInit = True
-        self.dicomWins = list()
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
         self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()
@@ -42,9 +32,6 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageViewer =  vtk.vtkImageViewer2()
         self.imageViewer.SetupInteractor(self.iren)
         self.renImage = vtk.vtkRenderer()
-        # self.renImage.SetBackground2(create_color_from_hexString(uiConfig.LightColor.Analogous1))
-        # self.renImage.SetBackground(create_color_from_hexString(uiConfig.LightColor.Complementary))
-        # self.renImage.GradientBackgroundOn()
         self.renText = vtk.vtkRenderer()
 
         #extra文本信息，依次是左上、右上、左下、右下
@@ -57,15 +44,10 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
         #方位actor，依次是left,right,top,bottom
         self.orientationActors = [vtk.vtkTextActor() for i in range(4)]
 
-        # crossView
-        # self.crossBoxWidget = CustomCrossBoxWidget(self)
-        # self.installEventFilter(self.crossBoxWidget)#防止CrossBox遮挡其他应用窗口
+        #crossView
+        self.crossBoxWidget = CustomCrossBoxWidget(self)
+        self.installEventFilter(self.crossBoxWidget)#防止CrossBox遮挡其他应用窗口
         # self.crossBoxWidget.show()
-
-        # interactive crossView
-        self.iCrossBoxWidget = CustomInteractiveCrossBoxWidget(self.interactiveSubSignal)
-        self.iCrossBoxWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.iCrossBoxWidget.show()
 
         self.timerThread = None
 
@@ -73,77 +55,61 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def initBaseData(self, imageData):
         self.imageData = imageData
-        #初始化窗位窗宽
-        level,width = self.imageData.getDicomWindowCenterAndLevel(self.imageData.currentIndex)
-        self.imageViewer.SetColorLevel(level)
-        self.imageViewer.SetColorWindow(width)
 
     def showAllViews(self):
         self.show2DImageVtkView()
         if self.imageShownData.showExtraInfoFlag:
-            # self.showImageExtraInfoVtkView()
+            self.showImageExtraInfoVtkView()
             self.renderVtkWindow()
         else:
+            self.show2DImageVtkView()
             self.renderVtkWindow(1)
             # self.showCrossView()
 
+    def getSingleContainerParent(self):
+        return self.parent().parent().parent()
+
     def show2DImageVtkView(self):
-        dcmFile = self.imageData.getDcmDataByIndex(self.imageData.currentIndex)
-        vtkImageData = numpy2VTK(np.uint16(dcmFile.pixel_array))
+        self.reader.SetDataByteOrderToLittleEndian()
+        self.reader.SetFileName(self.imageData.curFilePath)
+        self.reader.Update()
 
-        flip = vtk.vtkImageFlip()
-        flip.SetInputData(vtkImageData)
-        flip.SetFilteredAxes(1)
-        flip.Update()
-
-        self.imageViewer.SetInputConnection(flip.GetOutputPort())
-        level,width = self.imageData.getDicomWindowCenterAndLevel(self.imageData.currentIndex)
-        print("当前帧的窗位，窗宽依次是：{0} {1}".format(self.imageViewer.GetColorLevel(),self.imageViewer.GetColorWindow()))
+        self.imageViewer.SetInputConnection(self.reader.GetOutputPort())
+        level,width = getDicomWindowCenterAndLevel(self.imageData.curFilePath)
+        self.imageViewer.SetColorLevel(level)
+        self.imageViewer.SetColorWindow(width)
         self.imageViewer.SetRenderer(self.renImage)
         self.imageViewer.SetRenderWindow(self.qvtkWidget.GetRenderWindow())
         self.imageViewer.UpdateDisplayExtent()
 
         self.renImage.SetLayer(0)
-        if self.isInit:
-            self.renImage.ResetCamera()
-            self.isInit = False
+        self.renImage.ResetCamera()
 
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renImage)
 
     def showImageExtraInfoVtkView(self):
-        self.renText.SetInteractive(0)
-        self.renText.SetLayer(1)
+        #添加orientation注释
+        orientationInfo = getImageOrientationInfoFromDicom(self.imageData.curFilePath)
+        for i in range(len(orientationInfo)):
+            self.orientationActors[i].SetInput(orientationInfo[i])
+            self.orientationActors[i].GetTextProperty().SetFontSize(20)
+            self.orientationActors[i].GetTextProperty().SetColor(1, 0, 0)
 
         truWidth,truHeight = self.parent().width(),self.parent().height()
+        self.orientationActors[0].SetDisplayPosition(20,truHeight//2)
+        self.orientationActors[1].SetDisplayPosition(truWidth - 20,truHeight//2)
+        self.orientationActors[2].SetDisplayPosition(truWidth//2,truHeight - 40)
+        self.orientationActors[3].SetDisplayPosition(truWidth//2,20)
 
-        #添加orientation注释
-        orientationInfo = self.imageData.getImageOrientationInfoFromDicom(self.imageData.currentIndex)
-        if orientationInfo != Status.bad:
-            for i in range(len(orientationInfo)):
-                self.orientationActors[i].SetInput(orientationInfo[i])
-                self.orientationActors[i].SetTextScaleModeToViewport()
-                self.orientationActors[i].SetNonLinearFontScale(0.7,10)
-                self.orientationActors[i].GetTextProperty().SetColor(1, 0, 0)
-
-            self.orientationActors[0].SetDisplayPosition(20,truHeight//2)
-            self.orientationActors[1].SetDisplayPosition(truWidth - 20,truHeight//2)
-            self.orientationActors[2].SetDisplayPosition(truWidth//2,truHeight - 10)
-            self.orientationActors[2].GetTextProperty().SetVerticalJustificationToTop()
-            self.orientationActors[3].SetDisplayPosition(truWidth//2,10)
-
-            self.orientationActors[0].GetTextProperty().SetJustificationToLeft()
-            self.orientationActors[1].GetTextProperty().SetJustificationToRight()
-            self.orientationActors[2].GetTextProperty().SetJustificationToLeft()
-            self.orientationActors[3].GetTextProperty().SetJustificationToLeft()
-
-            for actor in self.orientationActors:
-                self.renText.AddActor(actor)
+        self.orientationActors[0].GetTextProperty().SetJustificationToLeft()
+        self.orientationActors[1].GetTextProperty().SetJustificationToRight()
+        self.orientationActors[2].GetTextProperty().SetJustificationToLeft()
+        self.orientationActors[3].GetTextProperty().SetJustificationToLeft()
 
         #添加文本注释
-        textDict = self.imageData.getImageExtraInfoFromDicom(self.imageData.currentIndex)
+        # self.textActor.SetTextScaleModeToProp()
+        textDict = getImageExtraInfoFromDicom(self.imageData.curFilePath)
         for location,textActor in self.textActors.items():
-            textActor.SetTextScaleModeToViewport()
-            textActor.SetNonLinearFontScale(0.6,12)
             textActor.SetInput(textDict[location])
 
         #调整文本位置
@@ -161,15 +127,21 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
                 self.calcExtraInfoWidth(), self.calcExtraInfoHeight())
         self.textActors[Location.DR].SetDisplayPosition(
                 truWidth - self.calcExtraInfoWidth(), self.calcExtraInfoHeight())
-
+        
         #调整文本字体颜色，并添加到render中
         for textActor in self.textActors.values():
-            color = create_color_from_hexString(uiConfig.LightColor.Black)
-            textActor.GetTextProperty().SetColor(color)
+            textActor.GetTextProperty().SetFontSize(20)
+            textActor.GetTextProperty().SetColor(1, 1, 1)
             textActor.GetTextProperty().BoldOn()
             textActor.GetTextProperty().ShadowOn()
 
             self.renText.AddActor(textActor)
+
+        self.renText.SetInteractive(0)
+        self.renText.SetLayer(1)
+    
+        for actor in self.orientationActors:
+            self.renText.AddActor(actor)
 
         self.qvtkWidget.GetRenderWindow().AddRenderer(self.renText)
         # size = [0.0,0.0]
@@ -181,92 +153,38 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
             self.qvtkWidget.GetRenderWindow().RemoveRenderer(self.renText)
             self.renderVtkWindow(layerCount=1)
 
-    def getImageDisplayPos(self):
-        """ 目前该函数只支持缩放中心点在视图正中央的情况，如果image被拖动到其他位置，计算错误"""
-        bounds = self.imageViewer.GetImageActor().GetBounds()
-        #图像右下角
-        colBound,rowBound = bounds[1],bounds[3]
-        z = self.renImage.GetZ(int(colBound),int(rowBound))
-        self.renImage.SetWorldPoint(colBound,rowBound,z,0)
-        self.renImage.WorldToDisplay()
-        imageBoundPoint = self.renImage.GetDisplayPoint()
-        #图像左上角
-        colBound2,rowBound2 = bounds[0],bounds[2]
-        z = self.renImage.GetZ(int(colBound2),int(rowBound2))
-        self.renImage.SetWorldPoint(colBound2,rowBound2,z,0)
-        self.renImage.WorldToDisplay()
-        imageBoundPoint2 = self.renImage.GetDisplayPoint()
-
-        # print("bounds: ",imageBoundPoint,imageBoundPoint2)
-        imageBoundPoint = np.array(imageBoundPoint[:2])
-        imageBoundPoint2 = np.array(imageBoundPoint2[:2])
-        width,height = tuple(imageBoundPoint - imageBoundPoint2)
-        pos = QPoint(imageBoundPoint2[0],imageBoundPoint2[1])
-        # print("左上角坐标：", pos,width,height)
-        return pos,width,height
-
     def tryHideCrossBoxWidget(self):
         if self.imageShownData.showCrossFlag:
-            self.iCrossBoxWidget.hide()
+            self.crossBoxWidget.hide()
             self.imageShownData.showCrossFlag = False
+            self.crossBoxWidget.isShowContent = False
 
     def updateCrossBoxWidget(self):
-        self.updateInteractiveCrossBoxContent()
-        self.updateInteractiveCrossBoxGeometry()
-        self.iCrossBoxWidget.show()
+        self.updateCrossBoxWidgetGeometry()
+        self.updateCrossBoxWidgetContent()
 
-    def getCrossBoxKeyPointsDisplayPos(self):
-        params = self.iCrossBoxWidget.getCustomICrossBoxParams()
-        points = [
-            params.keyPointTopLeft, params.keyPointTopRight, params.keyPointBottomRight, params.keyPointBottomLeft
-        ]
-        crossBoxSceneCenter = QPointF(self.width()/2, self.height()/2)
-        pointsToScreen = [point + crossBoxSceneCenter for point in points]
-        return pointsToScreen
-
-    def updateInteractiveCrossBoxGeometry(self):
-        pos = self.parent().mapToGlobal(QPoint(0,0))
+    def updateCrossBoxWidgetGeometry(self):
+        pos = self.mapToGlobal(QPoint(0,0))
         x,y = pos.x(),pos.y()
         width,height = self.width(),self.height()
-        print("update ic View Geometry ", x,y,width,height)
-        self.iCrossBoxWidget.setGeometry(x,y,width,height)
-        self.iCrossBoxWidget.update()
-        print("update res ", self.iCrossBoxWidget.geometry())
+        self.crossBoxWidget.setGeometry(x,y,width,height)
+        self.crossBoxWidget.update()
 
-    def updateInteractiveCrossBoxContent(self):
-        if self.imageShownData.isCrossViewProjection() or self.imageShownData.isCrossViewProjectionOrthonormal():
-            points = [
-                QPointF(rationXY[0] * self.width(), rationXY[1] * self.height())
-                for rationXY in self.imageShownData.crossViewRatios
-            ]
-            crossBoxSceneCenter = QPointF(self.width()/2, self.height()/2)
-            pointsToSceneCenter = [point - crossBoxSceneCenter for point in points]
-            params = mGraphicParallelogramParams()
-            params.setTopLeftPoint(pointsToSceneCenter[0])
-            params.setTopRightPoint(pointsToSceneCenter[1])
-            params.setBottomRightPoint(pointsToSceneCenter[2])
-            params.setBottomLeftPoint(pointsToSceneCenter[3])
-            if self.imageShownData.isCrossViewProjection():
-                self.iCrossBoxWidget.updateProjectionCrossBoxItem(params)
-            elif self.imageShownData.isCrossViewProjectionOrthonormal():
-                self.iCrossBoxWidget.updateProjectionOrthonormalCrossBoxItem(params)
-        elif self.imageShownData.isCrossViewIntersection():
-            points = [
-                QPointF(rationXY[0] * self.width(), rationXY[1] * self.height())
-                for rationXY in self.imageShownData.crossViewRatios
-            ]
-            crossBoxSceneCenter = QPointF(self.width()/2, self.height()/2)
-            pointsToSceneCenter = [point - crossBoxSceneCenter for point in points]
-            self.iCrossBoxWidget.updateInterscetionCrossBoxItem(pointsToSceneCenter[0], pointsToSceneCenter[1])
+    def updateCrossBoxWidgetContent(self):
+        x1,y1 = self.imageShownData.crossViewRatios[0]
+        x2,y2 = self.imageShownData.crossViewRatios[1]
+        _pos1 = QPoint(x1*self.width(),y1*self.height())
+        _pos2 = QPoint(x2*self.width(),y2*self.height())
+        self.crossBoxWidget.setPos(_pos1,_pos2)
+        self.crossBoxWidget.isShowContent = True
+        self.crossBoxWidget.update()
+        self.crossBoxWidget.show()
 
     def renderVtkWindow(self, layerCount = 2):
-        try:
-            self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(layerCount)
-            self.qvtkWidget.Initialize()
-            self.qvtkWidget.Start()
-            if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
-        except:
-            print("render error")
+        self.qvtkWidget.GetRenderWindow().SetNumberOfLayers(layerCount)
+        self.qvtkWidget.Initialize()
+        self.qvtkWidget.Start()
+        if not self.qvtkWidget.isVisible(): self.qvtkWidget.setVisible(True)
 
     def calcExtraInfoWidth(self):
         return uiConfig.shownTextInfoX
@@ -274,33 +192,11 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def calcExtraInfoHeight(self):
         return uiConfig.shownTextInfoY
 
-    def createRightMenu(self):
-        self.groupBox_menu = QMenu()
-
-        self.actionA = QAction('show DICOM tags')
-        style = QApplication.style()
-        icon = style.standardIcon(QStyle.SP_FileDialogInfoView)
-        self.actionA.setIcon(icon)
-        self.groupBox_menu.addAction(self.actionA)
-        self.actionA.triggered.connect(self.showDicomTagsWindow)
-        self.groupBox_menu.popup(QCursor.pos())
-
-    def showDicomTagsWindow(self):
-        def dicomWindowsCallBack(dicomWin):
-            self.dicomWins.remove(dicomWin)
-        self.dicomWins.append(CustomDicomTagsWindow(dicomWindowsCallBack))
-        self.dicomWins[-1].injectDicomData(self.imageData.getDcmDataByIndex(self.imageData.currentIndex))
-        self.dicomWins[-1].show()
-
     def resizeEvent(self, QResizeEvent):
         super().resizeEvent(QResizeEvent)
+        print("resize: ",self.geometry())
         self.qvtkWidget.setFixedSize(self.size())
-        # self.showImageExtraInfoVtkView()
-        if self.imageShownData.showCrossFlag:
-            self.updateCrossBoxWidget()
-
-    def moveEvent(self, event:QMoveEvent):
-        QFrame.moveEvent(self, event)
+        self.showImageExtraInfoVtkView()
 
     #滚轮调用sigWheelChanged
     def wheelEvent(self, ev):
@@ -317,28 +213,59 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
     def setCurrentIndex(self, ind):
         """Set the currently displayed frame index."""
         #ind调节到可用范围
-        ind %= self.imageData.seriesImageCount
+        ind %= len(self.imageData.filePaths)
         if ind < 0:
-            ind += self.imageData.seriesImageCount
+            ind += len(self.imageData.filePaths)
         self.imageData.currentIndex = ind
         self.imageData.curFilePath = self.imageData.filePaths[self.imageData.currentIndex]
+        
+        self.reader.SetFileName(self.imageData.curFilePath)
+        self.reader.Update()
 
-        self.showAllViews()
+        if self.imageShownData.showExtraInfoFlag:
+            self.showImageExtraInfoVtkView()
+            self.renderVtkWindow()
+        else:
+            self.renderVtkWindow(1)
+
+
         self.update2DImageShownSignal.emit()
         self.updateCrossViewSubSignal.emit()
 
-    def closeICrossBoxWidget(self):
-        if self.iCrossBoxWidget is not None:
-            self.iCrossBoxWidget.close()
+    def canSlideShow(self):
+        return len(self.imageData.filePaths) > 0
+
+    def setCurrentIndexMore(self, val):
+        self.setCurrentIndex(self.imageData.currentIndex + 1)
+
+    def controlSlideShow(self, flag):
+        if flag:
+            self.timerThread = CycleSyncThread(uiConfig.shownSlideSpeedDefault)
+            self.timerThread.signal.connect(lambda :self.setCurrentIndex(self.imageData.currentIndex + 1))
+            self.timerThread.start()
+        else:
+            print("申请退出线程")
+            self.timerThread.requestInterruption()
+            self.timerThread.quit()
+            # self.timerThread.wait()
+
+    def controlSlideShowSpeed(self, delta):
+        if self.timerThread is not None:
+            newSpeed = self.timerThread.interval + delta
+            newSpeed = max(min(newSpeed,uiConfig.shownSlideSpeedMin),uiConfig.shownSlideSpeedMax)
+            self.timerThread.interval = newSpeed
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
         self.qvtkWidget.Finalize()
-        self.closeICrossBoxWidget()
+        if self.timerThread is not None and not self.timerThread.isFinished():
+            self.timerThread.requestInterruption()
+            self.timerThread.quit()
+            self.timerThread.wait()
 
     def clearViews(self):
+        self.qvtkWidget.hide()
         self.qvtkWidget.Finalize()
-        self.closeICrossBoxWidget()
 
     def showEvent(self, *args, **kwargs):
         if self.imageShownData.showCrossFlag:
@@ -346,10 +273,5 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
     def hideEvent(self, *args, **kwargs):
         if self.imageShownData.showCrossFlag:
-            self.iCrossBoxWidget.hide()
-
-    def enterEvent(self, QEvent):
-        QFrame.enterEvent(self, QEvent)
-
-    def leaveEvent(self, QEvent):
-        QFrame.leaveEvent(self, QEvent)
+            self.crossBoxWidget.hide()
+            self.crossBoxWidget.isShowContent = True

@@ -1,77 +1,57 @@
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import *
-from Config import uiConfig
+from ui.config import uiConfig
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
 
-class CustomSelectRegionGridWidget(QWidget):
+class CustomSelectRegionGridWidget(QFrame):
 
-    def __init__(self, parent, signal):
-        QWidget.__init__(self)
+    def __init__(self, signal):
+        QFrame.__init__(self)
         self.updateImageShownLayoutSignal = signal
-        self.parent = parent
-        self.setWindowFlags(
-            Qt.FramelessWindowHint|Qt.WindowStaysOnTopHint
-        )# 隐藏标题栏|在主窗口前
-        self.setWindowModality(Qt.NonModal)
         width = uiConfig.toolsSelectRegionCol * uiConfig.toolsSelectRegionItemSize.width()
         height = uiConfig.toolsSelectRegionRow * uiConfig.toolsSelectRegionItemSize.height()
-        print(width,height)
         self.setFixedSize(width,height)
+        self.setFrameShape(QFrame.StyledPanel)
+        self.setFrameShadow(QFrame.Plain)
         self.setContentsMargins(0,0,0,0)
-        self.setWindowOpacity(0.7)
-        self.setWindowIcon(QIcon("ui_source/win_title_icon_color.png"))
-        self.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Primary))
-        self.vBoxLayout = CustomDecoratedLayout(QVBoxLayout())
-        self.vBoxLayout.initParamsForPlain()
-        self.vBoxLayout.setLeftMargin(uiConfig.toolsSelectRegionItemSize.width()//2)
-        self.vBoxLayout.setRightMargin(uiConfig.toolsSelectRegionItemSize.width()//2)
-        self.vBoxLayout.getLayout().setAlignment(Qt.AlignHCenter)
-        self.setLayout(self.vBoxLayout.getLayout())
-
-        self.hBoxLayout = CustomDecoratedLayout(QHBoxLayout())
-        self.hBoxLayout.initParamsForPlain()
-        self.hBoxLayout.setTopMargin(uiConfig.toolsSelectRegionItemSize.height()//2)
-        self.hBoxLayout.setBottomMargin(uiConfig.toolsSelectRegionItemSize.height()//2)
-        self.hBoxLayout.getLayout().setAlignment(Qt.AlignVCenter)
+        self.vBoxLayout = QVBoxLayout()
+        self.setLayout(self.vBoxLayout)
+        self.hBoxLayout = QHBoxLayout()
+        self.hBoxLayout.setContentsMargins(0,0,0,0)
+        self.hBoxLayout.setAlignment(Qt.AlignCenter)
 
         self.innerFrame = QFrame(self)
-        self.innerFrame.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.innerFrame.setFixedSize(self.width()//5 * 4, self.height()//5 * 4)
         self.innerFrame.setMouseTracking(True)
         self.innerFrame.setFrameShape(QFrame.StyledPanel)
         self.innerFrame.setFrameShadow(QFrame.Plain)
-        self.hBoxLayout.getLayout().addWidget(self.innerFrame)
-        self.vBoxLayout.getLayout().addLayout(self.hBoxLayout.getLayout())
+        self.hBoxLayout.addWidget(self.innerFrame)
+        self.vBoxLayout.addLayout(self.hBoxLayout)
 
-        self.gridLayout = CustomDecoratedLayout(QGridLayout())
-        self.innerFrame.setLayout(self.gridLayout.getLayout())
+        self.gridLayout = CustomDecoratedLayout(QGridLayout(self.innerFrame))
         self.gridLayout.initParamsForPlain()
         self.gridLayout.setSpacing(2)
 
-        for x in range(5):
-            for y in range(5):
-                widget = QWidget(self)
-                widget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-                widget.setStyleSheet("background-color:black;")
-                widget.setMouseTracking(True)
-                self.gridLayout.getLayout().addWidget(widget,x,y,1,1)
-        
-        self.setMouseTracking(True)
-        self.setEnabled(True)
+        for rect in [(0,0),(0,1),(1,0),(1,1)]:
+            widget = QWidget(self)
+            widget.setStyleSheet("background-color:black;")
+            widget.setMouseTracking(True)
+            self.gridLayout.getLayout().addWidget(widget,rect[0],rect[1],1,1)
 
     def mousePressEvent(self, QMouseEvent):
         super().mousePressEvent(QMouseEvent)
         point = QMouseEvent.pos()
         if not self.isInInnerFrame(point): return
-        # 注意：从0开始计数
+        #注意：从0开始计数
         row,col = -1,-1
         for i in range(uiConfig.toolsSelectRegionCol):
             widget = self.gridLayout.getLayout().itemAt(i).widget()
-            if point.x() - widget.size().width()//2 - widget.pos().x() > 0:
+            if point.x() - self.innerFrame.pos().x() - widget.pos().x() > 0:
                 col += 1
         for i in range(0,uiConfig.toolsSelectRegionRow * uiConfig.toolsSelectRegionCol, uiConfig.toolsSelectRegionCol):
             widget = self.gridLayout.getLayout().itemAt(i).widget()
-            if point.y() - widget.size().height()//2 - widget.pos().y() > 0:
+            if point.y() - self.innerFrame.pos().y() - widget.pos().y() > 0:
                 row += 1
         self.updateImageShownLayoutSignal.emit((0,0,row,col))
 
@@ -79,8 +59,11 @@ class CustomSelectRegionGridWidget(QWidget):
         super().mouseMoveEvent(QMouseEvent)
         point = QMouseEvent.pos()
         isInInnerFrame = self.isInInnerFrame(point)
+        print("cur point ", point)
+        print("innerframe ", self.innerFrame.pos())
         for i in range(self.gridLayout.getLayout().count()):
             widget = self.gridLayout.getLayout().itemAt(i).widget()
+            print(i," widget ", widget.pos())
             if isInInnerFrame and \
                 point.x() > self.innerFrame.pos().x() + widget.pos().x() and \
                 point.y() > self.innerFrame.pos().y() + widget.pos().y():
@@ -90,12 +73,17 @@ class CustomSelectRegionGridWidget(QWidget):
             widget.show()
 
     def isInInnerFrame(self, point):
-        x,y = self.innerFrame.x(), self.innerFrame.y()
-        if point.x() < x or point.y() < y or \
-            point.x() > x + self.innerFrame.width() or point.y() > y + self.innerFrame.height(): return False
+        limMin = self.innerFrame.rect().topLeft()
+        limMax = self.innerFrame.rect().bottomRight()
+        if point.x() < limMin.x() or point.y() < limMin.y() or \
+            point.x() > limMax.x() or point.y() > limMax.y(): return False
         return True
 
-    def leaveEvent(self, QEvent):
-        if self.isVisible():
-            self.hide()
-        super().leaveEvent(QEvent)
+    def setEnabled(self, bool):
+        for i in range(self.gridLayout.getLayout().count()):
+            widget = self.gridLayout.getLayout().itemAt(i).widget()
+            if bool:
+                widget.setStyleSheet("background-color:black;")
+            else:
+                widget.setStyleSheet("background-color:gray;")
+        super().setEnabled(bool)

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from Config import uiConfig
+from ui.config import uiConfig
 from ui.ImageScrollListWidget import ImageScrollListWidget
 from ui.ImageScrollTreeWidget import ImageScrollTreeWidget
 from ui.CustomDecoratedLayout import CustomDecoratedLayout
@@ -12,6 +12,7 @@ class ImageScrollContainer(QFrame):
     def __init__(self, ParentWidget):
         QFrame.__init__(self, ParentWidget)
 
+        self.setGeometry(uiConfig.calcScrollContainerGeometry())
         print("ImageScrollContainer Geometry:",self.geometry())
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Plain)
@@ -20,8 +21,7 @@ class ImageScrollContainer(QFrame):
         self.imageVerticalScrollLayout = CustomDecoratedLayout(QVBoxLayout())
         self.imageVerticalScrollLayout.initParamsForPlain()
         self.setLayout(self.imageVerticalScrollLayout.getLayout())
-        self.setStyleSheet("background-color: {0}".format(uiConfig.LightColor.Primary))
-        self.setMinimumWidth(uiConfig.scrollContainerHintWidth)
+        self.setStyleSheet("background: grey;")
 
     def updateListHeight(self, itemCount):
         listHeight = (uiConfig.iconSize.height() + uiConfig.itemSpace * 2) * itemCount
@@ -46,8 +46,8 @@ class ImageScrollContainer(QFrame):
         # 注意删除item时要先清除其所有的connect信号
         self.imageVerticalScrollWidget.clear()
 
-    def showImageList(self):
-        self.imageVerticalScrollWidget.showImageList()
+    def showImageList(self, dict, tag):
+        self.imageVerticalScrollWidget.showImageList(dict)
 
     def resizeEvent(self, *args, **kwargs):
         if self.imageVerticalScrollWidget is not None:

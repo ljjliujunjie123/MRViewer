@@ -1,124 +1,124 @@
 import numpy as np
+import pydicom as pyd
 import os
+from PIL import ImageOps, ImageEnhance
 from PIL.ImageQt import *
-from utils.status import Status
-from Config import uiConfig
-from PyQt5.QtCore import *
-from vtkmodules.vtkCommonColor import vtkNamedColors
-from vtkmodules.vtkRenderingAnnotation import vtkAnnotatedCubeActor
-from vtkmodules.util.numpy_support import numpy_to_vtk
-import vtkmodules.all as vtk
-from vtkmodules.util.vtkConstants import *
+from enum import Enum
 
-def checkMultiFrame(seriesDict):
-    return seriesDict.isMultiFrame
 
-# def createDicomPixmap(dcmFile):
-#     image_2d = dcmFile.pixel_array.astype(float)
-#     image_2d_scaled = (np.maximum(image_2d, 0) / max(image_2d.max(),1)) * 255.0
-#     image_2d_scaled = np.uint8(image_2d_scaled)#!
-#     image = Image.fromarray(image_2d_scaled)
-#     dcmImage = ImageQt(image)
-#     pix = QPixmap.fromImage(dcmImage)
-#     pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
-#     return pixmap_resized
-def createDicomPixmap(pixel_array):
-    image_2d = pixel_array.astype(float)
-    image_2d_scaled = (np.maximum(image_2d, 0) / max(image_2d.max(),1)) * 255.0
-    image_2d_scaled = np.uint8(image_2d_scaled)#!
-    image = Image.fromarray(image_2d_scaled)
-    dcmImage = ImageQt(image)
-    pix = QPixmap.fromImage(dcmImage)
-    pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
-    return pixmap_resized
+class Location(Enum):
+    """顺序为左上、右上、左下、右下"""
+    UL = 0 # up right
+    UR = 1
+    DL = 2 #down left
+    DR = 3
+
+normalKeyDict = {
+    Location.UL:{
+        "PatientName": "",
+        "StudyDescription": "Study: ",
+        "SeriesDescription": "Series: ",
+    },
+    Location.UR:{
+        "InstanceNumber": "Index: "
+    },
+    Location.DL:{
+        "RepetitionTime": "TR: ",
+        "EchoTime": "TE: ",
+    },
+    Location.DR:{
+        "SliceThickness": "Slice Thickness: "
+    }
+}
+
+orientationList = [
+    ("R","L"),
+    ("A","P"),
+    ("I","S")
+]
+
+def getDicomWindowCenterAndLevel(fileName):
+    dcmFile = pyd.dcmread(fileName)
+    return (dcmFile.WindowCenter, dcmFile.WindowWidth)
+
+def getImageTileInfoFromDicom(fileName):
+    dcmFile = pyd.dcmread(fileName)
+    res = ""
+    res += (normalKeyDict[Location.UL]["PatientName"] +  str(dcmFile["PatientName"].value))
+    res += " - "
+    res += (normalKeyDict[Location.UL]["SeriesDescription"] +  str(dcmFile["SeriesDescription"].value))
+    return res
+
+def getImageOrientationInfoFromDicom(fileName):
+    """
+        判断方向向量与标准轴的cos值，如果大于阈值，则增加一个标识
+    """
+    dcmFile = pyd.dcmread(fileName)
+    ImageOrientation=np.array(dcmFile.ImageOrientationPatient,dtype = float)
+    xVector,yVector = ImageOrientation[:3],ImageOrientation[3:]
+    func = lambda x:round(x,1)
+    xVector,yVector = tuple(map(func,xVector)),tuple(map(func,yVector))
+    print("orientation vector ", xVector, yVector)
+    xInfo = calcImageOrientation(xVector)
+    yInfo = calcImageOrientation(yVector)
+
+    print(xInfo,yInfo)
+    return tuple(xInfo) + tuple(yInfo)
+
+def calcImageOrientation(vector):
+    info = ["",""]
+    for index in reversed(np.array(vector).argsort()):
+        if abs(vector[index])<0.3:continue
+        value = orientationList[index]
+        info[0] += value[0] if vector[index] > 0 else value[1]
+        info[1] += value[1] if vector[index] > 0 else value[0]
+    return info
+
+def getImageExtraInfoFromDicom(fileName):
+    """从Dicom文件中读取信息，输出位置按照Location类的次序"""
+    dcmFile = pyd.dcmread(fileName)
+    res = {}
+    for location,tagDict in normalKeyDict.items():
+        tp = ""
+        for tag,text in tagDict.items():
+            tp = tp + text + str(dcmFile[tag].value) + "\n"
+        res[location] = tp
+    print(res)
+    return res
+
+def extract_grayscale_image(mri_file):
+    plan = pyd.read_file(mri_file)
+    image_2d = plan.pixel_array.astype(float)
+    image_2d_scaled = (np.maximum(image_2d, 0) / image_2d.max()) * 255.0
+    image_2d_scaled = np.uint8(image_2d_scaled)
+    return image_2d_scaled
+
+def dicom_to_qt(dcm_file, factor_contrast, factor_bright, auto_mode, inversion_mode, custom_size = (200,200)):
+    image = np.array(extract_grayscale_image(dcm_file))
+    image = Image.fromarray(image)
+    if auto_mode == 1:
+        image = ImageOps.equalize(image, mask=None)
+    enhancer = ImageEnhance.Contrast(image)
+    image = enhancer.enhance(factor_contrast)
+    enhancer = ImageEnhance.Brightness(image)
+    image = enhancer.enhance(factor_bright)
+    if inversion_mode == 1:
+        image = ImageOps.invert(image.convert('L'))
+    qim = ImageQt(image)
+    return (qim)
+
+def getSeriesPathFromFileName(fileName):
+    return os.path.split(fileName)[0]
 
 def getSeriesImageCountFromSeriesPath(seriesPath):
     return len(os.listdir(seriesPath))
 
-def checkSameStudy(df1,df2):
-    try:
-        return (df1["PatientName"] == df2["PatientName"]) and (df1["StudyDescription"] == df2["StudyDescription"])
-    except:
-        return False
+def checkSameStudy(f1,f2):
+    df1 = pyd.dcmread(f1)
+    df2 = pyd.dcmread(f2)
+    return (df1["PatientName"] == df2["PatientName"]) and (df1["StudyDescription"] == df2["StudyDescription"])
 
-def checkSameSeries(df1,df2):
-    try:
-        return df1["SeriesDescription"] == df2["SeriesDescription"]
-    except:
-        True
-
-def checkDirValidity(filePath):
-    #非文件夹检查
-    if not os.path.isdir(filePath):
-        # QMessageBox.information(None,"提示","请选择文件夹而非文件",QMessageBox.Ok)
-        print("Warning:", filePath, "should be a directory not a file!")
-        return Status.bad
-    subPaths = os.listdir(filePath)
-    #空检查
-    if len(subPaths) is 0:
-        # QMessageBox.information(None,"提示","有空文件夹！",QMessageBox.Ok)
-        print("Warning:", filePath, "is a empty directory!")
-        return Status.bad
-    return Status.good
-
-def MakeAnnotatedCubeActor(colors: vtkNamedColors):
-        """
-        :param colors: Used to determine the cube color.
-        :return: The annotated cube actor.
-        """
-        # A cube with labeled faces.
-        cube = vtkAnnotatedCubeActor()
-        cube.SetXPlusFaceText('R')  # Right
-        cube.SetXMinusFaceText('L')  # Left
-        cube.SetYPlusFaceText('A')  # Anterior
-        cube.SetYMinusFaceText('P')  # Posterior
-        cube.SetZPlusFaceText('S')  # Superior/Cranial
-        cube.SetZMinusFaceText('I')  # Inferior/Caudal
-        cube.SetFaceTextScale(0.5)
-        cube.GetCubeProperty().SetColor(colors.GetColor3d('Gainsboro'))
-
-        cube.GetTextEdgesProperty().SetColor(colors.GetColor3d('LightSlateGray'))
-
-        # Change the vector text colors.
-        cube.GetXPlusFaceProperty().SetColor(colors.GetColor3d('Tomato'))
-        cube.GetXMinusFaceProperty().SetColor(colors.GetColor3d('Tomato'))
-        cube.GetYPlusFaceProperty().SetColor(colors.GetColor3d('DeepSkyBlue'))
-        cube.GetYMinusFaceProperty().SetColor(colors.GetColor3d('DeepSkyBlue'))
-        cube.GetZPlusFaceProperty().SetColor(colors.GetColor3d('SeaGreen'))
-        cube.GetZMinusFaceProperty().SetColor(colors.GetColor3d('SeaGreen'))
-        return cube
-
-def numpy2VTK(img):
-    shape = img.shape
-    if len(shape) < 2:
-        raise Exception('numpy array must have dimensionality of at least 2')
-
-    height, width = shape[0], shape[1]
-    c = shape[2] if len(shape) == 3 else 1
-
-    linear_array = np.reshape(img, (width * height, c))
-    vtk_array = numpy_to_vtk(linear_array)
-
-    imageData = vtk.vtkImageData()
-    imageData.SetDimensions(width, height, 1)
-    imageData.AllocateScalars(VTK_UNSIGNED_INT, 1)
-    imageData.GetPointData().GetScalars().DeepCopy(vtk_array)
-
-    return imageData
-
-def create_color_from_hexString(color):
-    if color[0] == "#":
-        # Convert hex string to RGB
-        return [int(color[i:i + 2], 16) / 255 for i in range(1, 7, 2)]
-    else:
-        return [0,0,0]
-
-def isDicom(filePath):
-    if filePath.endswith(".dcm"):
-        return True
-    else:
-        with open(filePath,"rb") as f:
-            f.seek(128,1)
-            strb = f.read(4)
-            # return strb == b'DICM'
-            return strb == b'DICM'
+def checkSameSeries(f1,f2):
+    df1 = pyd.dcmread(f1)
+    df2 = pyd.dcmread(f2)
+    return df1["SeriesDescription"] == df2["SeriesDescription"]

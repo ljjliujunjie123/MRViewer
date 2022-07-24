@@ -1,20 +1,18 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QIcon,QDrag
-import json
-import numpy as np
-import pydicom as pyd
-from Config import uiConfig
+
+from PIL.ImageQt import *
+from ui.config import uiConfig
 from ui.ImageScrollItemDelegate import ImageScrollItemDelegate
-from utils.util import createDicomPixmap,checkMultiFrame
+from utils.util import dicom_to_qt,getSeriesPathFromFileName,getSeriesImageCountFromSeriesPath
 from utils.ImageItemMimeData import ImageItemMimeData
-from Model.ImagesDataModel import imageDataModel
 
 class ImageScrollListWidget(QListWidget):
 
-    def __init__(self,parent):
+    def __init__(self):
         QListWidget.__init__(self)
-        self.parent = parent
+
         self.setObjectName("ImageScrollListWidget")
 
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -27,32 +25,30 @@ class ImageScrollListWidget(QListWidget):
         self.setSpacing(uiConfig.itemSpace)
         self.setResizeMode(QListWidget.Adjust)
         self.setItemDelegate(ImageScrollItemDelegate(self))
-        self.setFlow(QListView.LeftToRight)
 
-    def showImageList(self):
-        print("showImageList")
-        rows = imageDataModel.selectStudyToList()
-        for row in rows:
-            studyName = row[0]
-            seriesName = row[1]
-            seriesImageCount = row[2]
-            pixelData = row[3]
+    def showImageList(self, dict):
+        for seriesName,imageFileName in dict.items():
+            self.addImageItem(imageFileName, seriesName)
 
-            imageIcon = QIcon()
-            imageIcon.addPixmap(createDicomPixmap(pixelData))
-
-            imageItem = QListWidgetItem()
-            imageItem.setIcon(imageIcon)
-            imageItem.setText(seriesName)
-            imageItem.setSizeHint(uiConfig.itemHintSize)
-
-            itemExtraData = {
-                "studyName": studyName,
-                "seriesName": seriesName,
-                "seriesImageCount": seriesImageCount
-            }
-            imageItem.setData(3,itemExtraData)
-            self.addItem(imageItem)
+    def addImageItem(self, fileName, text):
+        qim = dicom_to_qt(fileName,uiConfig.factor_contrast,
+                          uiConfig.factor_bright, uiConfig.autocontrast_mode,uiConfig.inversion_mode)
+        pix = QPixmap.fromImage(qim)
+        pixmap_resized = pix.scaled(uiConfig.iconSize, Qt.KeepAspectRatio)
+        imageIcon = QIcon()
+        imageIcon.addPixmap(pixmap_resized)
+        imageItem = QListWidgetItem()
+        imageItem.setIcon(imageIcon)
+        imageItem.setText(text)
+        imageItem.setSizeHint(uiConfig.itemHintSize)
+        seriesPath = getSeriesPathFromFileName(fileName)
+        seriesImageCount = getSeriesImageCountFromSeriesPath(seriesPath)
+        itemExtraData = {
+            "seriesPath": seriesPath,
+            "seriesImageCount": seriesImageCount
+        }
+        imageItem.setData(3,itemExtraData)
+        self.addItem(imageItem)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

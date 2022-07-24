@@ -1,9 +1,11 @@
+import os
+import numpy as np
+import pydicom
 from PyQt5.QtWidgets import QFrame
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from utils.util import MakeAnnotatedCubeActor,create_color_from_hexString
-from Config import uiConfig
+from utils.util import getDicomWindowCenterAndLevel,getImageTileInfoFromDicom
 
 class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
@@ -21,14 +23,11 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.qvtkWidget.setFixedSize(self.size())
 
     def showAllViews(self):
-        self.show3DImage(self.imageData.getSeriesPath())
+        self.show3DImage(self.imageData.seriesPath)
 
     def show3DImage(self, seriesPath):
         print("show 3D Dicom Window Begin")
         ren3D = vtk.vtkRenderer()
-        ren3D.SetBackground2(create_color_from_hexString(uiConfig.LightColor.Analogous1))
-        ren3D.SetBackground(create_color_from_hexString(uiConfig.LightColor.Complementary))
-        ren3D.GradientBackgroundOn()
         renWin = self.qvtkWidget.GetRenderWindow()
         renWin.AddRenderer(ren3D)
 
@@ -38,8 +37,21 @@ class m3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.style.SetDefaultRenderer(ren3D)
         self.iren.SetInteractorStyle(self.style)
         # 添加世界坐标系
-        axesActor = MakeAnnotatedCubeActor(vtk.vtkNamedColors())
-        self.axes_widget.SetViewport(0.8, 0.8, 1.0, 1.0)
+        axesActor = vtk.vtkAnnotatedCubeActor()
+        # ren3D.AddActor(axesActor)
+        # 注意这里设置的值是屏幕坐标系下的方位值，并不是解剖学上的方位
+        axesActor.SetXPlusFaceText("L")
+        axesActor.SetXMinusFaceText("R")
+        axesActor.SetYMinusFaceText("I")
+        axesActor.SetYPlusFaceText("S")
+        axesActor.SetZMinusFaceText("P")
+        axesActor.SetZPlusFaceText("A")
+        axesActor.SetXFaceTextRotation(-90)
+        axesActor.SetYFaceTextRotation(180)
+        axesActor.SetZFaceTextRotation(90)
+        axesActor.GetTextEdgesProperty().SetColor(1,0,0)
+        axesActor.GetTextEdgesProperty().SetLineWidth(2)
+        axesActor.GetCubeProperty().SetColor(0,0,1)
         self.axes_widget.SetOrientationMarker(axesActor)
         self.axes_widget.SetInteractor(self.iren)
         self.axes_widget.EnabledOn()
