@@ -1,9 +1,12 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import os
+
+from matplotlib.pyplot import title
 from Config import uiConfig
 from ui.m2DImageShownWidget import m2DImageShownWidget
 from ui.m3DFakeImageShownWidget import m3DFakeImageShownWidget
+from ui.mMock3DImageShownWidget import mMock3DImageShownWidget
 from ui.m3DImageShownWidget import m3DImageShownWidget
 from ui.mRealTimeImageShownWidget import mRealTimeImageShownWidget
 from utils.BaseImageData import BaseImageData
@@ -66,8 +69,25 @@ class SingleImageShownContainer(QFrame):
         self.vBoxLayout.setAlignment(Qt.AlignHCenter)
         self.setLayout(self.vBoxLayout)
 
+        #顶部title
+        self.title = QFrame()
+        self.title.setFrameShape(QFrame.StyledPanel)
+        self.title.setFrameShadow(QFrame.Plain)
+        self.title.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
+        self.title.setStyleSheet("background-color:grey;")
+        hBoxLayout = QHBoxLayout()
+        hBoxLayout.setContentsMargins(5,5,5,5)
+        hBoxLayout.setSpacing(0)
+        hBoxLayout.setAlignment(Qt.AlignLeft)
+        self.title.setLayout(hBoxLayout)
+        self.label = QLabel()
+        self.label.setText("This is a image container")
+        self.label.setStyleSheet("color:black;")
+        hBoxLayout.addWidget(self.label)
+
         #底部image
         self.imageContainer = QFrame()
+        self.imageContainer.setStyleSheet("background-color:black;")
         self.imageContainer.setObjectName("imageContainer")
         # self.imageContainer.setStyleSheet("background-color:{0};".format(uiConfig.LightColor.Primary))
         self.imageContainer.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
@@ -77,8 +97,14 @@ class SingleImageShownContainer(QFrame):
         self.imageContainer.setLayout(self.vImageBoxLayout.getLayout())
 
         #整体布局垂直
+        self.vBoxLayout.addWidget(self.title)
         self.vBoxLayout.addWidget(self.imageContainer)
 
+    def selectSignalHandler(self, isSelected):
+        if isSelected:
+            self.title.setStyleSheet("background-color:#eb9076;")
+        else:
+            self.title.setStyleSheet("background-color:grey;")
 
     def resetSelectState(self):
         self.isSelected = False
@@ -91,7 +117,8 @@ class SingleImageShownContainer(QFrame):
         self.mImageShownWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.vImageBoxLayout.getLayout().addWidget(self.mImageShownWidget)
 
-    def switchImageContainerMode(self, mode):
+    def switchImageContainerMode(self, mode, **kwargs):
+        if len(kwargs) > 0: path = kwargs["path"]
         filterRes = self.switchImageContainerModeFilter(mode)
         if filterRes != Status.good:
             print("当前series不能切换到{0}模式，原因是{1}".format(mode,filterRes))
@@ -113,14 +140,10 @@ class SingleImageShownContainer(QFrame):
             self.mImageShownWidget = m3DImageShownWidget()
         elif mode == self.m3DFakeMode:
             print("m3DFakeMode")
-            self.mImageShownWidget = m3DFakeImageShownWidget()
+            self.mImageShownWidget = mMock3DImageShownWidget()
         elif mode == self.mRTMode:
             print("mRTMode")
-            # self.mImageShownWidget = mRealTimeImageShownWidget()
-            self.mImageShownWidget = m2DImageShownWidget()
-            self.mImageShownWidget.imageShownData = self.mImage2DShownData
-            self.mImageShownWidget.updateCrossViewSubSignal.connect(self.tryUpdateCrossViewSignalEmit)
-            self.mImageShownWidget.interactiveSubSignal.connect(self.tryInteractiveSignalEmit)
+            self.mImageShownWidget = mRealTimeImageShownWidget(path)
         self.curMode = mode
         self.initImageShownWidget()
         self.mImageShownWidget.initBaseData(self.imageData)

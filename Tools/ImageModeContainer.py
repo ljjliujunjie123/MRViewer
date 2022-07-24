@@ -10,23 +10,24 @@ class ImageModeContainer(QFrame, ToolsInterface):
 
     iconPaths = {
         SingleImageShownContainer.m2DMode:"ui_source/2d_mode.png",
-        SingleImageShownContainer.m3DMode:"ui_source/3d_mode.png",
-        SingleImageShownContainer.m3DFakeMode:"ui_source/3d_fake_mode.png",
-        SingleImageShownContainer.mRTMode:"ui_source/RT_mode.png"
+        SingleImageShownContainer.m3DMode:"ui_source/3d_mode.png"
+        # SingleImageShownContainer.m3DFakeMode:"ui_source/3d_fake_mode.png",
+        # SingleImageShownContainer.mRTMode:"ui_source/RT_mode.png"
     }
 
     def __init__(self, parent, signal):
         super().__init__(parent=parent)
-        imageVBoxLayout =  CustomDecoratedLayout(QVBoxLayout())
-        imageVBoxLayout.initParamsForPlain()
-        imageVBoxLayout.setSpacing(2)
+        imageHBoxLayout =  CustomDecoratedLayout(QHBoxLayout())
+        imageHBoxLayout.initParamsForPlain()
+        imageHBoxLayout.setSpacing(2)
         bt2D = self.createImageModeButton(SingleImageShownContainer.m2DMode, signal)
         bt3D = self.createImageModeButton(SingleImageShownContainer.m3DMode, signal)
-        bt3DFake = self.createImageModeButton(SingleImageShownContainer.m3DFakeMode, signal)
-        btRT = self.createImageModeButton(SingleImageShownContainer.mRTMode, signal)
-        imageVBoxLayout.addItems([bt2D,bt3D,bt3DFake,btRT])
+        # bt3DFake = self.createImageModeButton(SingleImageShownContainer.m3DFakeMode, signal)
+        # btRT = self.createImageModeButton(SingleImageShownContainer.mRTMode, signal)
+        # imageHBoxLayout.addItems([bt2D,bt3D,bt3DFake,btRT])
+        imageHBoxLayout.addItems([bt2D,bt3D])
 
-        self.setLayout(imageVBoxLayout.getLayout())
+        self.setLayout(imageHBoxLayout.getLayout())
         self.setEnabled(False)
     
     def initImageMode(self):

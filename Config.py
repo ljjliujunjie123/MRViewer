@@ -34,7 +34,7 @@ class UIConfig():
     toolsSelectRegionRow = 5
     toolsSelectRegionItemSize = QSize(50,50)
 
-    toolsIconSize = QSize(80,80)
+    toolsIconSize = QSize(70,70)
 
     studyTag = 1
     patientTag = 2
@@ -53,6 +53,17 @@ class UIConfig():
     autocontrast_mode = 0
     inversion_mode = 0
     width_of = 450
+
+    # Real Time Display
+
+    # mainPath = '/home/zhongsijie/MRViewer/MRViewer/static_3d_axial.nii.gz'
+    # mainPathMask = '/home/zhongsijie/MRViewer/MRViewer/tips.nii.gz'
+    mainPath = r'E:\research\MRViewer_test\MRNewUI\static_3d_mask.nii.gz'
+    mainPathMask = r'E:\research\MRViewer_test\MRNewUI\tips.nii.gz'
+    # axialPath = r'/home/zhongsijie/MRViewer/mock_dicoms/'
+    axialPath = r'E:/research/MRViewer_test/MRNewUI/mock_dicoms/'
+    coronalPath = r'E:/research/MRViewer_test/MRNewUI/mock_dicoms1/'
+    sagittalPath = r'E:/research/MRViewer_test/MRNewUI/mock_dicoms2/'
 
     class LightColor():
         Primary = "#ffffff"

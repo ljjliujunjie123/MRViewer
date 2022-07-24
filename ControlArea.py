@@ -34,8 +34,8 @@ class ControlArea(QFrame):
 
         self.vlayout.addWidget(self.toolsContainer)
         self.vlayout.addWidget(self.extraToolsContainer)
-        self.vlayout.setStretchFactor(self.toolsContainer, 2)
-        self.vlayout.setStretchFactor(self.extraToolsContainer, 1)
+        self.vlayout.setStretchFactor(self.toolsContainer, 3)
+        self.vlayout.setStretchFactor(self.extraToolsContainer, 2)
 
         # 设置展示规则
         self.toolsContainer.setFrameShape(QListWidget.NoFrame) # 去除边框
@@ -79,8 +79,10 @@ class ControlArea(QFrame):
     # 为按钮添加点击事件，切换stackedwidget页面
     def PreSelect(self):
         self.modeSignal.emit(ImageMode.pre)
+        self.extraToolsContainer.setDisabled(False)
     def IntraSelect(self):
         self.modeSignal.emit(ImageMode.intra)
+        self.extraToolsContainer.setDisabled(True)
     # def PostSelect(self):
     #     self.modeSignal.emit(ImageMode.post)
     def resizeEvent(self, *args, **kwargs):

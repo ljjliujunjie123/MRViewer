@@ -1,4 +1,5 @@
 from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 from ui.SingleImageShownContainer import SingleImageShownContainer
 from Config import uiConfig
 from copy import deepcopy
@@ -16,13 +17,36 @@ class ImageShownLayoutController(QObject):
 
         self.curlayout = (0, 0, 1, 1)
         self.imageShownWidgetPool = { }
+        self.mainDisplayer = SingleImageShownContainer()
+        self.axialDisplayer = SingleImageShownContainer()#横截面
+        self.coronalDisplayer = SingleImageShownContainer()#冠状面
+        self.sagittalDisplayer = SingleImageShownContainer()#矢状面
+        self.mainDisplayer.switchImageContainerMode(SingleImageShownContainer.m3DFakeMode)
+        self.axialDisplayer.switchImageContainerMode(SingleImageShownContainer.mRTMode,path = uiConfig.axialPath)
+        self.coronalDisplayer.switchImageContainerMode(SingleImageShownContainer.mRTMode,path = uiConfig.coronalPath)
+        self.sagittalDisplayer.switchImageContainerMode(SingleImageShownContainer.mRTMode,path = uiConfig.sagittalPath)
         self.imageSlideshow = None
         self.imageSlideShowPlayFlag = False
+        
+        self.splitter = QSplitter()
+        self.sideSplitter = QSplitter()
+        self.sideSplitter.setOrientation(Qt.Vertical)
+        self.splitter.addWidget(self.mainDisplayer)
+        self.sideSplitter.addWidget(self.axialDisplayer)
+        self.sideSplitter.addWidget(self.coronalDisplayer)
+        self.sideSplitter.addWidget(self.sagittalDisplayer)
+        self.splitter.addWidget(self.sideSplitter)
+        self.splitter.setStretchFactor(0,3)
+        self.splitter.setStretchFactor(1,1)
 
     def setAllContainerSignals(self, funcList):
         for container in self.imageShownWidgetPool.values():
             for func in funcList:
                 func(container)
+        func(self.mainDisplayer)
+        func(self.axialDisplayer)
+        func(self.coronalDisplayer)
+        func(self.sagittalDisplayer)
 
     def initLayoutParams(self):
         self.imageShownContainerLayout.getLayout().setContentsMargins(uiConfig.shownContainerMargins)
@@ -32,7 +56,7 @@ class ImageShownLayoutController(QObject):
         for col in range(uiConfig.toolsSelectRegionCol):
             for row in range(uiConfig.toolsSelectRegionRow):
                 self.imageShownWidgetPool[(row, col)] = SingleImageShownContainer()
-        self.reAddImageContainers()
+        self.reAddInPool()
 
     def addWidget(self, childWidget, row, col, rowSpan = 1, colSpan = 1):
         self.imageShownContainerLayout.getLayout().addWidget(childWidget, row, col, rowSpan, colSpan)
@@ -40,9 +64,12 @@ class ImageShownLayoutController(QObject):
     def updateLayout(self, layoutTuple):
         if layoutTuple == self.curlayout: return
         self.curlayout = deepcopy(layoutTuple)
-        self.reAddImageContainers()
+        self.reAddInPool()
+    def switchToIntra(self):
+        self.imageShownContainerLayout.clearLayout()
+        self.addWidget(self.splitter,0,0)
 
-    def reAddImageContainers(self):
+    def reAddInPool(self):
         topRow, leftCol, bottomRow, rightCol = self.curlayout
 
         #从Layout移除所有子Widget

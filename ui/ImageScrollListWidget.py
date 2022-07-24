@@ -9,7 +9,7 @@ from ui.ImageScrollItemDelegate import ImageScrollItemDelegate
 from utils.util import createDicomPixmap,checkMultiFrame
 from utils.ImageItemMimeData import ImageItemMimeData
 from Model.ImagesDataModel import imageDataModel
-
+from DisplayArea import ImageMode
 class ImageScrollListWidget(QListWidget):
 
     def __init__(self,parent):
@@ -53,6 +53,12 @@ class ImageScrollListWidget(QListWidget):
             }
             imageItem.setData(3,itemExtraData)
             self.addItem(imageItem)
+
+    def ChangeOperationMode(self, mode):
+        if mode == ImageMode.pre:
+            self.setDisabled(False)
+        elif mode == ImageMode.intra:
+            self.setDisabled(True)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

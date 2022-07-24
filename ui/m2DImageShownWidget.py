@@ -164,8 +164,7 @@ class m2DImageShownWidget(QFrame, ImageShownWidgetInterface):
 
         #调整文本字体颜色，并添加到render中
         for textActor in self.textActors.values():
-            color = create_color_from_hexString(uiConfig.LightColor.Black)
-            textActor.GetTextProperty().SetColor(color)
+            textActor.GetTextProperty().SetColor(1, 1, 1)
             textActor.GetTextProperty().BoldOn()
             textActor.GetTextProperty().ShadowOn()
 

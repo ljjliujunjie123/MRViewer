@@ -144,7 +144,7 @@ class ExtraToolsContainer(QScrollArea):
         self.setObjectName("ToolsContainer")
         
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.toolsScrollContainer = QFrame(self)
 

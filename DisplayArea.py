@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QMouseEvent, QIcon
 from DataBaseDisplayer import DataBaseDisplayer
-from ImageDisplayer import PreImageDisplayer, IntraImageDisplayer
+from ImageDisplayer import PreImageDisplayer#, IntraImageDisplayer
 from Model.ImagesDataModel import ImagesDataModel
 from enum import IntEnum
 
@@ -24,10 +24,10 @@ class DisplayArea(QFrame):
         self.currentMode = ImageMode.pre
         self.dataBaseDisplayer = DataBaseDisplayer(self)
         self.preImageDisplayer = PreImageDisplayer(self)
-        self.intraImageDisplayer = IntraImageDisplayer(self)
+        # self.intraImageDisplayer = IntraImageDisplayer(self)
         self.stackedLayout.addWidget(self.dataBaseDisplayer)
         self.stackedLayout.addWidget(self.preImageDisplayer)
-        self.stackedLayout.addWidget(self.intraImageDisplayer)
+        # self.stackedLayout.addWidget(self.intraImageDisplayer)
 
 
         self.ShiftToDatabase()
@@ -37,7 +37,12 @@ class DisplayArea(QFrame):
         self.stackedLayout.setCurrentIndex(0)
     
     def ShiftToImage(self):
-        self.stackedLayout.setCurrentIndex(int(self.currentMode))
+        self.stackedLayout.setCurrentIndex(1)
+        if self.currentMode==ImageMode.pre:
+            self.preImageDisplayer.imageShownLayoutController.reAddInPool()
+        if self.currentMode==ImageMode.intra:
+            self.preImageDisplayer.imageShownLayoutController.switchToIntra()
+            
 
     def setCurrentMode(self,imageMode):
         print("shift image mode to",int(imageMode))

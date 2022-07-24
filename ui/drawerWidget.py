@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QFrame, QWidget
 from ui.ImageShownWidgetInterface import ImageShownWidgetInterface
 import vtkmodules.all as vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from utils.util import getDicomWindowCenterAndLevel,getImageTileInfoFromDicom
+# from utils.util import getDicomWindowCenterAndLevel,getImageTileInfoFromDicom
 
 class drawerWidget(QWidget):
     def __init__(self,parent,flags):

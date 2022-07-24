@@ -21,6 +21,7 @@ class MainWindow(QMainWindow):
         self.controlArea.toolsContainer.loadSignal.connect(self.displayArea.ShiftToDatabase)
         self.displayArea.dataBaseDisplayer.selectFileSignal.connect(self.imageScrollContainer.showImageList)
         self.controlArea.modeSignal.connect(self.displayArea.setCurrentMode)
+        self.controlArea.modeSignal.connect(self.imageScrollContainer.setDisabled)
 
         
         #旧信号绑定部分

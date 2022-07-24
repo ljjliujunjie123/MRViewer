@@ -26,4 +26,19 @@
 1. PreImageDisplayer 与 IntraImageDisplayer 分离。前者沿用LJJ的ImageShownContainer结构。后者运用3-by-1布局。
 
 ## 2022-7-24
-1. 完善布局，RealTime起步阶段。
+1. 完善布局，RT(RealTime)起步阶段。
+2. Config.py中存储RT的三个文件夹
+3. 存在无法读取的情况如
+        ERROR: In ..\IO\Image\vtkDICOMImageReader.cxx, line 264
+        vtkDICOMImageReader (000001AB1B3F45E0): There was a problem retrieving data from: E:/research/MRViewer_test/MRNewUI/mock_dicoms2//TEST0722.MR.IMR-SJTU_ZSJ.0059.0003.2022.07.23.16.56.39.512788.55368191.IMA
+
+        ERROR: In ..\Common\ExecutionModel\vtkExecutive.cxx, line 753
+        vtkCompositeDataPipeline (000001AB1B505FF0): Algorithm vtkDICOMImageReader(000001AB1B3F45E0) returned failure for request: vtkInformation (000001AB1B51A250)
+        Debug: Off
+        Modified Time: 7611
+        Reference Count: 1
+        Registered Events: (none)
+        Request: REQUEST_DATA
+        FORWARD_DIRECTION: 0
+        ALGORITHM_AFTER_FORWARD: 1
+        FROM_OUTPUT_PORT: 0
