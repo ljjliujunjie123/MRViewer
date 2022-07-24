@@ -27,6 +27,7 @@ class mMock3DImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.iren = self.qvtkWidget.GetRenderWindow().GetInteractor()
        
         self.path = '/home/zhongsijie/MRViewer/MRViewer/static_3d_mask.nii.gz'
+        self.path = r'E:\research\MRViewer_test\MRNewUI\static_3d_mask.nii.gz'
         # Renderer
         self.renderer = vtk.vtkRenderer()
         # renderer.SetBackground(.2, .3, .4)

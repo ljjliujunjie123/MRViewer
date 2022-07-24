@@ -38,7 +38,7 @@ class mRealTimeImageShownWidget(QFrame, ImageShownWidgetInterface):
     def initBaseData(self, imageData):
         self.imageData = BaseImageData()
         self.imageData.seriesPath = r'/home/zhongsijie/MRViewer_old/mock_dicoms'
-        # self.imageData.seriesPath = r'F:/runtimedata/GRE_2cross'
+        self.imageData.seriesPath = r'E:/research/MRViewer_test/MRNewUI/mock_dicoms'
         self.imageData.filePaths = [self.imageData.seriesPath + '/' + fileName for fileName in os.listdir(self.imageData.seriesPath)]
         self.imageData.seriesImageCount = len(self.imageData.filePaths)
         self.imageData.currentIndex = 0

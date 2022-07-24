@@ -413,10 +413,12 @@ class AddMRSliceTimerCallback():
         self.renderer = renderer
         self.MR_slice = VtkMRSlice(path, path_tips, iren)
         self.renderer.ResetCamera()
-        self.rawimg = sitk.ReadImage("/home/zhongsijie/MRViewer/MRViewer/dynamic_2d_robot.nii.gz")
+        # self.rawimg = sitk.ReadImage("/home/zhongsijie/MRViewer/MRViewer/dynamic_2d_robot.nii.gz")
+        self.rawimg = sitk.ReadImage(r'E:\research\MRViewer_test\MRNewUI\dynamic_2d_robot.nii.gz')
         self.imgs = sitk.GetArrayFromImage(self.rawimg)
         #-----------------------------------------------------------------------------
         self.seriespath = '/home/zhongsijie/MRViewer/mock_dicoms/'
+        self.seriespath = r'E:/research/MRViewer_test/MRNewUI/mock_dicoms/'
 
     def execute(self, iren, event):
         # 1. 读取最新扫描得到的一张2D图像

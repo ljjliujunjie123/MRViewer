@@ -42,6 +42,8 @@ class mMock3DImageShownWidget(QFrame, ImageShownWidgetInterface):
        
         self.path = '/home/zhongsijie/MRViewer/MRViewer/static_3d_axial.nii.gz'
         self.path_mask = '/home/zhongsijie/MRViewer/MRViewer/tips.nii.gz'
+        self.path = r'E:\research\MRViewer_test\MRNewUI\static_3d_axial.nii.gz'
+        self.path_mask = r'E:\research\MRViewer_test\MRNewUI\tips.nii.gz'
         # Renderer
         self.renderer = vtk.vtkRenderer()
         # renderer.SetBackground(.2, .3, .4)
