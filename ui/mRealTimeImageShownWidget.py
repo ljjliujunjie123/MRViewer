@@ -20,7 +20,6 @@ class mRealTimeImageShownWidget(QFrame, ImageShownWidgetInterface):
         #初始化数据
         self.imageData = None
         self.path = path
-        #初始化逻辑
         self.imageShownData = None
 
         self.qvtkWidget = CustomQVTKRenderWindowInteractor(self)
@@ -33,9 +32,11 @@ class mRealTimeImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.imageViewer.SetupInteractor(self.iren)
         self.renImage = vtk.vtkRenderer()
         self.renText = vtk.vtkRenderer()
+        self.imageData = BaseImageData()
+        self.initBaseData(self.path)
+        self.flag = 0
 
     def initBaseData(self, imageData):
-        self.imageData = BaseImageData()
         self.imageData.seriesPath = self.path #r'/home/zhongsijie/MRViewer_old/mock_dicoms'
         # self.imageData.seriesPath = r'E:/research/MRViewer_test/MRNewUI/mock_dicoms'
         self.imageData.filePaths = [self.imageData.seriesPath + '/' + fileName for fileName in os.listdir(self.imageData.seriesPath)]
@@ -48,20 +49,24 @@ class mRealTimeImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.timerThread.start()
 
     def tryUpdate2DImageVtkView(self):
-        print("waiting")
-        tmpFileNames = sorted(os.listdir(self.imageData.seriesPath))
+        tmpFileNames = os.listdir(self.imageData.seriesPath)
+
         if len(tmpFileNames) > self.imageData.seriesImageCount:
-            print(tmpFileNames)
+            tmpFileNames.sort(key=lambda fn:os.path.getmtime(self.imageData.seriesPath + "/" + fn))
             self.imageData.seriesImageCount = len(tmpFileNames)
-            self.imageData.currentIndex = self.imageData.seriesImageCount - 1
             self.imageData.curFilePath = self.imageData.seriesPath + '/' + tmpFileNames[-1]
-            if self.imageData.currentIndex == 0:
+            if self.flag == 0:
                 self.show2DImageVtkView()
+                self.flag = 1
             else:
                 self.reader.SetFileName(self.imageData.curFilePath)
                 self.reader.Update()
+            self.imageData.currentIndex = self.imageData.currentIndex + 1
             self.renderVtkWindow()
             print("更新",tmpFileNames[-1], self.imageData.curFilePath)
+            print("waiting")
+        elif len(tmpFileNames) < self.imageData.seriesImageCount:
+            self.initBaseData(self.path)
 
     def show2DImageVtkView(self):
         self.reader.SetDataByteOrderToLittleEndian()
@@ -91,7 +96,7 @@ class mRealTimeImageShownWidget(QFrame, ImageShownWidgetInterface):
         self.timerThread.requestInterruption()
         self.timerThread.quit()
         self.qvtkWidget.Finalize()
-    
+
     def resizeEvent(self, QResizeEvent):
         super().resizeEvent(QResizeEvent)
         self.qvtkWidget.setFixedSize(self.size())

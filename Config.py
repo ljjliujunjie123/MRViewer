@@ -58,8 +58,7 @@ class UIConfig():
 
     # mainPath = '/home/zhongsijie/MRViewer/MRViewer/static_3d_axial.nii.gz'
     # mainPathMask = '/home/zhongsijie/MRViewer/MRViewer/tips.nii.gz'
-    mainPath = r'E:\research\MRViewer_test\MRNewUI\static_3d_mask.nii.gz'
-    mainPathMask = r'E:\research\MRViewer_test\MRNewUI\tips.nii.gz'
+    mainPath = r'E:/research/MRViewer_test/MRNewUI/m3D/'
     # axialPath = r'/home/zhongsijie/MRViewer/mock_dicoms/'
     axialPath = r'E:/research/MRViewer_test/MRNewUI/mock_dicoms/'
     coronalPath = r'E:/research/MRViewer_test/MRNewUI/mock_dicoms1/'

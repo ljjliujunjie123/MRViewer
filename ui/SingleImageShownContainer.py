@@ -119,15 +119,16 @@ class SingleImageShownContainer(QFrame):
 
     def switchImageContainerMode(self, mode, **kwargs):
         if len(kwargs) > 0: path = kwargs["path"]
-        filterRes = self.switchImageContainerModeFilter(mode)
-        if filterRes != Status.good:
-            print("当前series不能切换到{0}模式，原因是{1}".format(mode,filterRes))
-            return
+        # filterRes = self.switchImageContainerModeFilter(mode)
+        # if filterRes != Status.good:
+        #     print("当前series不能切换到{0}模式，原因是{1}".format(mode,filterRes))
+        #     return
 
         if self.mImageShownWidget is not None:
             self.vImageBoxLayout.clearLayout()
             self.mImageShownWidget.clearViews()
             del self.mImageShownWidget
+        print(self.mRTMode,mode)
 
         if mode == self.m2DMode:
             print("m2DMode")

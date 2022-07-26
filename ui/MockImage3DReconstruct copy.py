@@ -410,6 +410,7 @@ finish = False
 begin = False
 class AddMRSliceTimerCallback():
     def __init__(self, renderer, iren, iterations, path, path_tips):
+        # print(r"//////////////////////////////////")
         self.iterations = iterations
         self.renderer = renderer
         self.MR_slice = VtkMRSlice(path, path_tips, iren)
@@ -478,11 +479,25 @@ class AddMRSliceTimerCallback():
 
         # target = (np.int(x_3d), np.int(y_3d))
 
-        # self.renderer.AddActor(self.MR_slice.axial)
+        self.renderer.AddActor(self.MR_slice.axial)
         self.renderer.AddActor(self.MR_slice.vtkActor)
         # self.renderer.AddActor(self.MR_slice.skin)
         self.renderer.AddVolume(self.MR_slice.newvol)
+        
+        self.MR_slice.clearSlice()
+        
+        # import pdb
+        # pdb.set_trace()
+        
+        # self.MR_slice.addSlice(grow, slice_idx, target)
         self.MR_slice.addSlice(slice_idx)
+        # slice_idx += 1
+        # if start_point_x < pre_x:
+        #     slice_idx += 1
+        #     # slice_idx += pre_x - start_point_x
+        # if stop == True and start == False:
+        #     slice_idx += 1
+
         if stop == False and begin == True:
             slice_idx += 1
         iren.GetRenderWindow().Render()
